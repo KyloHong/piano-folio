@@ -145,7 +145,6 @@ async function tursoExecute(sql, args = []) {
     const first = data.results ? data.results[0] : data;
     // 提取最终的 result 对象（包含 cols, rows, affected_row_count 等）
     const finalResult = first?.response?.result || first?.result || first;
-    console.log('Turso [', sql.substring(0, 50), '] result:', JSON.stringify(finalResult).substring(0, 200));
     if (first && first.error) {
         throw new Error(first.error.message || 'Turso query error');
     }
@@ -271,16 +270,13 @@ app.post('/api/auth/register', async (req, res) => {
         if (existing) return res.status(409).json({ error: '用户名已被占用' });
 
         const hash = bcrypt.hashSync(password, 10);
-        const insertResult = await dbRun('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, hash]);
-        console.log('Insert result:', JSON.stringify(insertResult));
+        await dbRun('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, hash]);
         
-        // 插入后通过用户名查询获取用户 ID（Turso HTTP API 是无状态的）
-        const userQuery = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
-        console.log('User query result:', JSON.stringify(userQuery));
-        const newUserId = userQuery ? userQuery.id : null;
+        // 插入后通过用户名查询获取用户 ID（Turso HTTP API 是无状态的，last_insert_rowid 在独立请求中不持久）
+        const newUser = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
+        const newUserId = newUser ? newUser.id : null;
         
         if (!newUserId) {
-            console.error('Failed to get user ID after insert for:', username);
             return res.status(500).json({ error: '创建用户失败' });
         }
         
@@ -460,49 +456,13 @@ app.get('/api/charts/public/:id', async (req, res) => {
     }
 });
 
-// --------------------- Health Check (调试用) ---------------------
+// --------------------- Health Check ---------------------
 app.get('/api/health', async (req, res) => {
     try {
-        const hasTursoUrl = !!process.env.TURSO_DATABASE_URL;
-        const hasTursoToken = !!process.env.TURSO_AUTH_TOKEN;
-        
-        // 直接调用 Turso 并返回原始响应
-        let rawSelect1 = null;
-        let rawSelect2 = null;
-        let rawInsert = null;
-        
-        try {
-            rawSelect1 = await tursoExecute('SELECT 1 as test_col');
-        } catch (e) {
-            rawSelect1 = { error: e.message };
-        }
-        
-        try {
-            rawInsert = await tursoExecute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)');
-        } catch (e) {
-            rawInsert = { error: e.message };
-        }
-        
-        try {
-            rawSelect2 = await tursoExecute('SELECT COUNT(*) as cnt FROM users');
-        } catch (e) {
-            rawSelect2 = { error: e.message };
-        }
-        
-        res.json({
-            turso_url_configured: hasTursoUrl,
-            turso_token_configured: hasTursoToken,
-            raw_select_1: rawSelect1,
-            raw_insert: rawInsert,
-            raw_select_2: rawSelect2,
-            parsed_users: {
-                all: await dbAll('SELECT * FROM users LIMIT 3'),
-                get: await dbGet('SELECT * FROM users LIMIT 1')
-            },
-            server_time: new Date().toISOString()
-        });
+        await dbGet('SELECT 1 as ok');
+        res.json({ status: 'ok', server_time: new Date().toISOString() });
     } catch (e) {
-        res.status(500).json({ error: e.message, stack: e.stack });
+        res.status(500).json({ error: e.message });
     }
 });
 
