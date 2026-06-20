@@ -3313,17 +3313,14 @@
                 throw new Error('网络连接失败，请检查网络或稍后重试');
             }
             const contentType = res.headers.get('content-type') || '';
-            if (res.ok && contentType.includes('application/json')) {
-                return await res.json();
-            }
-            if (res.status === 404 || res.status >= 500) {
-                throw new Error('服务暂时不可用，正在重启，请稍后再试');
-            }
-            if (contentType.includes('application/json')) {
-                const data = await res.json();
-                throw new Error(data.error || '请求失败');
-            }
-            throw new Error('后端服务不可用，请稍后重试');
+            const isJson = contentType.includes('application/json');
+            let data = isJson ? await res.json() : null;
+            if (res.ok && isJson) return data;
+            if (res.status === 401) throw new Error((data && data.error) || '未登录或登录已过期');
+            if (res.status === 404) throw new Error((data && data.error) || '请求失败 (404)');
+            if (res.status >= 500) throw new Error((data && data.error) || '服务器错误，请稍后重试');
+            if (isJson && data && data.error) throw new Error(data.error);
+            throw new Error('请求失败，请稍后重试');
         }
 
         function escapeHtml(str) {
