@@ -242,6 +242,9 @@ app.post('/api/auth/register', async (req, res) => {
         res.json({ token, userId: newUserId, username });
     } catch (e) {
         console.error('Register error:', e.message);
+        if (e.message.includes('UNIQUE constraint') || e.message.includes('unique')) {
+            return res.status(409).json({ error: '用户名已被占用' });
+        }
         res.status(500).json({ error: '服务器错误，请稍后重试' });
     }
 });
