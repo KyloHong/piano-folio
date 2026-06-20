@@ -135,14 +135,24 @@ async function tursoExecute(sql, args = []) {
         body: JSON.stringify(body)
     });
 
+    const text = await res.text();
+    
     if (!res.ok) {
-        const text = await res.text();
         throw new Error('Turso API error: ' + res.status + ' ' + text);
     }
 
-    const data = await res.json();
-    const first = data.results ? data.results[0] : null;
-    if (first && first.error) throw new Error(first.error.message || 'Turso query error');
+    let data;
+    try {
+        data = JSON.parse(text);
+    } catch (e) {
+        throw new Error('Turso response parse error: ' + text);
+    }
+    
+    // 处理 pipeline 格式
+    const first = data.results ? data.results[0] : data;
+    if (first && first.error) {
+        throw new Error(first.error.message || 'Turso query error');
+    }
     return first;
 }
 
@@ -335,21 +345,31 @@ app.post('/api/charts/my', authenticate, async (req, res) => {
         await initSchema();
         const { name, song, chord_data, display_mode } = req.body;
         if (!name || !name.trim()) return res.status(400).json({ error: '图谱名称不能为空' });
-        const id = crypto.randomUUID();
+        
+        // 生成 UUID，兼容不支持 crypto.randomUUID 的环境
+        const id = crypto.randomUUID ? crypto.randomUUID() : 
+            'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0;
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        
         const songData = song || {};
         const lyrics = Array.isArray(songData.lyrics) ? songData.lyrics : [];
         const sections = songData.sections || {};
-        await dbRun(`INSERT INTO charts (id, user_id, name, song_title, song_artist, song_lyrics, song_sections, chord_data, display_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        
+        const result = await dbRun(`INSERT INTO charts (id, user_id, name, song_title, song_artist, song_lyrics, song_sections, chord_data, display_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
             id, req.userId, name.trim(),
             songData.title || '', songData.artist || '',
             JSON.stringify(lyrics), JSON.stringify(sections),
             JSON.stringify(chord_data || {}),
             display_mode || 'name'
         ]);
+        
+        console.log('Chart created:', id, 'changes:', result.changes);
         res.json({ id, message: '图谱创建成功' });
     } catch (e) {
         console.error('Create chart error:', e.message);
-        res.status(500).json({ error: '创建图谱失败' });
+        res.status(500).json({ error: '创建图谱失败: ' + e.message });
     }
 });
 
