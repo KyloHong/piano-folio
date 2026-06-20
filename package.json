@@ -1,14 +1,14 @@
 {
   "name": "piano-chord-practice",
-  "version": "2.1.0",
-  "description": "钢琴曲目和弦标记工具（Netlify + Supabase）",
-  "main": "server-netlify.js",
+  "version": "2.2.0",
+  "description": "钢琴曲目和弦标记工具（Netlify + Turso）",
+  "main": "server.js",
   "scripts": {
-    "start": "node server-netlify.js",
-    "dev": "node server-netlify.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
+    "@libsql/client": "^0.14.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

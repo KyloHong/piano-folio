@@ -6,9 +6,10 @@
 [functions]
   node_bundler = "esbuild"
 
+# 使用 Turso 版本的 API（api-turso.js）
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
+  to = "/.netlify/functions/api-turso/:splat"
   status = 200
 
 [[redirects]]
