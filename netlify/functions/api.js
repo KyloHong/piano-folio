@@ -60,16 +60,12 @@ function toTursoValue(val) {
 }
 
 // 解析 Turso HTTP API 返回的行数据
-// Turso 返回格式可能是：
-// {results: [{type: "ok", result: {cols: [...], rows: [[{type,value}]], affected_row_count, last_insert_rowid}}]}
-// 或者：{results: [{cols: [...], rows: [[{type,value}]], affected_row_count, last_insert_rowid}]}
+// Turso 返回格式：{cols: [...], rows: [[{type,value}]], affected_row_count, last_insert_rowid}
 function parseTursoResult(response) {
     if (!response) return [];
-    // 处理嵌套的 result 字段
-    const data = response.result || response;
-    if (!data.rows || data.rows.length === 0) return [];
-    const cols = data.cols || [];
-    return data.rows.map(row => {
+    if (!response.rows || response.rows.length === 0) return [];
+    const cols = response.cols || [];
+    return response.rows.map(row => {
         const obj = {};
         for (let i = 0; i < cols.length; i++) {
             const cell = row[i];
@@ -77,20 +73,16 @@ function parseTursoResult(response) {
             if (cell === null || cell === undefined) {
                 obj[colName] = null;
             } else if (typeof cell === 'object' && cell !== null) {
-                // 格式：{type: "integer", value: "1"}
-                if (cell.type === 'null' || cell.value === null || cell.value === undefined) {
-                    obj[colName] = null;
-                } else if (cell.type === 'integer') {
-                    obj[colName] = parseInt(cell.value, 10);
-                } else if (cell.type === 'real') {
-                    obj[colName] = parseFloat(cell.value);
-                } else if (cell.type === 'blob') {
-                    obj[colName] = cell.value;
-                } else {
-                    obj[colName] = cell.value;
-                }
+                    if (cell.type === 'null' || cell.value === null || cell.value === undefined) {
+                        obj[colName] = null;
+                    } else if (cell.type === 'integer') {
+                        obj[colName] = parseInt(cell.value, 10);
+                    } else if (cell.type === 'real') {
+                        obj[colName] = parseFloat(cell.value);
+                    } else {
+                        obj[colName] = cell.value;
+                    }
             } else {
-                // 简单格式：直接是值
                 obj[colName] = cell;
             }
         }
@@ -100,22 +92,14 @@ function parseTursoResult(response) {
 
 function getAffectedCount(response) {
     if (!response) return 0;
-    const data = response.result || response;
-    return data.affected_row_count || data.rows_affected || 0;
+    return response.affected_row_count || 0;
 }
 
 function getLastInsertId(response) {
     if (!response) return null;
-    // 处理可能的嵌套结构
-    const data = response.result || response;
-    // Turso 返回格式：{last_insert_rowid: {type: "integer", value: "123"}}
-    // 或者直接：{last_insert_rowid: 123}
-    let id = data.last_insert_rowid;
+    const id = response.last_insert_rowid;
     if (id === null || id === undefined) return null;
-    // 如果是对象格式 {type: "integer", value: "123"}
-    if (typeof id === 'object' && id.value) {
-        return parseInt(id.value, 10);
-    }
+    if (typeof id === 'object' && id.value) return parseInt(id.value, 10);
     return parseInt(id, 10);
 }
 
@@ -157,14 +141,15 @@ async function tursoExecute(sql, args = []) {
         throw new Error('Turso response parse error: ' + text);
     }
     
-    // 处理 pipeline 格式
+    // Turso pipeline 格式: { results: [{ type: "ok", response: { type: "execute", result: { cols, rows, affected_row_count, last_insert_rowid } } }] }
     const first = data.results ? data.results[0] : data;
-    console.log('Turso FULL response:', JSON.stringify(data).substring(0, 500));
-    console.log('Turso FIRST result:', JSON.stringify(first).substring(0, 300));
+    // 提取最终的 result 对象（包含 cols, rows, affected_row_count 等）
+    const finalResult = first?.response?.result || first?.result || first;
+    console.log('Turso [', sql.substring(0, 50), '] result:', JSON.stringify(finalResult).substring(0, 200));
     if (first && first.error) {
         throw new Error(first.error.message || 'Turso query error');
     }
-    return first;
+    return finalResult;
 }
 
 async function dbAll(sql, args = []) {
