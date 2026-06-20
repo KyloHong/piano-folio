@@ -106,9 +106,16 @@ function getAffectedCount(response) {
 
 function getLastInsertId(response) {
     if (!response) return null;
+    // 处理可能的嵌套结构
     const data = response.result || response;
-    const id = data.last_insert_rowid;
+    // Turso 返回格式：{last_insert_rowid: {type: "integer", value: "123"}}
+    // 或者直接：{last_insert_rowid: 123}
+    let id = data.last_insert_rowid;
     if (id === null || id === undefined) return null;
+    // 如果是对象格式 {type: "integer", value: "123"}
+    if (typeof id === 'object' && id.value) {
+        return parseInt(id.value, 10);
+    }
     return parseInt(id, 10);
 }
 
@@ -275,15 +282,23 @@ app.post('/api/auth/register', async (req, res) => {
         if (existing) return res.status(409).json({ error: '用户名已被占用' });
 
         const hash = bcrypt.hashSync(password, 10);
-        await dbRun('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, hash]);
+        const result = await dbRun('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, hash]);
         
-        // 插入后查询用户获取 ID（因为 last_insert_rowid 可能不可靠）
-        const newUser = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
-        if (!newUser) {
+        // 获取插入的用户 ID
+        let newUserId = result.lastInsertRowid;
+        
+        // 如果 lastInsertRowid 获取失败，等待一下再查询
+        if (!newUserId) {
+            await new Promise(r => setTimeout(r, 100));
+            const newUser = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
+            newUserId = newUser ? newUser.id : null;
+        }
+        
+        if (!newUserId) {
+            console.error('Failed to get user ID after insert');
             return res.status(500).json({ error: '创建用户失败' });
         }
         
-        const newUserId = newUser.id;
         const token = jwt.sign({ userId: newUserId, username }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
         res.json({ token, userId: newUserId, username });
     } catch (e) {
