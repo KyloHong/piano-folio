@@ -406,4 +406,14 @@ app.get('/api/charts/public/:id', async (req, res) => {
 
 // --------------------- Handler ---------------------
 
-module.exports.handler = serverless(app);
+// Netlify redirects /api/* → /.netlify/functions/api/*，所以 Express 收到的是 /charts/public
+// 但 Express 路由定义是 /api/charts/public，需要手动加上 /api 前缀
+const handler = serverless((event, context) => {
+    const originalPath = event.path || event.rawPath || '';
+    const fnPrefix = '/.netlify/functions/api';
+    if (originalPath.startsWith(fnPrefix)) {
+        event.path = '/api' + originalPath.slice(fnPrefix.length);
+    }
+    return app(event, context);
+});
+module.exports.handler = handler;

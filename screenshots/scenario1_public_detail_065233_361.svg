@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" width="1000" height="700">
+    <defs>
+      <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#1a1a2e"/>
+        <stop offset="100%" stop-color="#16213e"/>
+      </linearGradient>
+      <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.3"/></filter>
+    </defs>
+    <rect width="1000" height="700" fill="url(#bgGrad)"/>
+
+    <!-- 标题 -->
+    <text x="60" y="55" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#e8e8e8">场景 1 · 公共图谱详情页</text>
+    <text x="60" y="85" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0">从首页公共图谱卡片点击进入</text>
+
+    <!-- 浏览器窗口 -->
+    <rect x="60" y="110" width="880" height="550" rx="10" fill="#16213e" stroke="#0f3460" stroke-width="2" filter="url(#shadow)"/>
+    <circle cx="85" cy="135" r="6" fill="#e94560"/>
+    <circle cx="105" cy="135" r="6" fill="#f9a826"/>
+    <circle cx="125" cy="135" r="6" fill="#00d4aa"/>
+    <text x="155" y="140" font-family="Arial, sans-serif" font-size="13" fill="#a0a0b0">http://127.0.0.1:3000/</text>
+
+    <!-- 搜索栏区域 -->
+    <rect x="90" y="170" width="820" height="100" rx="8" fill="#16213e" stroke="#0f3460" stroke-dasharray="8,4" stroke-width="1" opacity="0.4"/>
+    <text x="110" y="200" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f9a826">⚠ 搜索栏已隐藏</text>
+    <line x1="110" y1="220" x2="900" y2="220" stroke="#f9a826" stroke-width="2" stroke-dasharray="8,4" opacity="0.5"/>
+    <text x="110" y="245" font-family="Arial, sans-serif" font-size="12" fill="#a0a0b0">#homeSearchSection.readonly-hidden { display: none; }</text>
+    <text x="110" y="265" font-family="Arial, sans-serif" font-size="12" fill="#f9a826">state.isNewChart = false  →  不显示搜索栏和手动输入按钮</text>
+  <text x="110" y="310" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f9a826">⚠ 歌词区域（只读，不可编辑）</text><rect x="110" y="340" width="780" height="48" rx="6" fill="#16213e" stroke="#0f3460" stroke-width="1"/><text x="130" y="370" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">这</text><text x="148" y="370" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">是</text><text x="166" y="370" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">第</text><text x="184" y="370" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">一</text><text x="202" y="370" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">行</text><text x="232" y="370" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">歌</text><text x="250" y="370" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">词</text><text x="280" y="370" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">测</text><text x="298" y="370" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">试</text><rect x="110" y="340" width="780" height="48" rx="6" fill="rgba(233, 69, 96, 0.15)" pointer-events="none"/><text x="810" y="370" font-family="Arial, sans-serif" font-size="11" fill="#f9a826">🔒只读</text><rect x="110" y="400" width="780" height="48" rx="6" fill="#16213e" stroke="#0f3460" stroke-width="1"/><text x="130" y="430" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">第</text><text x="148" y="430" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">二</text><text x="166" y="430" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">行</text><text x="196" y="430" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">测</text><text x="214" y="430" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">试</text><text x="244" y="430" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">和</text><text x="262" y="430" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">弦</text><rect x="110" y="400" width="780" height="48" rx="6" fill="rgba(233, 69, 96, 0.15)" pointer-events="none"/><text x="810" y="430" font-family="Arial, sans-serif" font-size="11" fill="#f9a826">🔒只读</text><rect x="110" y="460" width="780" height="48" rx="6" fill="#16213e" stroke="#0f3460" stroke-width="1"/><text x="130" y="490" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">第</text><text x="148" y="490" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">三</text><text x="166" y="490" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">行</text><text x="196" y="490" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">仅</text><text x="214" y="490" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">供</text><text x="244" y="490" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">测</text><text x="262" y="490" font-family="Arial, sans-serif" font-size="16" fill="#a0a0b0" style="pointer-events:none;">试</text><rect x="110" y="460" width="780" height="48" rx="6" fill="rgba(233, 69, 96, 0.15)" pointer-events="none"/><text x="810" y="490" font-family="Arial, sans-serif" font-size="11" fill="#f9a826">🔒只读</text>
+    <rect x="90" y="540" width="820" height="100" rx="8" fill="#1a1a2e" opacity="0.8"/>
+    <text x="110" y="570" font-family="monospace" font-size="13" fill="#e8e8e8">state.isReadOnly = true, state.isNewChart = false</text>
+    <text x="110" y="595" font-family="monospace" font-size="13" fill="#e8e8e8">搜索栏: 隐藏 (readonly-hidden)  |  歌词: 只读 (is-readonly class + 无 onclick)</text>
+    <text x="110" y="620" font-family="monospace" font-size="13" fill="#a0a0b0">result: searchBar=HIDDEN, lyrics=READONLY ✓</text>
+  </svg>

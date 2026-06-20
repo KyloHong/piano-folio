@@ -1,0 +1,3003 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钢琴曲目练习 - 和弦标记工具</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-hover: #22222e;
+            --accent-gold: #d4a574;
+            --accent-gold-dim: #a67c52;
+            --accent-rose: #c77d8e;
+            --accent-sage: #7d9a8c;
+            --text-primary: #f5f0e8;
+            --text-secondary: #a8a4a0;
+            --text-dim: #6b6868;
+            --border-subtle: rgba(212, 165, 116, 0.15);
+            --shadow-glow: 0 0 40px rgba(212, 165, 116, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Background texture */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(212, 165, 116, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(199, 125, 142, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 120px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .tagline {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .search-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-gold-dim);
+            box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dim));
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(212, 165, 116, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-gold-dim);
+        }
+
+        /* Mode Toggle */
+        .mode-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mode-btn {
+            padding: 10px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .mode-btn.active {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+            border-color: var(--accent-gold);
+        }
+
+        .mode-btn:hover:not(.active) {
+            border-color: var(--accent-gold-dim);
+            color: var(--text-primary);
+        }
+
+        /* Song Info */
+        .song-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .song-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .song-artist {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Lyrics Section */
+        .lyrics-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border-subtle), transparent);
+        }
+
+        /* Lyric Line */
+        .lyric-line {
+            display: flex;
+            align-items: flex-start;
+            padding: 8px 16px;
+            margin: 4px 0;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+            cursor: pointer;
+            min-height: 48px;
+        }
+
+        .lyric-line:hover {
+            background: var(--bg-hover);
+        }
+
+        .lyric-line.active {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .line-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            width: 28px;
+            padding-top: 18px;
+            padding-bottom: 2px;
+            line-height: 1.2;
+            user-select: none;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .line-content {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            align-items: center;
+        }
+
+        .line-content.editable {
+            outline: none;
+            min-height: 32px;
+        }
+
+        .line-content.editable:focus {
+            outline: 2px solid var(--accent-gold-dim);
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+
+        /* Lyric Character with Chord */
+        .lyric-char {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 24px 1px 2px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            min-height: 32px;
+            box-sizing: border-box;
+        }
+
+        .lyric-char:hover {
+            background: rgba(212, 165, 116, 0.15);
+        }
+
+        .char-text {
+            font-size: 1.15rem;
+            color: var(--text-primary);
+            line-height: 1.2;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.15s ease;
+        }
+
+        .lyric-char.has-chord .char-text {
+            border-bottom-color: var(--accent-gold);
+        }
+
+        .char-chord {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            white-space: nowrap;
+            line-height: 1.3;
+            pointer-events: none;
+        }
+
+        .char-chord:empty {
+            display: none;
+        }
+
+        /* Chord Slot (pre/post position) */
+        .chord-slot {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 24px 2px 2px;
+            margin: 0 1px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            min-height: 32px;
+            box-sizing: border-box;
+            border-bottom: 2px solid transparent;
+        }
+
+        .chord-slot:hover {
+            background: rgba(212, 165, 116, 0.1);
+        }
+
+        .chord-slot.has-chord {
+            border-bottom-color: var(--accent-gold);
+        }
+
+        .slot-chord {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            white-space: nowrap;
+            line-height: 1.3;
+            pointer-events: none;
+        }
+
+        .slot-chord:empty {
+            display: none;
+        }
+
+        .slot-text {
+            font-size: 1.15rem;
+            color: var(--text-dim);
+            line-height: 1.2;
+        }
+
+        /* Position indicator dot on chord-slot */
+        .chord-slot::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: var(--text-dim);
+            border-radius: 50%;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .chord-slot.has-chord::before {
+            display: none;
+        }
+
+        /* Position Selector */
+        .position-selector {
+            display: flex;
+            gap: 4px;
+            margin: 12px 0;
+            padding: 4px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+        }
+
+        .pos-btn {
+            flex: 1;
+            padding: 7px 4px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .pos-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+
+        .pos-btn.active {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+            border-color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* Chord Builder - New Panel Styles */
+        .chord-builder {
+            padding: 0;
+        }
+
+        .chord-section {
+            margin-bottom: 12px;
+        }
+
+        .chord-section-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .chord-btn-group {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .chord-btn {
+            padding: 8px 12px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .chord-btn:hover {
+            background: var(--bg-card);
+            border-color: var(--accent-gold-dim);
+        }
+
+        .chord-btn.selected {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+            border-color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .chord-btn.sharp {
+            background: rgba(212, 165, 116, 0.1);
+        }
+
+        .chord-btn.flat {
+            background: rgba(199, 125, 142, 0.1);
+        }
+
+        .chord-preview {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            text-align: center;
+        }
+
+        .chord-preview-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+            margin-bottom: 4px;
+        }
+
+        .chord-preview-tab {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .slash-chord-group {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .slash-btn {
+            padding: 6px 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .slash-btn:hover {
+            border-color: var(--accent-gold-dim);
+            color: var(--text-primary);
+        }
+
+        .slash-btn.selected {
+            background: var(--accent-sage);
+            color: var(--bg-primary);
+            border-color: var(--accent-sage);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .empty-hint {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        /* Chord Panel (Popup) */
+        .chord-panel {
+            position: fixed;
+            z-index: 1000;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            min-width: 280px;
+            display: none;
+        }
+
+        .chord-panel.visible {
+            display: block;
+            animation: panelIn 0.2s ease;
+        }
+
+        @keyframes panelIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .panel-close {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .panel-close:hover {
+            color: var(--text-primary);
+        }
+
+        .chord-presets {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .chord-preset {
+            padding: 8px 4px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .chord-preset:hover {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+            border-color: var(--accent-gold);
+        }
+
+        .chord-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .chord-input {
+            flex: 1;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .chord-input:focus {
+            outline: none;
+            border-color: var(--accent-gold-dim);
+        }
+
+        .chord-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chord-actions .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 10px;
+            font-size: 0.85rem;
+        }
+
+        .chord-delete {
+            background: rgba(199, 125, 142, 0.2);
+            color: var(--accent-rose);
+            border: 1px solid rgba(199, 125, 142, 0.3);
+        }
+
+        .chord-delete:hover {
+            background: var(--accent-rose);
+            color: white;
+        }
+
+        /* Extended Chord Input */
+        .chord-extended {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .ext-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .ext-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .ext-input {
+            width: 50px;
+            padding: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .ext-input:focus {
+            outline: none;
+            border-color: var(--accent-gold-dim);
+        }
+
+        /* Section Tag */
+        .section-tag {
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--accent-sage);
+            color: var(--bg-primary);
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .lyric-line {
+            position: relative;
+        }
+
+        /* Section Selector Dropdown */
+        .section-selector {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .lyric-line:hover .section-selector {
+            opacity: 1;
+        }
+
+        .section-btn {
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .section-btn:hover {
+            border-color: var(--accent-gold-dim);
+            color: var(--accent-gold);
+        }
+
+        /* Chord Summary Panel */
+        .chord-summary {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: 32px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .summary-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .summary-item:hover {
+            border-color: var(--accent-gold-dim);
+            transform: translateY(-2px);
+        }
+
+        .summary-chord {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--accent-gold);
+            margin-bottom: 4px;
+        }
+
+        .summary-count {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-gold-dim);
+        }
+
+        /* Floating Main Menu (Top-Right) */
+        .floating-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+
+        .menu-trigger {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dim));
+            color: var(--bg-primary);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 8px 24px rgba(212, 165, 116, 0.3);
+            transition: all 0.25s ease;
+        }
+
+        .menu-trigger:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 32px rgba(212, 165, 116, 0.4);
+        }
+
+        .menu-trigger.active {
+            background: var(--bg-card);
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            min-width: 280px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: none;
+        }
+
+        .menu-dropdown.visible {
+            display: block;
+            animation: menuIn 0.2s ease;
+        }
+
+        @keyframes menuIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .menu-section {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .menu-section:last-child {
+            border-bottom: none;
+        }
+
+        .menu-section-title {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            padding: 8px 16px 4px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .menu-item-icon {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-item-text {
+            flex: 1;
+        }
+
+        .menu-item-shortcut {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        /* Save Dialog */
+        .save-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 380px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            z-index: 1500;
+            display: none;
+        }
+
+        .save-dialog.visible {
+            display: block;
+            animation: menuIn 0.2s ease;
+        }
+
+        .save-dialog-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+            margin-bottom: 16px;
+        }
+
+        .save-dialog-hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .save-name-input {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        .save-name-input:focus {
+            outline: none;
+            border-color: var(--accent-gold-dim);
+        }
+
+        .save-dialog-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .save-dialog-actions .btn {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+        }
+
+        /* Save Conflict Dialog */
+        .conflict-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 12px 0;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+        }
+
+        .conflict-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .conflict-item:last-child {
+            border-bottom: none;
+        }
+
+        .conflict-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .conflict-item-title {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .conflict-item-meta {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        /* Favorites List */
+        .favorites-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .favorite-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 12px;
+            transition: background 0.15s ease;
+        }
+
+        .favorite-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .favorite-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .favorite-title {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .favorite-meta {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .favorite-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .favorite-action-btn {
+            padding: 4px 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .favorite-action-btn:hover {
+            color: var(--accent-gold);
+            border-color: var(--accent-gold-dim);
+        }
+
+        .favorite-action-btn.delete:hover {
+            color: var(--accent-rose);
+            border-color: var(--accent-rose);
+        }
+
+        .empty-favorites {
+            padding: 24px 16px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        /* Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1400;
+            display: none;
+        }
+
+        .modal-overlay.visible {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Version Management */
+        .version-list {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .version-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            gap: 12px;
+            transition: background 0.15s ease;
+        }
+
+        .version-item:last-child {
+            border-bottom: none;
+        }
+
+        .version-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dim));
+            color: var(--bg-primary);
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            flex-shrink: 0;
+        }
+
+        .version-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .version-title {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .version-meta {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 3px;
+            line-height: 1.5;
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .empty-versions {
+            padding: 32px 16px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        .version-tag {
+            display: inline-block;
+            padding: 1px 6px;
+            background: rgba(212, 165, 116, 0.15);
+            color: var(--accent-gold);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 6px;
+        }
+
+        /* Confirm Rollback Dialog */
+        .rollback-confirm {
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        .rollback-confirm-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .rollback-confirm-name {
+            font-size: 1rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px 100px;
+            }
+
+            .search-row {
+                flex-direction: column;
+            }
+
+            .mode-toggle {
+                width: 100%;
+            }
+
+            .mode-btn {
+                flex: 1;
+            }
+
+            .chord-presets {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">Piano Practice</h1>
+            <p class="tagline">和弦标记与练习工具</p>
+        </header>
+
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-row">
+                <input type="text" class="search-input" id="searchInput" placeholder="输入歌曲名称或歌手...">
+                <button class="btn btn-primary" id="searchBtn">
+                    <span>🔍</span> 搜索
+                </button>
+                <button class="btn btn-secondary" id="manualBtn">
+                    <span>✏️</span> 手动输入
+                </button>
+            </div>
+            <div class="search-row" style="justify-content: flex-end;">
+                <div class="mode-toggle">
+                    <button class="mode-btn active" data-mode="name">和弦名模式</button>
+                    <button class="mode-btn" data-mode="tab">弹唱标记模式</button>
+                </div>
+            </div>
+            <div class="song-info" id="songInfo" style="display: none;">
+                <div class="song-title" id="songTitle"></div>
+                <div class="song-artist" id="songArtist"></div>
+            </div>
+        </section>
+
+        <!-- Lyrics Section -->
+        <section class="lyrics-section">
+            <h2 class="section-title">歌词与和弦</h2>
+            <div id="lyricsContainer">
+                <div class="empty-state">
+                    <div class="empty-icon">🎹</div>
+                    <div class="empty-text">搜索歌曲或手动输入歌词</div>
+                    <div class="empty-hint">搜索后将自动获取歌词，点击字符即可标记和弦</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chord Summary -->
+        <section class="chord-summary" id="chordSummary" style="display: none;">
+            <h2 class="section-title">和弦总结</h2>
+            <div class="summary-grid" id="summaryGrid"></div>
+        </section>
+    </div>
+
+    <!-- Chord Panel (Popup) - New Builder -->
+    <div class="chord-panel" id="chordPanel" style="min-width: 320px;">
+        <div class="panel-header">
+            <span class="panel-title">标记和弦</span>
+            <button class="panel-close" id="panelClose">×</button>
+        </div>
+        
+        <div class="chord-builder" id="chordBuilder">
+            <!-- 根音选择 -->
+            <div class="chord-section">
+                <span class="chord-section-label">根音</span>
+                <div class="chord-btn-group" id="rootGroup">
+                    <button class="chord-btn" data-root="C">C</button>
+                    <button class="chord-btn" data-root="D">D</button>
+                    <button class="chord-btn" data-root="E">E</button>
+                    <button class="chord-btn" data-root="F">F</button>
+                    <button class="chord-btn" data-root="G">G</button>
+                    <button class="chord-btn" data-root="A">A</button>
+                    <button class="chord-btn" data-root="B">B</button>
+                </div>
+            </div>
+            
+            <!-- 升降号 -->
+            <div class="chord-section">
+                <span class="chord-section-label">升降号</span>
+                <div class="chord-btn-group" id="accidentalGroup">
+                    <button class="chord-btn sharp" data-accidental="sharp">#</button>
+                    <button class="chord-btn flat" data-accidental="flat">b</button>
+                    <button class="chord-btn selected" data-accidental="none">无</button>
+                </div>
+            </div>
+            
+            <!-- 和弦性质 -->
+            <div class="chord-section">
+                <span class="chord-section-label">性质</span>
+                <div class="chord-btn-group" id="qualityGroup">
+                    <button class="chord-btn selected" data-quality="major">大三</button>
+                    <button class="chord-btn" data-quality="minor">小三(m)</button>
+                    <button class="chord-btn" data-quality="7">属七(7)</button>
+                    <button class="chord-btn" data-quality="maj7">大七(maj7)</button>
+                    <button class="chord-btn" data-quality="m7">小七(m7)</button>
+                    <button class="chord-btn" data-quality="dim">减(dim)</button>
+                    <button class="chord-btn" data-quality="aug">增(aug)</button>
+                    <button class="chord-btn" data-quality="sus2">Sus2</button>
+                    <button class="chord-btn" data-quality="sus4">Sus4</button>
+                </div>
+            </div>
+            
+            <!-- 扩展音 -->
+            <div class="chord-section">
+                <span class="chord-section-label">扩展音</span>
+                <div class="chord-btn-group" id="extensionGroup">
+                    <button class="chord-btn" data-ext="9">9</button>
+                    <button class="chord-btn" data-ext="11">11</button>
+                    <button class="chord-btn" data-ext="13">13</button>
+                    <button class="chord-btn" data-ext="add9">add9</button>
+                    <button class="chord-btn" data-ext="add2">add2</button>
+                </div>
+            </div>
+            
+            <!-- 转位 -->
+            <div class="chord-section" id="slashSection" style="display: none;">
+                <span class="chord-section-label">转位</span>
+                <div class="slash-chord-group" id="slashGroup"></div>
+            </div>
+            
+            <!-- 预览 -->
+            <div class="chord-preview">
+                <div class="chord-preview-name" id="previewName">-</div>
+                <div class="chord-preview-tab" id="previewTab">左手: - | 右手: (-)</div>
+            </div>
+            
+            <!-- 位置选择 -->
+            <div class="chord-section">
+                <span class="chord-section-label">标记位置</span>
+                <div class="position-selector" id="positionSelector">
+                    <button class="pos-btn active" data-pos="current">当前</button>
+                    <button class="pos-btn" data-pos="pre">文字之前</button>
+                    <button class="pos-btn" data-pos="post">文字之后</button>
+                </div>
+            </div>
+            
+            <!-- 操作按钮 -->
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <button class="btn btn-primary" id="chordConfirm" style="flex: 1;">确认</button>
+                <button class="btn chord-delete" id="chordDelete" style="flex: 1;">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Input Modal -->
+    <div class="chord-panel" id="manualModal" style="min-width: 400px;">
+        <div class="panel-header">
+            <span class="panel-title">手动输入歌词</span>
+            <button class="panel-close" id="modalClose">×</button>
+        </div>
+        <div style="margin-bottom: 16px;">
+            <input type="text" class="search-input" id="manualSong" placeholder="歌曲名称" style="margin-bottom: 12px;">
+            <input type="text" class="search-input" id="manualArtist" placeholder="歌手" style="margin-bottom: 12px;">
+            <textarea class="search-input" id="manualLyrics" placeholder="输入歌词，每行一句..." rows="8" style="resize: vertical;"></textarea>
+        </div>
+        <div class="chord-actions">
+            <button class="btn btn-secondary" id="modalCancel">取消</button>
+            <button class="btn btn-primary" id="modalConfirm">确定</button>
+        </div>
+    </div>
+
+    <!-- Floating Main Menu (Top-Right) -->
+    <div class="floating-menu">
+        <button class="menu-trigger" id="menuTrigger" title="主菜单">☰</button>
+        <div class="menu-dropdown" id="menuDropdown">
+            <div class="menu-section">
+                <div class="menu-section-title">文件</div>
+                <button class="menu-item" data-action="new">
+                    <span class="menu-item-icon">📄</span>
+                    <span class="menu-item-text">新建图谱</span>
+                </button>
+                <button class="menu-item" data-action="save">
+                    <span class="menu-item-icon">💾</span>
+                    <span class="menu-item-text" id="saveMenuText">保存图谱</span>
+                    <span class="menu-item-shortcut">Ctrl+S</span>
+                </button>
+                <button class="menu-item" data-action="favorites">
+                    <span class="menu-item-icon">⭐</span>
+                    <span class="menu-item-text">我的收藏</span>
+                    <span class="menu-item-shortcut" id="favCount">0</span>
+                </button>
+                <button class="menu-item" data-action="versions">
+                    <span class="menu-item-icon">📸</span>
+                    <span class="menu-item-text">版本管理</span>
+                    <span class="menu-item-shortcut" id="versionCount">0</span>
+                </button>
+            </div>
+            <div class="menu-section">
+                <div class="menu-section-title">编辑</div>
+                <button class="menu-item" data-action="clear">
+                    <span class="menu-item-icon">🗑️</span>
+                    <span class="menu-item-text">清空当前图谱</span>
+                </button>
+            </div>
+            <div class="menu-section">
+                <div class="menu-section-title">帮助</div>
+                <button class="menu-item" data-action="about">
+                    <span class="menu-item-icon">ℹ️</span>
+                    <span class="menu-item-text">使用说明</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Dialog -->
+    <div class="modal-overlay" id="saveOverlay"></div>
+    <div class="save-dialog" id="saveDialog">
+        <div class="save-dialog-title">保存图谱</div>
+        <div class="save-dialog-hint">为你的图谱起个名字，便于在收藏夹中查找</div>
+        <input type="text" class="save-name-input" id="saveNameInput" placeholder="图谱名称（如：七里香-练习版）">
+        <div class="save-dialog-actions">
+            <button class="btn btn-secondary" id="saveCancel">取消</button>
+            <button class="btn btn-primary" id="saveConfirm">保存</button>
+        </div>
+    </div>
+
+    <!-- Save Conflict Dialog -->
+    <div class="save-dialog" id="conflictDialog" style="min-width: 420px;">
+        <div class="save-dialog-title">名称已存在</div>
+        <div class="save-dialog-hint" id="conflictHint">已存在同名图谱，请选择操作：</div>
+        <div class="conflict-list" id="conflictList"></div>
+        <div class="save-dialog-actions">
+            <button class="btn btn-secondary" id="conflictCancel">取消</button>
+            <button class="btn btn-primary" id="conflictNew">另存为新图谱</button>
+            <button class="btn btn-secondary" id="conflictOverwrite">覆盖原图谱</button>
+        </div>
+    </div>
+
+    <!-- Favorites Dialog -->
+    <div class="save-dialog" id="favoritesDialog" style="min-width: 480px;">
+        <div class="save-dialog-title">我的收藏</div>
+        <div class="favorites-list" id="favoritesList"></div>
+        <div class="save-dialog-actions" style="margin-top: 16px;">
+            <button class="btn btn-secondary" id="favoritesClose">关闭</button>
+        </div>
+    </div>
+
+    <!-- Version Management Dialog -->
+    <div class="save-dialog" id="versionDialog" style="min-width: 520px;">
+        <div class="save-dialog-title">版本管理</div>
+        <div style="margin-bottom: 12px;">
+            <button class="btn btn-primary" id="createVersionBtn" style="width: 100%;">
+                <span>📸</span> 创建新版本快照
+            </button>
+        </div>
+        <div class="version-list" id="versionList"></div>
+        <div class="save-dialog-actions" style="margin-top: 16px;">
+            <button class="btn btn-secondary" id="versionClose">关闭</button>
+        </div>
+    </div>
+
+    <!-- Rollback Confirm Dialog -->
+    <div class="save-dialog" id="rollbackDialog" style="min-width: 380px;">
+        <div class="save-dialog-title">⚠️ 确认回滚</div>
+        <div class="rollback-confirm">
+            <div class="rollback-confirm-text">确定要回滚到版本</div>
+            <div class="rollback-confirm-name" id="rollbackVersionName"></div>
+            <div class="rollback-confirm-text" style="font-size: 0.8rem;">回滚后当前未保存的修改将丢失，是否继续？</div>
+        </div>
+        <div class="save-dialog-actions">
+            <button class="btn btn-secondary" id="rollbackCancel">取消</button>
+            <button class="btn btn-primary" id="rollbackConfirm">确认回滚</button>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        const state = {
+            song: { title: '', artist: '', lyrics: [] },
+            displayMode: 'name', // 'name' or 'tab'
+            selectedChar: null,
+            chordData: {}, // { lineIndex: { charIndex: { chord: 'C', left: '1', right: '135' } } }
+            // 收藏夹相关
+            currentChartId: null,      // 当前打开的图谱ID（null表示未保存的新图谱）
+            currentChartName: null,    // 当前图谱名称
+            isDirty: false,            // 是否有未保存的修改
+            favorites: {},             // { id: { id, name, song, chordData, displayMode, createdAt, updatedAt } }
+            // 版本管理相关
+            versions: [],               // [{ id, versionNumber, name, song, chordData, displayMode, favorites, createdAt }]
+            versionCounter: 0           // 自动递增的版本计数器
+        };
+
+        // Chord Builder State
+        const chordBuilderState = {
+            root: null,
+            accidental: 'none',
+            quality: 'major',
+            extensions: [],
+            slash: null
+        };
+
+        // 音名到半音位置映射
+        const noteToSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+        
+        // 半音到数字标记映射（含升降号）
+        const semitoneToNumber = {
+            0: '1', 1: '1#', 2: '2', 3: '2#', 4: '3', 5: '4', 6: '4#',
+            7: '5', 8: '5#', 9: '6', 10: '6#', 11: '7'
+        };
+
+        // 和弦性质音程结构（半音）
+        const chordIntervals = {
+            'major': [0, 4, 7],
+            'minor': [0, 3, 7],
+            '7': [0, 4, 7, 10],
+            'maj7': [0, 4, 7, 11],
+            'm7': [0, 3, 7, 10],
+            'dim': [0, 3, 6],
+            'dim7': [0, 3, 6, 9],
+            'aug': [0, 4, 8],
+            'sus2': [0, 2, 7],
+            'sus4': [0, 5, 7]
+        };
+
+        // 扩展音半音偏移
+        const extensionIntervals = {
+            '9': 14, '11': 17, '13': 21,
+            'add9': 14, 'add2': 2
+        };
+
+        // 计算弹唱标记
+        function calculateChordTab(root, accidental, quality, extensions, slash) {
+            if (!root) return { name: '-', left: '-', right: '-' };
+            
+            // 计算根音半音位置
+            let rootSemitone = noteToSemitone[root];
+            if (accidental === 'sharp') rootSemitone += 1;
+            if (accidental === 'flat') rootSemitone -= 1;
+            rootSemitone = (rootSemitone + 12) % 12;
+            
+            // 获取和弦音程
+            let intervals = chordIntervals[quality] || chordIntervals['major'];
+            
+            // 添加扩展音
+            extensions.forEach(ext => {
+                const interval = extensionIntervals[ext];
+                if (interval && !intervals.includes(interval)) {
+                    intervals.push(interval);
+                }
+            });
+            
+            // 计算各音半音位置并转换为数字
+            const notes = intervals.map(interval => {
+                const semitone = (rootSemitone + interval) % 12;
+                return semitoneToNumber[semitone];
+            });
+            
+            // 计算左手（根音数字）
+            const leftHand = semitoneToNumber[rootSemitone];
+            
+            // 如果有转位，左手改为转位低音
+            let left = leftHand;
+            if (slash) {
+                const slashSemitone = noteToSemitone[slash];
+                left = semitoneToNumber[slashSemitone];
+            }
+            
+            // 构建和弦名称
+            let chordName = root;
+            if (accidental === 'sharp') chordName += '#';
+            if (accidental === 'flat') chordName += 'b';
+            
+            if (quality === 'minor') chordName += 'm';
+            else if (quality === '7') chordName += '7';
+            else if (quality === 'maj7') chordName += 'maj7';
+            else if (quality === 'm7') chordName += 'm7';
+            else if (quality === 'dim') chordName += 'dim';
+            else if (quality === 'dim7') chordName += 'dim7';
+            else if (quality === 'aug') chordName += 'aug';
+            else if (quality === 'sus2') chordName += 'sus2';
+            else if (quality === 'sus4') chordName += 'sus4';
+            
+            extensions.forEach(ext => {
+                if (ext === 'add9' || ext === 'add2') {
+                    chordName += ext;
+                } else if (['9', '11', '13'].includes(ext)) {
+                    // 7和弦扩展为9/11/13
+                    if (quality === '7' || quality === 'm7' || quality === 'maj7') {
+                        chordName = chordName.replace('7', ext);
+                    } else {
+                        chordName += ext;
+                    }
+                }
+            });
+            
+            if (slash) chordName += '/' + slash;
+            
+            return {
+                name: chordName,
+                left: left,
+                right: notes.join('')
+            };
+        }
+
+        // 更新和弦预览
+        function updateChordPreview() {
+            const result = calculateChordTab(
+                chordBuilderState.root,
+                chordBuilderState.accidental,
+                chordBuilderState.quality,
+                chordBuilderState.extensions,
+                chordBuilderState.slash
+            );
+            
+            document.getElementById('previewName').textContent = result.name;
+            document.getElementById('previewTab').textContent = `左手: ${result.left} | 右手: (${result.right})`;
+        }
+
+        // 更新转位选项
+        function updateSlashOptions() {
+            const root = chordBuilderState.root;
+            if (!root) {
+                document.getElementById('slashSection').style.display = 'none';
+                return;
+            }
+            
+            const slashSection = document.getElementById('slashSection');
+            const slashGroup = document.getElementById('slashGroup');
+            
+            // 根据根音生成转位选项
+            const slashOptions = {
+                'C': ['E', 'G'],
+                'D': ['F', 'A'],
+                'E': ['G', 'B'],
+                'F': ['A', 'C'],
+                'G': ['B', 'D'],
+                'A': ['C', 'E'],
+                'B': ['D', 'F']
+            };
+            
+            const options = slashOptions[root] || [];
+            if (options.length === 0) {
+                slashSection.style.display = 'none';
+                return;
+            }
+            
+            slashGroup.innerHTML = `<button class="slash-btn selected" data-slash="none">无转位</button>` +
+                options.map(note => `<button class="slash-btn" data-slash="${note}">${root}/${note}</button>`).join('');
+            
+            slashSection.style.display = 'block';
+        }
+
+        // 重置和弦构建器
+        function resetChordBuilder() {
+            chordBuilderState.root = null;
+            chordBuilderState.accidental = 'none';
+            chordBuilderState.quality = 'major';
+            chordBuilderState.extensions = [];
+            chordBuilderState.slash = null;
+            
+            // 重置UI
+            document.querySelectorAll('#rootGroup .chord-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('#accidentalGroup .chord-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('#qualityGroup .chord-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('#extensionGroup .chord-btn').forEach(b => b.classList.remove('selected'));
+            
+            document.querySelector('#accidentalGroup [data-accidental="none"]').classList.add('selected');
+            document.querySelector('#qualityGroup [data-quality="major"]').classList.add('selected');
+            
+            document.getElementById('slashSection').style.display = 'none';
+            updateChordPreview();
+        }
+
+        // Section Tags
+        const sectionTags = ['主歌A', '主歌B', '主歌C', '副歌A', '副歌B', '副歌C', '过渡段', '间奏', '尾奏', '前奏'];
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const manualBtn = document.getElementById('manualBtn');
+        const lyricsContainer = document.getElementById('lyricsContainer');
+        const chordPanel = document.getElementById('chordPanel');
+        const songInfo = document.getElementById('songInfo');
+        const chordSummary = document.getElementById('chordSummary');
+        const summaryGrid = document.getElementById('summaryGrid');
+        const manualModal = document.getElementById('manualModal');
+
+        // ============== Utility Functions ==============
+
+        // Generate UUID
+        function generateId() {
+            return 'chart_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        }
+
+        // Format date
+        function formatDate(ts) {
+            const d = new Date(ts);
+            const pad = n => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        // Mark dirty when changes happen
+        function markDirty() {
+            if (!state.isDirty) {
+                state.isDirty = true;
+                if (typeof updateSaveMenuText === 'function') updateSaveMenuText();
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        // Initialize
+        function init() {
+            bindEvents();
+            loadFromStorage();
+            updateFavCount();
+            updateSaveMenuText();
+            updateVersionCount();
+        }
+
+        // Bind events
+        function bindEvents() {
+            // Search
+            searchBtn.addEventListener('click', searchSong);
+            searchInput.addEventListener('keypress', e => e.key === 'Enter' && searchSong());
+
+            // Manual input
+            manualBtn.addEventListener('click', () => toggleModal(true));
+            document.getElementById('modalClose').addEventListener('click', () => toggleModal(false));
+            document.getElementById('modalCancel').addEventListener('click', () => toggleModal(false));
+            document.getElementById('modalConfirm').addEventListener('click', handleManualInput);
+
+            // Mode toggle
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.displayMode = btn.dataset.mode;
+                    renderLyrics();
+                    updateSummary();
+                });
+            });
+
+            // Chord panel
+            document.getElementById('panelClose').addEventListener('click', closeChordPanel);
+            document.getElementById('chordConfirm').addEventListener('click', confirmChord);
+            document.getElementById('chordDelete').addEventListener('click', deleteChord);
+
+            // Chord Builder - Root selection
+            document.getElementById('rootGroup').addEventListener('click', e => {
+                const btn = e.target.closest('.chord-btn');
+                if (!btn) return;
+                document.querySelectorAll('#rootGroup .chord-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                chordBuilderState.root = btn.dataset.root;
+                updateChordPreview();
+                updateSlashOptions();
+            });
+
+            // Chord Builder - Accidental selection
+            document.getElementById('accidentalGroup').addEventListener('click', e => {
+                const btn = e.target.closest('.chord-btn');
+                if (!btn) return;
+                document.querySelectorAll('#accidentalGroup .chord-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                chordBuilderState.accidental = btn.dataset.accidental;
+                updateChordPreview();
+                updateSlashOptions();
+            });
+
+            // Chord Builder - Quality selection
+            document.getElementById('qualityGroup').addEventListener('click', e => {
+                const btn = e.target.closest('.chord-btn');
+                if (!btn) return;
+                document.querySelectorAll('#qualityGroup .chord-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                chordBuilderState.quality = btn.dataset.quality;
+                updateChordPreview();
+            });
+
+            // Chord Builder - Extension selection (multi-select)
+            document.getElementById('extensionGroup').addEventListener('click', e => {
+                const btn = e.target.closest('.chord-btn');
+                if (!btn) return;
+                const ext = btn.dataset.ext;
+                if (chordBuilderState.extensions.includes(ext)) {
+                    chordBuilderState.extensions = chordBuilderState.extensions.filter(x => x !== ext);
+                    btn.classList.remove('selected');
+                } else {
+                    chordBuilderState.extensions.push(ext);
+                    btn.classList.add('selected');
+                }
+                updateChordPreview();
+            });
+
+            // Chord Builder - Slash selection
+            document.getElementById('slashGroup').addEventListener('click', e => {
+                const btn = e.target.closest('.slash-btn');
+                if (!btn) return;
+                document.querySelectorAll('#slashGroup .slash-btn').forEach(b => b.classList.remove('selected'));
+                if (btn.dataset.slash === 'none') {
+                    chordBuilderState.slash = null;
+                } else {
+                    btn.classList.add('selected');
+                    chordBuilderState.slash = btn.dataset.slash;
+                }
+                updateChordPreview();
+            });
+
+            // Position selector in chord panel
+            document.getElementById('positionSelector').addEventListener('click', e => {
+                const btn = e.target.closest('.pos-btn');
+                if (!btn || !state.selectedChar) return;
+                const newPos = btn.dataset.pos;
+                state.selectedChar.pos = newPos;
+                document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+
+            // Floating menu
+            document.getElementById('menuTrigger').addEventListener('click', e => {
+                e.stopPropagation();
+                toggleMainMenu();
+            });
+
+            // Menu item actions
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const action = item.dataset.action;
+                    closeMainMenu();
+                    handleMenuAction(action);
+                });
+            });
+
+            // Save dialog
+            document.getElementById('saveCancel').addEventListener('click', closeSaveDialog);
+            document.getElementById('saveConfirm').addEventListener('click', confirmSave);
+            document.getElementById('saveNameInput').addEventListener('keypress', e => e.key === 'Enter' && confirmSave());
+            document.getElementById('saveOverlay').addEventListener('click', () => {
+                closeSaveDialog();
+                closeConflictDialog();
+                closeFavoritesDialog();
+            });
+
+            // Conflict dialog
+            document.getElementById('conflictCancel').addEventListener('click', closeConflictDialog);
+            document.getElementById('conflictNew').addEventListener('click', saveAsNew);
+            document.getElementById('conflictOverwrite').addEventListener('click', overwriteExisting);
+
+            // Favorites dialog
+            document.getElementById('favoritesClose').addEventListener('click', closeFavoritesDialog);
+
+            // Version dialog
+            document.getElementById('versionClose').addEventListener('click', closeVersionDialog);
+            document.getElementById('createVersionBtn').addEventListener('click', createVersionSnapshot);
+
+            // Rollback dialog
+            document.getElementById('rollbackCancel').addEventListener('click', closeRollbackDialog);
+            document.getElementById('rollbackConfirm').addEventListener('click', confirmRollback);
+
+            // Click outside to close
+            document.addEventListener('click', e => {
+                if (!chordPanel.contains(e.target) && !e.target.closest('.lyric-char')) {
+                    closeChordPanel();
+                }
+                if (!e.target.closest('.floating-menu') && !e.target.closest('.save-dialog')) {
+                    closeMainMenu();
+                }
+            });
+
+            // Keyboard shortcut
+            document.addEventListener('keydown', e => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    handleMenuAction('save');
+                }
+            });
+        }
+
+        // Search song (using lyrics.ovh API)
+        async function searchSong() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            searchBtn.textContent = '搜索中...';
+            searchBtn.disabled = true;
+
+            try {
+                // Try to get lyrics from lyrics.ovh
+                const response = await fetch(`https://api.lyrics.ovh/v1/${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error('API Error');
+
+                const data = await response.json();
+                if (data.error) throw new Error('Not found');
+
+                // Parse lyrics
+                const lyrics = data.lyrics.split('\n').filter(line => line.trim());
+                
+                state.song = {
+                    title: query,
+                    artist: data.artist || '未知艺术家',
+                    lyrics: lyrics
+                };
+                state.chordData = {};
+                state.currentChartId = null;
+                state.currentChartName = null;
+                state.isDirty = false;
+
+                updateSongInfo();
+                renderLyrics();
+                updateSummary();
+                updateSaveMenuText();
+                saveToStorage();
+            } catch (error) {
+                // Fallback: show manual input
+                alert('未找到该歌曲，请尝试手动输入歌词');
+                toggleModal(true);
+            } finally {
+                searchBtn.innerHTML = '<span>🔍</span> 搜索';
+                searchBtn.disabled = false;
+            }
+        }
+
+        // Manual input modal
+        function toggleModal(show) {
+            manualModal.classList.toggle('visible', show);
+            if (show) {
+                manualModal.style.left = '50%';
+                manualModal.style.top = '50%';
+                manualModal.style.transform = 'translate(-50%, -50%)';
+            }
+        }
+
+        function handleManualInput() {
+            const title = document.getElementById('manualSong').value.trim();
+            const artist = document.getElementById('manualArtist').value.trim();
+            const lyrics = document.getElementById('manualLyrics').value.trim();
+
+            if (!lyrics) {
+                alert('请输入歌词');
+                return;
+            }
+
+            state.song = {
+                title: title || '未知歌曲',
+                artist: artist || '未知艺术家',
+                lyrics: lyrics.split('\n').filter(line => line.trim())
+            };
+            state.chordData = {};
+            state.currentChartId = null;
+            state.currentChartName = null;
+            state.isDirty = false;
+
+            toggleModal(false);
+            updateSongInfo();
+            renderLyrics();
+            updateSummary();
+            updateSaveMenuText();
+            saveToStorage();
+        }
+
+        // Update song info display
+        function updateSongInfo() {
+            if (state.song.title) {
+                songInfo.style.display = 'block';
+                document.getElementById('songTitle').textContent = state.song.title;
+                document.getElementById('songArtist').textContent = state.song.artist;
+            } else {
+                songInfo.style.display = 'none';
+            }
+        }
+
+        // Fix overlapping chords - ensure ALL chords display completely without overlap
+        function fixOverlappingChords() {
+            const lines = lyricsContainer.querySelectorAll('.lyric-line');
+            lines.forEach(lineEl => {
+                const chars = lineEl.querySelectorAll('.lyric-char, .chord-slot');
+                
+                // Reset margins
+                chars.forEach(charEl => {
+                    charEl.style.marginLeft = '';
+                    charEl.classList.remove('extra-space');
+                });
+
+                // Collect all chord elements with their positions
+                const chordItems = [];
+                chars.forEach((charEl, index) => {
+                    const chordEl = charEl.querySelector('.char-chord, .slot-chord');
+                    if (chordEl?.textContent?.trim()) {
+                        chordItems.push({
+                            index,
+                            charEl,
+                            chordEl,
+                            originalLeft: charEl.getBoundingClientRect().left,
+                            charCenter: charEl.getBoundingClientRect().left + charEl.getBoundingClientRect().width / 2,
+                            chordWidth: chordEl.offsetWidth
+                        });
+                    }
+                });
+
+                // If no chords or only one chord, nothing to do
+                if (chordItems.length <= 1) return;
+
+                // Iterative overlap resolution
+                let hasOverlap = true;
+                let iterations = 0;
+                const maxIterations = 10; // Prevent infinite loop
+
+                while (hasOverlap && iterations < maxIterations) {
+                    hasOverlap = false;
+                    iterations++;
+
+                    // Sort by current position
+                    chordItems.sort((a, b) => a.charEl.getBoundingClientRect().left - b.charEl.getBoundingClientRect().left);
+
+                    // Check all pairs (not just adjacent)
+                    for (let i = 0; i < chordItems.length; i++) {
+                        for (let j = i + 1; j < chordItems.length; j++) {
+                            const item1 = chordItems[i];
+                            const item2 = chordItems[j];
+
+                            const rect1 = item1.charEl.getBoundingClientRect();
+                            const rect2 = item2.charEl.getBoundingClientRect();
+
+                            const chord1Right = rect1.left + rect1.width / 2 + item1.chordWidth / 2;
+                            const chord2Left = rect2.left + rect2.width / 2 - item2.chordWidth / 2;
+
+                            if (chord1Right > chord2Left) {
+                                const overlap = chord1Right - chord2Left;
+                                // Add margin to item2 to push it right
+                                const currentMargin = parseFloat(item2.charEl.style.marginLeft) || 0;
+                                item2.charEl.style.marginLeft = `${currentMargin + overlap + 4}px`;
+                                item2.charEl.classList.add('extra-space');
+                                hasOverlap = true;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderLyrics() {
+            if (!state.song.lyrics.length) {
+                lyricsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎹</div>
+                        <div class="empty-text">搜索歌曲或手动输入歌词</div>
+                        <div class="empty-hint">搜索后将自动获取歌词，点击字符即可标记和弦</div>
+                    </div>
+                `;
+                return;
+            }
+
+            lyricsContainer.innerHTML = state.song.lyrics.map((line, lineIndex) => {
+                const chars = line.split('').map((char, charIndex) => {
+                    const preChord = getChord(lineIndex, charIndex, 'pre');
+                    const curChord = getChord(lineIndex, charIndex, 'current');
+                    const postChord = getChord(lineIndex, charIndex, 'post');
+
+                    const preDisplay = formatChord(preChord);
+                    const curDisplay = formatChord(curChord);
+                    const postDisplay = formatChord(postChord);
+
+                    const hasPre = preChord && preChord.chord;
+                    const hasCur = curChord && curChord.chord;
+                    const hasPost = postChord && postChord.chord;
+
+                    return `
+                        ${hasPre ? `
+                        <span class="chord-slot ${hasPre ? 'has-chord' : ''}"
+                              data-line="${lineIndex}"
+                              data-char="${charIndex}"
+                              data-pos="pre">
+                            <span class="slot-chord">${preDisplay}</span>
+                            <span class="slot-text">·</span>
+                        </span>` : ''}
+                        <span class="lyric-char ${hasCur ? 'has-chord' : ''}"
+                              data-line="${lineIndex}"
+                              data-char="${charIndex}"
+                              data-pos="current">
+                            <span class="char-chord">${curDisplay}</span>
+                            <span class="char-text">${char === ' ' ? '&nbsp;' : char}</span>
+                        </span>
+                        ${hasPost ? `
+                        <span class="chord-slot ${hasPost ? 'has-chord' : ''}"
+                              data-line="${lineIndex}"
+                              data-char="${charIndex}"
+                              data-pos="post">
+                            <span class="slot-chord">${postDisplay}</span>
+                            <span class="slot-text">·</span>
+                        </span>` : ''}
+                    `;
+                }).join('');
+
+                return `
+                    <div class="lyric-line" data-line="${lineIndex}">
+                        <span class="line-number">${lineIndex + 1}</span>
+                        <div class="line-content">${chars}</div>
+                        <div class="section-selector">
+                            <button class="section-btn" data-line="${lineIndex}">+ 段落</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Bind click events for chord marking (character)
+            lyricsContainer.querySelectorAll('.lyric-char').forEach(el => {
+                el.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const line = parseInt(el.dataset.line);
+                    const char = parseInt(el.dataset.char);
+                    const pos = el.dataset.pos || 'current';
+                    openChordPanel(line, char, pos, el);
+                });
+            });
+
+            // Bind click events for chord slots (pre/post)
+            lyricsContainer.querySelectorAll('.chord-slot').forEach(el => {
+                el.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const line = parseInt(el.dataset.line);
+                    const char = parseInt(el.dataset.char);
+                    const pos = el.dataset.pos;
+                    openChordPanel(line, char, pos, el);
+                });
+            });
+
+            // Bind section selector
+            lyricsContainer.querySelectorAll('.section-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const lineIndex = parseInt(btn.dataset.line);
+                    showSectionSelector(btn, lineIndex);
+                });
+            });
+
+            // Fix overlapping chords after render
+            setTimeout(fixOverlappingChords, 0);
+        }
+
+        // Get chord data (supports both old numeric keys and new composite keys)
+        function getChord(lineIndex, charIndex, position) {
+            const lineData = state.chordData[lineIndex];
+            if (!lineData) return null;
+            // New composite key format: "2_current"
+            const newKey = `${charIndex}_${position}`;
+            if (lineData[newKey]) return lineData[newKey];
+            // Legacy format: numeric key (for old saved data)
+            if (position === 'current' && lineData[charIndex] && !String(charIndex).includes('_')) {
+                return lineData[charIndex];
+            }
+            return null;
+        }
+
+        // Format chord for display
+        function formatChord(chord) {
+            if (!chord || !chord.chord) return '';
+            
+            if (state.displayMode === 'tab' && chord.left && chord.right) {
+                return `${chord.chord} ${chord.left}(${chord.right})`;
+            }
+            return chord.chord;
+        }
+
+        // Open chord panel
+        function openChordPanel(lineIndex, charIndex, position, targetEl) {
+            position = position || 'current';
+            state.selectedChar = { line: lineIndex, char: charIndex, pos: position };
+
+            // Close any open section selector
+            document.querySelectorAll('.section-dropdown').forEach(el => el.remove());
+
+            // Reset chord builder first
+            resetChordBuilder();
+
+            // Load existing chord data and try to restore builder state
+            const chord = getChord(lineIndex, charIndex, position);
+            if (chord && chord.chord) {
+                // 尝试解析现有和弦名称恢复构建器状态
+                parseChordToBuilder(chord.chord, chord.left, chord.right);
+            }
+
+            // Position panel
+            const rect = targetEl.getBoundingClientRect();
+            chordPanel.style.left = `${rect.left}px`;
+            chordPanel.style.top = `${rect.bottom + 8}px`;
+            chordPanel.classList.add('visible');
+
+            // Update position selector
+            document.querySelectorAll('.pos-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.pos === position);
+            });
+
+            updateChordPreview();
+        }
+
+        // 解析和弦名称到构建器状态
+        function parseChordToBuilder(chordName, left, right) {
+            // 简单解析：提取根音、升降号、性质
+            const match = chordName.match(/^([CDEFGAB])(#|b)?(.*)$/);
+            if (!match) return;
+
+            const root = match[1];
+            const accidental = match[2] ? (match[2] === '#' ? 'sharp' : 'flat') : 'none';
+            const suffix = match[3] || '';
+
+            // 设置根音
+            chordBuilderState.root = root;
+            document.querySelectorAll('#rootGroup .chord-btn').forEach(b => {
+                b.classList.toggle('selected', b.dataset.root === root);
+            });
+
+            // 设置升降号
+            chordBuilderState.accidental = accidental;
+            document.querySelectorAll('#accidentalGroup .chord-btn').forEach(b => {
+                b.classList.toggle('selected', b.dataset.accidental === accidental);
+            });
+
+            // 解析性质
+            let quality = 'major';
+            if (suffix.includes('m7')) quality = 'm7';
+            else if (suffix.includes('maj7')) quality = 'maj7';
+            else if (suffix.includes('dim7')) quality = 'dim7';
+            else if (suffix.includes('dim')) quality = 'dim';
+            else if (suffix.includes('aug')) quality = 'aug';
+            else if (suffix.includes('sus2')) quality = 'sus2';
+            else if (suffix.includes('sus4')) quality = 'sus4';
+            else if (suffix.includes('m')) quality = 'minor';
+            else if (suffix.includes('7')) quality = '7';
+
+            chordBuilderState.quality = quality;
+            document.querySelectorAll('#qualityGroup .chord-btn').forEach(b => {
+                b.classList.toggle('selected', b.dataset.quality === quality);
+            });
+
+            // 解析扩展音
+            const extensions = [];
+            if (suffix.includes('add9')) extensions.push('add9');
+            if (suffix.includes('add2')) extensions.push('add2');
+            if (suffix.includes('9') && !suffix.includes('add9')) extensions.push('9');
+            if (suffix.includes('11')) extensions.push('11');
+            if (suffix.includes('13')) extensions.push('13');
+
+            chordBuilderState.extensions = extensions;
+            document.querySelectorAll('#extensionGroup .chord-btn').forEach(b => {
+                b.classList.toggle('selected', extensions.includes(b.dataset.ext));
+            });
+
+            // 解析转位
+            const slashMatch = chordName.match(/\/([CDEFGAB])$/);
+            if (slashMatch) {
+                chordBuilderState.slash = slashMatch[1];
+                updateSlashOptions();
+                setTimeout(() => {
+                    document.querySelectorAll('#slashGroup .slash-btn').forEach(b => {
+                        b.classList.toggle('selected', b.dataset.slash === slashMatch[1]);
+                    });
+                }, 0);
+            }
+        }
+
+        // Close chord panel
+        function closeChordPanel() {
+            chordPanel.classList.remove('visible');
+            state.selectedChar = null;
+        }
+
+        // Confirm chord
+        function confirmChord() {
+            if (!state.selectedChar) return;
+
+            // 从和弦构建器获取数据
+            const result = calculateChordTab(
+                chordBuilderState.root,
+                chordBuilderState.accidental,
+                chordBuilderState.quality,
+                chordBuilderState.extensions,
+                chordBuilderState.slash
+            );
+
+            if (!chordBuilderState.root || result.name === '-') {
+                deleteChord();
+                return;
+            }
+
+            const position = state.selectedChar.pos || 'current';
+
+            // Save chord with composite key
+            if (!state.chordData[state.selectedChar.line]) {
+                state.chordData[state.selectedChar.line] = {};
+            }
+            const key = `${state.selectedChar.char}_${position}`;
+            state.chordData[state.selectedChar.line][key] = {
+                chord: result.name,
+                left: result.left,
+                right: result.right,
+                position: position
+            };
+
+            markDirty();
+            closeChordPanel();
+            renderLyrics();
+            updateSummary();
+            saveToStorage();
+        }
+
+        // Delete chord
+        function deleteChord() {
+            if (!state.selectedChar) return;
+
+            const { line, char, pos } = state.selectedChar;
+            const position = pos || 'current';
+            const key = `${char}_${position}`;
+            if (state.chordData[line]?.[key]) {
+                delete state.chordData[line][key];
+                if (Object.keys(state.chordData[line]).length === 0) {
+                    delete state.chordData[line];
+                }
+                markDirty();
+            }
+
+            closeChordPanel();
+            renderLyrics();
+            updateSummary();
+            saveToStorage();
+        }
+
+        // Show section selector
+        function showSectionSelector(btn, lineIndex) {
+            // Remove existing dropdowns
+            document.querySelectorAll('.section-dropdown').forEach(el => el.remove());
+
+            const dropdown = document.createElement('div');
+            dropdown.className = 'section-dropdown';
+            dropdown.style.cssText = `
+                position: absolute;
+                right: 0;
+                top: 100%;
+                background: var(--bg-card);
+                border: 1px solid var(--border-subtle);
+                border-radius: 8px;
+                padding: 8px;
+                z-index: 100;
+                min-width: 100px;
+            `;
+
+            dropdown.innerHTML = sectionTags.map(tag => 
+                `<button class="section-btn" data-tag="${tag}" style="display: block; width: 100%; margin: 4px 0;">${tag}</button>`
+            ).join('');
+
+            btn.parentElement.appendChild(dropdown);
+
+            // Bind click events
+            dropdown.querySelectorAll('.section-btn').forEach(tagBtn => {
+                tagBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const tag = tagBtn.dataset.tag;
+                    // Toggle tag (simplified - would need more state management for full implementation)
+                    dropdown.remove();
+                });
+            });
+
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', function closeDropdown() {
+                    dropdown.remove();
+                    document.removeEventListener('click', closeDropdown);
+                });
+            }, 0);
+        }
+
+        // Update chord summary
+        function updateSummary() {
+            const chordCount = {};
+
+            Object.values(state.chordData).forEach(charData => {
+                Object.values(charData).forEach(data => {
+                    if (data.chord) {
+                        const name = data.chord.replace(/[0-9]/g, '').trim();
+                        chordCount[name] = (chordCount[name] || 0) + 1;
+                    }
+                });
+            });
+
+            const chords = Object.entries(chordCount).sort((a, b) => b[1] - a[1]);
+
+            if (chords.length === 0) {
+                chordSummary.style.display = 'none';
+                return;
+            }
+
+            chordSummary.style.display = 'block';
+            summaryGrid.innerHTML = chords.map(([chord, count]) => `
+                <div class="summary-item">
+                    <div class="summary-chord">${chord}</div>
+                    <div class="summary-count">出现 ${count} 次</div>
+                </div>
+            `).join('');
+        }
+
+        // Local Storage
+        function saveToStorage() {
+            localStorage.setItem('pianoPractice', JSON.stringify({
+                song: state.song,
+                chordData: state.chordData,
+                currentChartId: state.currentChartId,
+                currentChartName: state.currentChartName,
+                favorites: state.favorites,
+                versions: state.versions,
+                versionCounter: state.versionCounter
+            }));
+        }
+
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('pianoPractice');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.song = data.song || { title: '', artist: '', lyrics: [] };
+                    state.chordData = data.chordData || {};
+                    state.currentChartId = data.currentChartId || null;
+                    state.currentChartName = data.currentChartName || null;
+                    state.favorites = data.favorites || {};
+                    state.versions = data.versions || [];
+                    state.versionCounter = data.versionCounter || 0;
+                    updateSongInfo();
+                    renderLyrics();
+                    updateSummary();
+                }
+            } catch (e) {
+                console.warn('Failed to load from storage');
+            }
+        }
+
+        // ============== Main Menu & Favorites System ==============
+
+        // Toggle main menu dropdown
+        function toggleMainMenu() {
+            const trigger = document.getElementById('menuTrigger');
+            const dropdown = document.getElementById('menuDropdown');
+            const isOpen = dropdown.classList.contains('visible');
+            if (isOpen) {
+                closeMainMenu();
+            } else {
+                dropdown.classList.add('visible');
+                trigger.classList.add('active');
+            }
+        }
+
+        function closeMainMenu() {
+            document.getElementById('menuDropdown').classList.remove('visible');
+            document.getElementById('menuTrigger').classList.remove('active');
+        }
+
+        // Handle menu actions
+        function handleMenuAction(action) {
+            switch (action) {
+                case 'new':
+                    newChart();
+                    break;
+                case 'save':
+                    openSaveDialog();
+                    break;
+                case 'favorites':
+                    openFavoritesDialog();
+                    break;
+                case 'versions':
+                    openVersionDialog();
+                    break;
+                case 'clear':
+                    clearCurrentChart();
+                    break;
+                case 'about':
+                    showAbout();
+                    break;
+            }
+        }
+
+        // New chart
+        function newChart() {
+            if (state.isDirty && !confirm('当前图谱有未保存的修改，确定要新建吗？')) return;
+            state.song = { title: '', artist: '', lyrics: [] };
+            state.chordData = {};
+            state.currentChartId = null;
+            state.currentChartName = null;
+            state.isDirty = false;
+            updateSongInfo();
+            renderLyrics();
+            updateSummary();
+            updateSaveMenuText();
+            saveToStorage();
+        }
+
+        // Clear current chart
+        function clearCurrentChart() {
+            if (!state.song.lyrics.length) {
+                alert('当前没有图谱可清空');
+                return;
+            }
+            if (!confirm('确定要清空当前图谱的所有内容和和弦吗？此操作不会删除收藏夹中的图谱。')) return;
+            state.chordData = {};
+            state.isDirty = true;
+            renderLyrics();
+            updateSummary();
+            updateSaveMenuText();
+        }
+
+        // About
+        function showAbout() {
+            alert(`钢琴曲目练习 - 和弦标记工具
+
+功能介绍：
+• 搜索或手动输入歌词
+• 点击字符标记和弦
+• 切换和弦名 / 弹唱标记模式
+• 段落标记（主歌A/B、副歌A/B 等）
+• 底部和弦总结
+• 右上角菜单：保存/收藏/加载图谱
+
+快捷键：
+• Ctrl+S - 保存图谱
+• 鼠标点击字符 - 标记和弦
+• 鼠标点击行后段落按钮 - 标记段落`);
+        }
+
+        // Open save dialog
+        function openSaveDialog(prefilledName) {
+            if (!state.song.lyrics.length) {
+                alert('请先搜索或输入歌词');
+                return;
+            }
+            const dialog = document.getElementById('saveDialog');
+            const overlay = document.getElementById('saveOverlay');
+            const input = document.getElementById('saveNameInput');
+            input.value = prefilledName || state.currentChartName || state.song.title || '';
+            dialog.classList.add('visible');
+            overlay.classList.add('visible');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeSaveDialog() {
+            document.getElementById('saveDialog').classList.remove('visible');
+            document.getElementById('saveOverlay').classList.remove('visible');
+            document.getElementById('saveNameInput').value = '';
+        }
+
+        // Confirm save - check for name conflicts
+        function confirmSave() {
+            const name = document.getElementById('saveNameInput').value.trim();
+            if (!name) {
+                alert('请输入图谱名称');
+                return;
+            }
+
+            // Check for existing chart with same name
+            const existing = findChartByName(name);
+            if (existing && existing.id !== state.currentChartId) {
+                // Show conflict dialog
+                closeSaveDialog();
+                showConflictDialog(name, existing);
+                return;
+            }
+
+            // Save (new or update existing)
+            performSave(name, state.currentChartId);
+            closeSaveDialog();
+        }
+
+        function findChartByName(name) {
+            return Object.values(state.favorites).find(c => c.name === name);
+        }
+
+        // Conflict dialog
+        function showConflictDialog(name, existing) {
+            const dialog = document.getElementById('conflictDialog');
+            const overlay = document.getElementById('saveOverlay');
+            const list = document.getElementById('conflictList');
+            document.getElementById('conflictHint').textContent = `已存在同名图谱"${name}"，请选择：另存为新图谱，或覆盖原图谱。`;
+
+            list.innerHTML = `
+                <div class="conflict-item">
+                    <div class="conflict-item-title">${existing.name}</div>
+                    <div class="conflict-item-meta">${existing.song.artist || '未知'} · 创建于 ${formatDate(existing.createdAt)} · 最后更新 ${formatDate(existing.updatedAt)}</div>
+                </div>
+            `;
+
+            dialog.classList.add('visible');
+            overlay.classList.add('visible');
+        }
+
+        function closeConflictDialog() {
+            document.getElementById('conflictDialog').classList.remove('visible');
+            document.getElementById('saveOverlay').classList.remove('visible');
+        }
+
+        // Save as new (different ID)
+        function saveAsNew() {
+            const name = document.getElementById('saveNameInput').value.trim() ||
+                         (document.querySelector('#conflictList .conflict-item-title')?.textContent);
+            closeConflictDialog();
+            performSave(name, null); // null = create new
+        }
+
+        // Overwrite existing
+        function overwriteExisting() {
+            const existing = findChartByName(document.querySelector('#conflictList .conflict-item-title')?.textContent || '');
+            closeConflictDialog();
+            if (existing) {
+                performSave(existing.name, existing.id);
+            }
+        }
+
+        // Perform save
+        function performSave(name, existingId) {
+            const now = Date.now();
+            const id = existingId || generateId();
+            const existing = existingId ? state.favorites[existingId] : null;
+
+            state.favorites[id] = {
+                id,
+                name,
+                song: JSON.parse(JSON.stringify(state.song)),
+                chordData: JSON.parse(JSON.stringify(state.chordData)),
+                displayMode: state.displayMode,
+                createdAt: existing ? existing.createdAt : now,
+                updatedAt: now
+            };
+
+            state.currentChartId = id;
+            state.currentChartName = name;
+            state.isDirty = false;
+
+            updateFavCount();
+            updateSaveMenuText();
+            saveToStorage();
+        }
+
+        // Update favorites count badge
+        function updateFavCount() {
+            document.getElementById('favCount').textContent = Object.keys(state.favorites).length;
+        }
+
+        // Update save menu text based on current state
+        function updateSaveMenuText() {
+            const txt = document.getElementById('saveMenuText');
+            if (state.isDirty) {
+                txt.textContent = state.currentChartName ? `保存修改 (${state.currentChartName})` : '保存图谱';
+            } else {
+                txt.textContent = state.currentChartName ? `更新 (${state.currentChartName})` : '保存图谱';
+            }
+        }
+
+        // Mark dirty when chordData changes
+        function markDirty() {
+            if (!state.isDirty) {
+                state.isDirty = true;
+                updateSaveMenuText();
+            }
+        }
+
+        // Format date
+        function formatDate(ts) {
+            const d = new Date(ts);
+            const pad = n => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        // Open favorites dialog
+        function openFavoritesDialog() {
+            const dialog = document.getElementById('favoritesDialog');
+            const overlay = document.getElementById('saveOverlay');
+            renderFavoritesList();
+            dialog.classList.add('visible');
+            overlay.classList.add('visible');
+        }
+
+        function closeFavoritesDialog() {
+            document.getElementById('favoritesDialog').classList.remove('visible');
+            document.getElementById('saveOverlay').classList.remove('visible');
+        }
+
+        // Render favorites list
+        function renderFavoritesList() {
+            const list = document.getElementById('favoritesList');
+            const charts = Object.values(state.favorites).sort((a, b) => b.updatedAt - a.updatedAt);
+
+            if (charts.length === 0) {
+                list.innerHTML = `<div class="empty-favorites">还没有收藏的图谱<br>在编辑图谱后通过主菜单"保存图谱"来添加收藏</div>`;
+                return;
+            }
+
+            list.innerHTML = charts.map(chart => `
+                <div class="favorite-item" data-id="${chart.id}">
+                    <div class="favorite-info">
+                        <div class="favorite-title">${escapeHtml(chart.name)}</div>
+                        <div class="favorite-meta">
+                            ${escapeHtml(chart.song.artist || '未知')} · ${chart.song.lyrics.length} 行
+                            · 更新于 ${formatDate(chart.updatedAt)}
+                        </div>
+                    </div>
+                    <div class="favorite-actions">
+                        <button class="favorite-action-btn" data-action="load" data-id="${chart.id}">打开</button>
+                        <button class="favorite-action-btn delete" data-action="delete" data-id="${chart.id}">删除</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Bind buttons
+            list.querySelectorAll('.favorite-action-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const action = btn.dataset.action;
+                    const id = btn.dataset.id;
+                    if (action === 'load') {
+                        loadChart(id);
+                    } else if (action === 'delete') {
+                        deleteChart(id);
+                    }
+                });
+            });
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        // Load chart from favorites
+        function loadChart(id) {
+            const chart = state.favorites[id];
+            if (!chart) return;
+
+            if (state.isDirty && !confirm('当前图谱有未保存的修改，确定要切换吗？')) return;
+
+            state.song = JSON.parse(JSON.stringify(chart.song));
+            state.chordData = JSON.parse(JSON.stringify(chart.chordData));
+            state.displayMode = chart.displayMode || 'name';
+            state.currentChartId = chart.id;
+            state.currentChartName = chart.name;
+            state.isDirty = false;
+
+            // Update mode toggle UI
+            document.querySelectorAll('.mode-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.mode === state.displayMode);
+            });
+
+            closeFavoritesDialog();
+            updateSongInfo();
+            renderLyrics();
+            updateSummary();
+            updateSaveMenuText();
+            saveToStorage();
+        }
+
+        // Delete chart from favorites
+        function deleteChart(id) {
+            const chart = state.favorites[id];
+            if (!chart) return;
+            if (!confirm(`确定要删除图谱"${chart.name}"吗？此操作不可恢复。`)) return;
+            delete state.favorites[id];
+            if (state.currentChartId === id) {
+                state.currentChartId = null;
+                state.currentChartName = null;
+            }
+            updateFavCount();
+            updateSaveMenuText();
+            saveToStorage();
+            renderFavoritesList();
+        }
+
+        // ============== Version Management ==============
+
+        // Update version count badge
+        function updateVersionCount() {
+            document.getElementById('versionCount').textContent = state.versions.length;
+        }
+
+        // Create a new version snapshot
+        function createVersionSnapshot() {
+            if (!state.song.lyrics.length) {
+                alert('请先输入歌词内容后再创建版本快照');
+                return;
+            }
+            state.versionCounter++;
+            const now = Date.now();
+            const versionName = state.song.title || `未命名图谱`;
+
+            const version = {
+                id: generateId(),
+                versionNumber: state.versionCounter,
+                name: versionName,
+                song: JSON.parse(JSON.stringify(state.song)),
+                chordData: JSON.parse(JSON.stringify(state.chordData)),
+                displayMode: state.displayMode,
+                favorites: JSON.parse(JSON.stringify(state.favorites)),
+                createdAt: now
+            };
+
+            state.versions.push(version);
+            updateVersionCount();
+            saveToStorage();
+            renderVersionList();
+        }
+
+        // Open version dialog
+        function openVersionDialog() {
+            const dialog = document.getElementById('versionDialog');
+            const overlay = document.getElementById('saveOverlay');
+            renderVersionList();
+            dialog.classList.add('visible');
+            overlay.classList.add('visible');
+        }
+
+        function closeVersionDialog() {
+            document.getElementById('versionDialog').classList.remove('visible');
+            document.getElementById('saveOverlay').classList.remove('visible');
+        }
+
+        // Render version list
+        function renderVersionList() {
+            const list = document.getElementById('versionList');
+            const sorted = [...state.versions].sort((a, b) => b.createdAt - a.createdAt);
+
+            if (sorted.length === 0) {
+                list.innerHTML = `<div class="empty-versions">还没有版本快照<br>点击上方按钮创建第一个版本快照</div>`;
+                return;
+            }
+
+            list.innerHTML = sorted.map(v => {
+                const chordCount = Object.values(v.chordData || {}).reduce((acc, chars) => acc + Object.keys(chars).length, 0);
+                const favCount = Object.keys(v.favorites || {}).length;
+                return `
+                    <div class="version-item">
+                        <div class="version-badge">v${v.versionNumber}</div>
+                        <div class="version-info">
+                            <div class="version-title">
+                                ${escapeHtml(v.name || '未命名')}
+                                ${v.id === state.currentChartId ? '<span class="version-tag">当前</span>' : ''}
+                            </div>
+                            <div class="version-meta">
+                                ${v.song.artist || '未知'} · ${v.song.lyrics.length} 行歌词 · ${chordCount} 个和弦标记 · ${favCount} 个收藏 · ${formatDate(v.createdAt)}
+                            </div>
+                        </div>
+                        <div class="version-actions">
+                            <button class="favorite-action-btn" data-action="rollback" data-id="${v.id}">回滚</button>
+                            <button class="favorite-action-btn delete" data-action="deletev" data-id="${v.id}">删除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Bind action buttons
+            list.querySelectorAll('.favorite-action-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const action = btn.dataset.action;
+                    const id = btn.dataset.id;
+                    if (action === 'rollback') {
+                        openRollbackDialog(id);
+                    } else if (action === 'deletev') {
+                        deleteVersion(id);
+                    }
+                });
+            });
+        }
+
+        // Open rollback confirm dialog
+        let pendingRollbackId = null;
+        function openRollbackDialog(versionId) {
+            const version = state.versions.find(v => v.id === versionId);
+            if (!version) return;
+            pendingRollbackId = versionId;
+            document.getElementById('rollbackVersionName').textContent = `v${version.versionNumber} - ${version.name || '未命名'} (${formatDate(version.createdAt)})`;
+            document.getElementById('rollbackDialog').classList.add('visible');
+            document.getElementById('saveOverlay').classList.add('visible');
+        }
+
+        function closeRollbackDialog() {
+            document.getElementById('rollbackDialog').classList.remove('visible');
+            document.getElementById('saveOverlay').classList.remove('visible');
+            pendingRollbackId = null;
+        }
+
+        // Confirm rollback
+        function confirmRollback() {
+            if (!pendingRollbackId) return;
+            const version = state.versions.find(v => v.id === pendingRollbackId);
+            if (!version) return;
+
+            // Restore state from version
+            state.song = JSON.parse(JSON.stringify(version.song));
+            state.chordData = JSON.parse(JSON.stringify(version.chordData));
+            state.displayMode = version.displayMode || 'name';
+            state.favorites = JSON.parse(JSON.stringify(version.favorites || {}));
+            state.currentChartId = version.id; // version snapshot's id as current chart
+            state.currentChartName = version.name;
+            state.isDirty = false;
+
+            // Update mode toggle UI
+            document.querySelectorAll('.mode-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.mode === state.displayMode);
+            });
+
+            closeRollbackDialog();
+            closeVersionDialog();
+            updateSongInfo();
+            renderLyrics();
+            updateSummary();
+            updateSaveMenuText();
+            updateFavCount();
+            saveToStorage();
+        }
+
+        // Delete version
+        function deleteVersion(versionId) {
+            const version = state.versions.find(v => v.id === versionId);
+            if (!version) return;
+            if (!confirm(`确定要删除版本 v${version.versionNumber} 吗？此操作不可恢复。`)) return;
+            state.versions = state.versions.filter(v => v.id !== versionId);
+            updateVersionCount();
+            saveToStorage();
+            renderVersionList();
+        }
+
+        // Hook into save - auto create version snapshot on save
+        const _origPerformSave = performSave;
+        function performSave(name, existingId) {
+            // Auto snapshot before save
+            if (state.song.lyrics.length) {
+                state.versionCounter++;
+                const now = Date.now();
+                const version = {
+                    id: 'autosave_' + now,
+                    versionNumber: state.versionCounter,
+                    name: (name || state.song.title || '未命名') + ' (自动快照)',
+                    song: JSON.parse(JSON.stringify(state.song)),
+                    chordData: JSON.parse(JSON.stringify(state.chordData)),
+                    displayMode: state.displayMode,
+                    favorites: JSON.parse(JSON.stringify(state.favorites)),
+                    createdAt: now,
+                    isAuto: true
+                };
+                state.versions.push(version);
+                updateVersionCount();
+            }
+
+            _origPerformSave(name, existingId);
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
