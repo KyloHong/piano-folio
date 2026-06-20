@@ -145,6 +145,7 @@ async function tursoExecute(sql, args = []) {
     const text = await res.text();
     
     if (!res.ok) {
+        console.error('Turso API error - status:', res.status, 'body:', text);
         throw new Error('Turso API error: ' + res.status + ' ' + text);
     }
 
@@ -152,11 +153,13 @@ async function tursoExecute(sql, args = []) {
     try {
         data = JSON.parse(text);
     } catch (e) {
+        console.error('Turso response parse error:', text);
         throw new Error('Turso response parse error: ' + text);
     }
     
     // 处理 pipeline 格式
     const first = data.results ? data.results[0] : data;
+    console.log('Turso response for [', sql.substring(0, 50), ']:', JSON.stringify(first).substring(0, 200));
     if (first && first.error) {
         throw new Error(first.error.message || 'Turso query error');
     }
@@ -282,11 +285,13 @@ app.post('/api/auth/register', async (req, res) => {
         if (existing) return res.status(409).json({ error: '用户名已被占用' });
 
         const hash = bcrypt.hashSync(password, 10);
-        await dbRun('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, hash]);
+        const insertResult = await dbRun('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, hash]);
+        console.log('Insert result:', JSON.stringify(insertResult));
         
-        // 插入后通过用户名查询获取用户 ID（Turso HTTP API 是无状态的，last_insert_rowid 不持久）
-        const newUser = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
-        const newUserId = newUser ? newUser.id : null;
+        // 插入后通过用户名查询获取用户 ID（Turso HTTP API 是无状态的）
+        const userQuery = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
+        console.log('User query result:', JSON.stringify(userQuery));
+        const newUserId = userQuery ? userQuery.id : null;
         
         if (!newUserId) {
             console.error('Failed to get user ID after insert for:', username);
