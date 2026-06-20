@@ -406,14 +406,18 @@ app.get('/api/charts/public/:id', async (req, res) => {
 
 // --------------------- Handler ---------------------
 
-// Netlify redirects /api/* → /.netlify/functions/api/*，所以 Express 收到的是 /charts/public
-// 但 Express 路由定义是 /api/charts/public，需要手动加上 /api 前缀
-const handler = serverless((event, context) => {
-    const originalPath = event.path || event.rawPath || '';
+// Netlify Function 收到的路径是 /.netlify/functions/api/charts/my
+// 我们需要把它改成 /api/charts/my 才能匹配 Express 路由
+const httpHandler = serverless(app);
+
+module.exports.handler = (event, context) => {
     const fnPrefix = '/.netlify/functions/api';
-    if (originalPath.startsWith(fnPrefix)) {
-        event.path = '/api' + originalPath.slice(fnPrefix.length);
+    if (event.path && event.path.startsWith(fnPrefix)) {
+        event.path = '/api' + event.path.slice(fnPrefix.length);
     }
-    return app(event, context);
-});
-module.exports.handler = handler;
+    // 也处理 rawPath（新版事件格式）
+    if (event.rawPath && event.rawPath.startsWith(fnPrefix)) {
+        event.rawPath = '/api' + event.rawPath.slice(fnPrefix.length);
+    }
+    return httpHandler(event, context);
+};
