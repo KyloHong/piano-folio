@@ -159,7 +159,8 @@ async function tursoExecute(sql, args = []) {
     
     // 处理 pipeline 格式
     const first = data.results ? data.results[0] : data;
-    console.log('Turso response for [', sql.substring(0, 50), ']:', JSON.stringify(first).substring(0, 200));
+    console.log('Turso FULL response:', JSON.stringify(data).substring(0, 500));
+    console.log('Turso FIRST result:', JSON.stringify(first).substring(0, 300));
     if (first && first.error) {
         throw new Error(first.error.message || 'Turso query error');
     }
