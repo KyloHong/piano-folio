@@ -4,7 +4,6 @@ require('dotenv').config();
 
 const serverless = require('serverless-http');
 const express = require('express');
-const { createClient } = require('@libsql/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -33,43 +32,95 @@ function checkRateLimit(key) {
     return true;
 }
 
-// --------------------- Turso DB Client ---------------------
+// --------------------- Turso HTTP API Client ---------------------
 
-let tursoClient;
-function getDb() {
-    if (!tursoClient) {
-        const url = process.env.TURSO_DATABASE_URL;
-        const token = process.env.TURSO_AUTH_TOKEN;
-        if (!url || !token) {
-            throw new Error('TURSO_DATABASE_URL 和 TURSO_AUTH_TOKEN 未设置');
-        }
-        // 使用 HTTP 模式（避免 native 二进制兼容性问题）
-        // 将 libsql:// 替换为 turso:// 即可自动使用 HTTP 连接
-        const httpUrl = url.startsWith('libsql://') 
-            ? url.replace('libsql://', 'https://') + '?authToken=' + token
-            : url;
-        tursoClient = createClient({ url: httpUrl, authToken: token });
-    }
-    return tursoClient;
+function getTursoEndpoint() {
+    const url = process.env.TURSO_DATABASE_URL;
+    if (!url) throw new Error('TURSO_DATABASE_URL 未设置');
+    // libsql://db-url.turso.io -> https://db-url.turso.io/v2/pipeline
+    const httpUrl = url.startsWith('libsql://')
+        ? 'https://' + url.substring(9) + '/v2/pipeline'
+        : url + '/v2/pipeline';
+    return httpUrl;
 }
 
-function normalise(obj) {
-    if (obj === null || obj === undefined) return obj;
-    if (Array.isArray(obj)) return obj.map(normalise);
-    if (typeof obj === 'bigint') return Number(obj);
-    if (typeof obj === 'object') {
-        const out = {};
-        for (const k of Object.keys(obj)) {
-            out[k] = normalise(obj[k]);
+function getTursoToken() {
+    const token = process.env.TURSO_AUTH_TOKEN;
+    if (!token) throw new Error('TURSO_AUTH_TOKEN 未设置');
+    return token;
+}
+
+// 将 JS 值转换为 Turso 支持的格式
+function toTursoValue(val) {
+    if (val === null || val === undefined) return { type: 'null' };
+    if (typeof val === 'number') return { type: 'integer', value: val.toString() };
+    if (typeof val === 'string') return { type: 'text', value: val };
+    if (typeof val === 'boolean') return { type: 'integer', value: val ? '1' : '0' };
+    return { type: 'text', value: String(val) };
+}
+
+// 解析 Turso 返回的行数据
+function parseTursoResult(result) {
+    if (!result || !result.rows) return [];
+    const cols = result.cols || [];
+    return result.rows.map(row => {
+        const obj = {};
+        for (let i = 0; i < cols.length; i++) {
+            const cell = row[i];
+            if (!cell) {
+                obj[cols[i].name] = null;
+            } else if (cell.type === 'integer') {
+                obj[cols[i].name] = parseInt(cell.value, 10);
+            } else if (cell.type === 'real') {
+                obj[cols[i].name] = parseFloat(cell.value);
+            } else if (cell.type === 'null') {
+                obj[cols[i].name] = null;
+            } else {
+                obj[cols[i].name] = cell.value;
+            }
         }
-        return out;
+        return obj;
+    });
+}
+
+async function tursoExecute(sql, args = []) {
+    const endpoint = getTursoEndpoint();
+    const token = getTursoToken();
+
+    const body = {
+        requests: [{
+            type: 'execute',
+            stmt: {
+                sql: sql,
+                args: args.map(toTursoValue)
+            }
+        }]
+    };
+
+    const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error('Turso API error: ' + res.status + ' ' + text);
     }
-    return obj;
+
+    const data = await res.json();
+    // 第一个响应包含 query 结果
+    const first = data.results ? data.results[0] : null;
+    if (first && first.error) throw new Error(first.error.message || 'Turso query error');
+    return first;
 }
 
 async function dbAll(sql, args = []) {
-    const result = await getDb().execute({ sql, args });
-    return normalise(result.rows);
+    const result = await tursoExecute(sql, args);
+    return parseTursoResult(result);
 }
 
 async function dbGet(sql, args = []) {
@@ -78,11 +129,10 @@ async function dbGet(sql, args = []) {
 }
 
 async function dbRun(sql, args = []) {
-    const result = await getDb().execute({ sql, args });
-    return {
-        changes: Number(result.rowsAffected || 0),
-        lastInsertRowid: result.lastInsertRowid ? Number(result.lastInsertRowid) : null
-    };
+    const result = await tursoExecute(sql, args);
+    const affected = result && result.rows_affected ? result.rows_affected : 0;
+    const lastId = result && result.last_insert_rowid ? parseInt(result.last_insert_rowid, 10) : null;
+    return { changes: affected, lastInsertRowid: lastId };
 }
 
 // --------------------- Schema Init ---------------------
@@ -91,13 +141,13 @@ let schemaInited = false;
 async function initSchema() {
     if (schemaInited) return;
     try {
-        await getDb().execute(`CREATE TABLE IF NOT EXISTS users (
+        await tursoExecute(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
-        await getDb().execute(`CREATE TABLE IF NOT EXISTS charts (
+        await tursoExecute(`CREATE TABLE IF NOT EXISTS charts (
             id TEXT PRIMARY KEY,
             user_id INTEGER NOT NULL,
             name TEXT NOT NULL,
@@ -112,7 +162,7 @@ async function initSchema() {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
         const addCol = async (table, col, def) => {
-            try { await getDb().execute(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`); } catch (_) {}
+            try { await tursoExecute(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`); } catch (_) {}
         };
         await addCol('charts', 'is_public', 'INTEGER DEFAULT 0');
         await addCol('charts', 'song_lyrics', `TEXT DEFAULT '[]'`);
@@ -191,7 +241,7 @@ app.post('/api/auth/register', async (req, res) => {
         const token = jwt.sign({ userId: newUserId, username }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
         res.json({ token, userId: newUserId, username });
     } catch (e) {
-        console.error('Register error:', e);
+        console.error('Register error:', e.message);
         res.status(500).json({ error: '服务器错误，请稍后重试' });
     }
 });
@@ -214,7 +264,7 @@ app.post('/api/auth/login', async (req, res) => {
         const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
         res.json({ token, userId: user.id, username: user.username });
     } catch (e) {
-        console.error('Login error:', e);
+        console.error('Login error:', e.message);
         res.status(500).json({ error: '服务器错误，请稍后重试' });
     }
 });
@@ -231,7 +281,7 @@ app.get('/api/charts/my', authenticate, async (req, res) => {
         const charts = (await dbAll(`SELECT id, name, song_title, song_artist, display_mode, is_public, created_at, updated_at FROM charts WHERE user_id = ? ORDER BY updated_at DESC`, [req.userId])).map(convertChartTimestamps);
         res.json(charts);
     } catch (e) {
-        console.error('List charts error:', e);
+        console.error('List charts error:', e.message);
         res.status(500).json({ error: '获取图谱列表失败' });
     }
 });
@@ -243,7 +293,7 @@ app.get('/api/charts/my/:id', authenticate, async (req, res) => {
         if (!chart) return res.status(404).json({ error: '图谱不存在或无权访问' });
         res.json(convertChartTimestamps(chart));
     } catch (e) {
-        console.error('Get chart error:', e);
+        console.error('Get chart error:', e.message);
         res.status(500).json({ error: '获取图谱详情失败' });
     }
 });
@@ -266,7 +316,7 @@ app.post('/api/charts/my', authenticate, async (req, res) => {
         ]);
         res.json({ id, message: '图谱创建成功' });
     } catch (e) {
-        console.error('Create chart error:', e);
+        console.error('Create chart error:', e.message);
         res.status(500).json({ error: '创建图谱失败' });
     }
 });
@@ -282,11 +332,11 @@ app.put('/api/charts/my/:id', authenticate, async (req, res) => {
         const sections = songData.sections || {};
         await dbRun(`UPDATE charts SET name = ?, song_title = ?, song_artist = ?, song_lyrics = ?, song_sections = ?, chord_data = ?, display_mode = ?, is_public = CASE WHEN ? IS NOT NULL THEN ? ELSE is_public END, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?`, [
             name ? name.trim() : chart.name,
-            songData.title || chart.song_title,
-            songData.artist || chart.song_artist,
+            songData.title !== undefined ? songData.title : chart.song_title,
+            songData.artist !== undefined ? songData.artist : chart.song_artist,
             JSON.stringify(lyrics),
             JSON.stringify(sections),
-            JSON.stringify(chord_data || (chart.chord_data ? JSON.parse(chart.chord_data) : {})),
+            JSON.stringify(chord_data !== undefined ? chord_data : (chart.chord_data ? JSON.parse(chart.chord_data) : {})),
             display_mode || chart.display_mode,
             is_public !== undefined ? (is_public ? 1 : 0) : null,
             is_public !== undefined ? (is_public ? 1 : 0) : null,
@@ -295,7 +345,7 @@ app.put('/api/charts/my/:id', authenticate, async (req, res) => {
         ]);
         res.json({ message: '更新成功' });
     } catch (e) {
-        console.error('Update chart error:', e);
+        console.error('Update chart error:', e.message);
         res.status(500).json({ error: '更新图谱失败' });
     }
 });
@@ -307,7 +357,7 @@ app.delete('/api/charts/my/:id', authenticate, async (req, res) => {
         if (result.changes === 0) return res.status(404).json({ error: '图谱不存在或无权删除' });
         res.json({ message: '删除成功' });
     } catch (e) {
-        console.error('Delete chart error:', e);
+        console.error('Delete chart error:', e.message);
         res.status(500).json({ error: '删除图谱失败' });
     }
 });
@@ -316,12 +366,12 @@ app.put('/api/charts/my/:id/public', authenticate, async (req, res) => {
     try {
         await initSchema();
         const { is_public } = req.body;
-        const chart = await dbGet('SELECT * FROM charts WHERE id = ? AND user_id = ?', [req.params.id, req.userId]);
+        const chart = await dbGet('SELECT id FROM charts WHERE id = ? AND user_id = ?', [req.params.id, req.userId]);
         if (!chart) return res.status(404).json({ error: '图谱不存在或无权操作' });
         await dbRun('UPDATE charts SET is_public = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?', [is_public ? 1 : 0, req.params.id, req.userId]);
         res.json({ message: is_public ? '已发布到公共图谱' : '已从公共图谱取消发布' });
     } catch (e) {
-        console.error('Publish error:', e);
+        console.error('Publish error:', e.message);
         res.status(500).json({ error: '操作失败' });
     }
 });
@@ -334,7 +384,7 @@ app.get('/api/charts/public', async (req, res) => {
         const charts = (await dbAll(`SELECT c.id, c.name, c.song_title, c.song_artist, c.display_mode, c.created_at, c.updated_at, u.username as author FROM charts c JOIN users u ON c.user_id = u.id WHERE c.is_public = 1 ORDER BY c.updated_at DESC`)).map(convertChartTimestamps);
         res.json(charts);
     } catch (e) {
-        console.error('List public charts error:', e);
+        console.error('List public charts error:', e.message);
         res.status(500).json({ error: '获取公共图谱失败' });
     }
 });
@@ -346,7 +396,7 @@ app.get('/api/charts/public/:id', async (req, res) => {
         if (!chart) return res.status(404).json({ error: '公共图谱不存在' });
         res.json(convertChartTimestamps(chart));
     } catch (e) {
-        console.error('Get public chart error:', e);
+        console.error('Get public chart error:', e.message);
         res.status(500).json({ error: '获取图谱详情失败' });
     }
 });
