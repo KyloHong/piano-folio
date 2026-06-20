@@ -441,12 +441,16 @@ const httpHandler = serverless(app);
 
 module.exports.handler = (event, context) => {
     const fnPrefix = '/.netlify/functions/api';
-    if (event.path && event.path.startsWith(fnPrefix)) {
-        event.path = '/api' + event.path.slice(fnPrefix.length);
+    
+    // 确保 event.path 存在，用于 serverless-http 路由
+    const pathToUse = event.rawPath || event.path || '/';
+    
+    // 如果是函数路径，重写为 API 路径
+    if (pathToUse.startsWith(fnPrefix)) {
+        const newPath = '/api' + pathToUse.slice(fnPrefix.length);
+        event.path = newPath;
+        event.rawPath = newPath;
     }
-    // 也处理 rawPath（新版事件格式）
-    if (event.rawPath && event.rawPath.startsWith(fnPrefix)) {
-        event.rawPath = '/api' + event.rawPath.slice(fnPrefix.length);
-    }
+    
     return httpHandler(event, context);
 };

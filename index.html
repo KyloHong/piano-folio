@@ -5529,6 +5529,7 @@
                 showToast(isNewChart ? '已保存到我的图谱！' : '图谱已更新！');
             } catch (e) {
                 console.warn('Sync to server failed:', e.message);
+                showToast('保存失败: ' + e.message, 3000);
             }
         }
 
