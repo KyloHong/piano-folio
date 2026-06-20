@@ -474,6 +474,54 @@ app.get('/api/charts/public/:id', async (req, res) => {
     }
 });
 
+// --------------------- Health Check (调试用) ---------------------
+app.get('/api/health', async (req, res) => {
+    try {
+        const hasTursoUrl = !!process.env.TURSO_DATABASE_URL;
+        const hasTursoToken = !!process.env.TURSO_AUTH_TOKEN;
+        
+        let testResult = 'not tested';
+        let testError = null;
+        try {
+            const result = await dbGet('SELECT 1 as ok');
+            testResult = JSON.stringify(result);
+        } catch (err) {
+            testError = err.message;
+        }
+        
+        // 测试创建临时表
+        let createResult = 'not tested';
+        try {
+            await dbRun('CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, name TEXT)');
+            const r = await dbRun('INSERT INTO test_table (name) VALUES (?)', ['test_' + Date.now()]);
+            createResult = 'insert ok, changes=' + r.changes;
+        } catch (err) {
+            createResult = 'error: ' + err.message;
+        }
+        
+        // 查询当前用户数量
+        let userCount = 'not tested';
+        try {
+            const uc = await dbGet('SELECT COUNT(*) as cnt FROM users');
+            userCount = JSON.stringify(uc);
+        } catch (err) {
+            userCount = 'error: ' + err.message;
+        }
+        
+        res.json({
+            turso_url_configured: hasTursoUrl,
+            turso_token_configured: hasTursoToken,
+            select_test: testResult,
+            select_test_error: testError,
+            create_test: createResult,
+            user_count: userCount,
+            server_time: new Date().toISOString()
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // --------------------- Handler ---------------------
 
 // Netlify Function 收到的路径是 /.netlify/functions/api/charts/my
