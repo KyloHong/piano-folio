@@ -59,28 +59,57 @@ function toTursoValue(val) {
     return { type: 'text', value: String(val) };
 }
 
-// 解析 Turso 返回的行数据
-function parseTursoResult(result) {
-    if (!result || !result.rows) return [];
-    const cols = result.cols || [];
-    return result.rows.map(row => {
+// 解析 Turso HTTP API 返回的行数据
+// Turso 返回格式可能是：
+// {results: [{type: "ok", result: {cols: [...], rows: [[{type,value}]], affected_row_count, last_insert_rowid}}]}
+// 或者：{results: [{cols: [...], rows: [[{type,value}]], affected_row_count, last_insert_rowid}]}
+function parseTursoResult(response) {
+    if (!response) return [];
+    // 处理嵌套的 result 字段
+    const data = response.result || response;
+    if (!data.rows || data.rows.length === 0) return [];
+    const cols = data.cols || [];
+    return data.rows.map(row => {
         const obj = {};
         for (let i = 0; i < cols.length; i++) {
             const cell = row[i];
-            if (!cell) {
-                obj[cols[i].name] = null;
-            } else if (cell.type === 'integer') {
-                obj[cols[i].name] = parseInt(cell.value, 10);
-            } else if (cell.type === 'real') {
-                obj[cols[i].name] = parseFloat(cell.value);
-            } else if (cell.type === 'null') {
-                obj[cols[i].name] = null;
+            const colName = cols[i].name || cols[i] || '';
+            if (cell === null || cell === undefined) {
+                obj[colName] = null;
+            } else if (typeof cell === 'object' && cell !== null) {
+                // 格式：{type: "integer", value: "1"}
+                if (cell.type === 'null' || cell.value === null || cell.value === undefined) {
+                    obj[colName] = null;
+                } else if (cell.type === 'integer') {
+                    obj[colName] = parseInt(cell.value, 10);
+                } else if (cell.type === 'real') {
+                    obj[colName] = parseFloat(cell.value);
+                } else if (cell.type === 'blob') {
+                    obj[colName] = cell.value;
+                } else {
+                    obj[colName] = cell.value;
+                }
             } else {
-                obj[cols[i].name] = cell.value;
+                // 简单格式：直接是值
+                obj[colName] = cell;
             }
         }
         return obj;
     });
+}
+
+function getAffectedCount(response) {
+    if (!response) return 0;
+    const data = response.result || response;
+    return data.affected_row_count || data.rows_affected || 0;
+}
+
+function getLastInsertId(response) {
+    if (!response) return null;
+    const data = response.result || response;
+    const id = data.last_insert_rowid;
+    if (id === null || id === undefined) return null;
+    return parseInt(id, 10);
 }
 
 async function tursoExecute(sql, args = []) {
@@ -112,7 +141,6 @@ async function tursoExecute(sql, args = []) {
     }
 
     const data = await res.json();
-    // 第一个响应包含 query 结果
     const first = data.results ? data.results[0] : null;
     if (first && first.error) throw new Error(first.error.message || 'Turso query error');
     return first;
@@ -130,9 +158,10 @@ async function dbGet(sql, args = []) {
 
 async function dbRun(sql, args = []) {
     const result = await tursoExecute(sql, args);
-    const affected = result && result.rows_affected ? result.rows_affected : 0;
-    const lastId = result && result.last_insert_rowid ? parseInt(result.last_insert_rowid, 10) : null;
-    return { changes: affected, lastInsertRowid: lastId };
+    return {
+        changes: getAffectedCount(result),
+        lastInsertRowid: getLastInsertId(result)
+    };
 }
 
 // --------------------- Schema Init ---------------------
