@@ -43,7 +43,12 @@ function getDb() {
         if (!url || !token) {
             throw new Error('TURSO_DATABASE_URL 和 TURSO_AUTH_TOKEN 未设置');
         }
-        tursoClient = createClient({ url, authToken: token });
+        // 使用 HTTP 模式（避免 native 二进制兼容性问题）
+        // 将 libsql:// 替换为 turso:// 即可自动使用 HTTP 连接
+        const httpUrl = url.startsWith('libsql://') 
+            ? url.replace('libsql://', 'https://') + '?authToken=' + token
+            : url;
+        tursoClient = createClient({ url: httpUrl, authToken: token });
     }
     return tursoClient;
 }
