@@ -2995,8 +2995,17 @@
             favorites: {}              // { id: { id, name, song, chordData, displayMode, createdAt, updatedAt } }
         };
 
-        // Auth state
-        let authToken = localStorage.getItem('authToken') || null;
+        function safeGet(key) {
+            try { return localStorage.getItem(key); } catch (e) { return null; }
+        }
+        function safeSet(key, val) {
+            try { localStorage.setItem(key, val); } catch (e) {}
+        }
+        function safeDel(key) {
+            try { localStorage.removeItem(key); } catch (e) {}
+        }
+
+        let authToken = safeGet('authToken') || null;
         let currentUser = null;
 
         // Chord Builder State
@@ -3297,14 +3306,24 @@
         async function apiRequest(url, options = {}) {
             const headers = { 'Content-Type': 'application/json' };
             if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
-            const res = await fetch(url, { ...options, headers: { ...headers, ...(options.headers || {}) } });
-            const contentType = res.headers.get('content-type') || '';
-            if (!contentType.includes('application/json')) {
-                throw new Error('后端服务不可用（请确认 API 服务已启动）');
+            let res;
+            try {
+                res = await fetch(url, { ...options, headers: { ...headers, ...(options.headers || {}) } });
+            } catch (err) {
+                throw new Error('网络连接失败，请检查网络或稍后重试');
             }
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || '请求失败');
-            return data;
+            const contentType = res.headers.get('content-type') || '';
+            if (res.ok && contentType.includes('application/json')) {
+                return await res.json();
+            }
+            if (res.status === 404 || res.status >= 500) {
+                throw new Error('服务暂时不可用，正在重启，请稍后再试');
+            }
+            if (contentType.includes('application/json')) {
+                const data = await res.json();
+                throw new Error(data.error || '请求失败');
+            }
+            throw new Error('后端服务不可用，请稍后重试');
         }
 
         function escapeHtml(str) {
@@ -4377,7 +4396,7 @@
 
         // Local Storage
         function saveToStorage() {
-            localStorage.setItem('pianoPractice', JSON.stringify({
+            safeSet('pianoPractice', JSON.stringify({
                 song: state.song,
                 chordData: state.chordData,
                 currentChartId: state.currentChartId,
@@ -4388,7 +4407,7 @@
 
         function loadFromStorage() {
             try {
-                const saved = localStorage.getItem('pianoPractice');
+                const saved = safeGet('pianoPractice');
                 if (saved) {
                     const data = JSON.parse(saved);
                     state.song = data.song || { title: '', artist: '', lyrics: [], sections: {} };
@@ -4974,8 +4993,8 @@
 
         // Initialize auth state from localStorage
         function initAuth() {
-            const savedToken = localStorage.getItem('authToken');
-            const savedUser = localStorage.getItem('currentUser');
+            const savedToken = safeGet('authToken');
+            const savedUser = safeGet('currentUser');
             if (savedToken && savedUser) {
                 authToken = savedToken;
                 try {
@@ -4984,7 +5003,7 @@
                     // Verify token is still valid
                     apiRequest('/api/auth/me').then(user => {
                         currentUser = user;
-                        localStorage.setItem('currentUser', JSON.stringify(user));
+                        safeSet('currentUser', JSON.stringify(user));
                         updateNavUI();
                     }).catch(() => {
                         logout();
@@ -5024,8 +5043,8 @@
         function logout() {
             authToken = null;
             currentUser = null;
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('currentUser');
+            safeDel('authToken');
+            safeDel('currentUser');
             closeUserMenu();
             updateNavUI();
             switchPage('home');
@@ -5077,8 +5096,8 @@
                 });
                 authToken = data.token;
                 currentUser = { userId: data.userId, username: data.username };
-                localStorage.setItem('authToken', data.token);
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                safeSet('authToken', data.token);
+                safeSet('currentUser', JSON.stringify(currentUser));
                 closeLoginModal();
                 updateNavUI();
                 loadMyCharts();
@@ -5103,8 +5122,8 @@
                 });
                 authToken = data.token;
                 currentUser = { userId: data.userId, username: data.username };
-                localStorage.setItem('authToken', data.token);
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                safeSet('authToken', data.token);
+                safeSet('currentUser', JSON.stringify(currentUser));
                 closeRegisterModal();
                 updateNavUI();
                 loadMyCharts();
