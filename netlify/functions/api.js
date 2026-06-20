@@ -481,45 +481,43 @@ app.get('/api/health', async (req, res) => {
         const hasTursoUrl = !!process.env.TURSO_DATABASE_URL;
         const hasTursoToken = !!process.env.TURSO_AUTH_TOKEN;
         
-        let testResult = 'not tested';
-        let testError = null;
+        // 直接调用 Turso 并返回原始响应
+        let rawSelect1 = null;
+        let rawSelect2 = null;
+        let rawInsert = null;
+        
         try {
-            const result = await dbGet('SELECT 1 as ok');
-            testResult = JSON.stringify(result);
-        } catch (err) {
-            testError = err.message;
+            rawSelect1 = await tursoExecute('SELECT 1 as test_col');
+        } catch (e) {
+            rawSelect1 = { error: e.message };
         }
         
-        // 测试创建临时表
-        let createResult = 'not tested';
         try {
-            await dbRun('CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, name TEXT)');
-            const r = await dbRun('INSERT INTO test_table (name) VALUES (?)', ['test_' + Date.now()]);
-            createResult = 'insert ok, changes=' + r.changes;
-        } catch (err) {
-            createResult = 'error: ' + err.message;
+            rawInsert = await tursoExecute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)');
+        } catch (e) {
+            rawInsert = { error: e.message };
         }
         
-        // 查询当前用户数量
-        let userCount = 'not tested';
         try {
-            const uc = await dbGet('SELECT COUNT(*) as cnt FROM users');
-            userCount = JSON.stringify(uc);
-        } catch (err) {
-            userCount = 'error: ' + err.message;
+            rawSelect2 = await tursoExecute('SELECT COUNT(*) as cnt FROM users');
+        } catch (e) {
+            rawSelect2 = { error: e.message };
         }
         
         res.json({
             turso_url_configured: hasTursoUrl,
             turso_token_configured: hasTursoToken,
-            select_test: testResult,
-            select_test_error: testError,
-            create_test: createResult,
-            user_count: userCount,
+            raw_select_1: rawSelect1,
+            raw_insert: rawInsert,
+            raw_select_2: rawSelect2,
+            parsed_users: {
+                all: await dbAll('SELECT * FROM users LIMIT 3'),
+                get: await dbGet('SELECT * FROM users LIMIT 1')
+            },
             server_time: new Date().toISOString()
         });
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.status(500).json({ error: e.message, stack: e.stack });
     }
 });
 
