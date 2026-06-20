@@ -284,17 +284,11 @@ app.post('/api/auth/register', async (req, res) => {
         const hash = bcrypt.hashSync(password, 10);
         const result = await dbRun('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, hash]);
         
-        console.log('Insert result:', JSON.stringify(result));
-        
-        // 获取插入的用户 ID
+        // 获取插入的用户 ID - 使用 SELECT last_insert_rowid() 查询
         let newUserId = result.lastInsertRowid;
-        console.log('LastInsertRowid:', newUserId);
-        
-        // 如果 lastInsertRowid 获取失败，等待一下再查询
         if (!newUserId) {
-            await new Promise(r => setTimeout(r, 100));
-            const newUser = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
-            newUserId = newUser ? newUser.id : null;
+            const row = await dbGet('SELECT last_insert_rowid() as id');
+            newUserId = row ? row.id : null;
         }
         
         if (!newUserId) {
