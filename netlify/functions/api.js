@@ -282,17 +282,14 @@ app.post('/api/auth/register', async (req, res) => {
         if (existing) return res.status(409).json({ error: '用户名已被占用' });
 
         const hash = bcrypt.hashSync(password, 10);
-        const result = await dbRun('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, hash]);
+        await dbRun('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, hash]);
         
-        // 获取插入的用户 ID - 使用 SELECT last_insert_rowid() 查询
-        let newUserId = result.lastInsertRowid;
-        if (!newUserId) {
-            const row = await dbGet('SELECT last_insert_rowid() as id');
-            newUserId = row ? row.id : null;
-        }
+        // 插入后通过用户名查询获取用户 ID（Turso HTTP API 是无状态的，last_insert_rowid 不持久）
+        const newUser = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
+        const newUserId = newUser ? newUser.id : null;
         
         if (!newUserId) {
-            console.error('Failed to get user ID after insert');
+            console.error('Failed to get user ID after insert for:', username);
             return res.status(500).json({ error: '创建用户失败' });
         }
         
