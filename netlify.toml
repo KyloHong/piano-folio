@@ -1,12 +1,11 @@
 [build]
-  command = "npm install"
-  publish = "."  # 静态文件在根目录（index.html）
+  command = "npm install && npm run build"
+  publish = "."
   functions = "netlify/functions"
 
 [functions]
   node_bundler = "esbuild"
 
-# 使用 Turso 版本的 API（api-turso.js）
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api-turso/:splat"
