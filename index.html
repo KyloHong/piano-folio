@@ -3870,14 +3870,25 @@
 
             // Edit lyric line
             function editLyricLine(lineIndex, btn) {
+                // Close any open section dropdown first
+                document.querySelectorAll('.section-dropdown').forEach(el => el.remove());
+                document.querySelectorAll('.line-actions.section-dropdown-active').forEach(el => {
+                    el.classList.remove('section-dropdown-active');
+                });
+                if (sectionDropdownOutsideHandler) {
+                    document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
+                    sectionDropdownOutsideHandler = null;
+                }
+
                 const lineEl = btn.closest('.lyric-line');
                 const lineContent = lineEl.querySelector('.line-content');
                 const currentText = state.song.lyrics[lineIndex] || '';
 
-                // Hide other controls
-                lineEl.querySelectorAll('.line-edit-btn, .section-selector').forEach(el => {
-                    el.style.visibility = 'hidden';
-                });
+                // Hide edit button only (keep section-selector visible for other rows)
+                lineEl.querySelector('.line-edit-btn').style.visibility = 'hidden';
+                // Also hide section-selector for this row only
+                const sectionSel = lineEl.querySelector('.section-selector');
+                if (sectionSel) sectionSel.style.visibility = 'hidden';
 
                 // Create edit container with textarea and delete button
                 const editContainer = document.createElement('div');
