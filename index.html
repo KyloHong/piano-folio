@@ -4348,12 +4348,14 @@
             dropdown.querySelectorAll('.section-dropdown-btn').forEach(tagBtn => {
                 tagBtn.addEventListener('click', e => {
                     e.stopPropagation();
+                    e.preventDefault();
                     if (tagBtn.dataset.action === 'clear') {
                         delete state.song.sections[lineIndex];
                     } else {
                         const tag = tagBtn.dataset.tag;
                         state.song.sections[lineIndex] = tag;
                     }
+                    // Close dropdown
                     dropdown.remove();
                     if (lineActions) lineActions.classList.remove('section-dropdown-active');
                     if (sectionDropdownOutsideHandler) {
@@ -4362,7 +4364,12 @@
                     }
                     markDirty();
                     saveToStorage();
-                    renderLyrics();
+                    // Do NOT call renderLyrics() here to avoid DOM rebuild
+                    // Just update the section button text without full re-render
+                    const sectionBtn = parentSelector.querySelector('.section-btn');
+                    if (sectionBtn) {
+                        sectionBtn.textContent = state.song.sections[lineIndex] ? '更换段落' : '+ 段落';
+                    }
                 });
             });
 
