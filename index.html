@@ -4073,8 +4073,15 @@
             position = position || 'current';
             state.selectedChar = { line: lineIndex, char: charIndex, pos: position };
 
-            // Close any open section selector
+            // Close any open section selector dropdown
             document.querySelectorAll('.section-dropdown').forEach(el => el.remove());
+            document.querySelectorAll('.line-actions.section-dropdown-active').forEach(el => {
+                el.classList.remove('section-dropdown-active');
+            });
+            if (sectionDropdownOutsideHandler) {
+                document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
+                sectionDropdownOutsideHandler = null;
+            }
 
             // Reset chord builder first
             resetChordBuilder();
