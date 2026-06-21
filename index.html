@@ -4344,6 +4344,15 @@
             const lineActions = btn.closest('.line-actions');
             if (lineActions) lineActions.classList.add('section-dropdown-active');
 
+            // Disable ALL edit buttons in lyrics container while dropdown is open
+            // This prevents clicking edit buttons on other lines
+            const lyricsContainer = btn.closest('#lyricsContainer');
+            const allEditBtns = lyricsContainer ? lyricsContainer.querySelectorAll('.line-edit-btn') : [];
+            allEditBtns.forEach(editBtn => {
+                editBtn.style.pointerEvents = 'none';
+                editBtn.style.opacity = '0.3';
+            });
+
             // Bind tag selection - use click only (prevent mousedown interference)
             dropdown.querySelectorAll('.section-dropdown-btn').forEach(tagBtn => {
                 tagBtn.addEventListener('click', e => {
@@ -4362,6 +4371,11 @@
                         document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
                         sectionDropdownOutsideHandler = null;
                     }
+                    // Re-enable all edit buttons
+                    allEditBtns.forEach(editBtn => {
+                        editBtn.style.pointerEvents = '';
+                        editBtn.style.opacity = '';
+                    });
                     markDirty();
                     saveToStorage();
                     // Do NOT call renderLyrics() here to avoid DOM rebuild
@@ -4380,6 +4394,11 @@
                     if (lineActions) lineActions.classList.remove('section-dropdown-active');
                     document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
                     sectionDropdownOutsideHandler = null;
+                    // Re-enable all edit buttons
+                    allEditBtns.forEach(editBtn => {
+                        editBtn.style.pointerEvents = '';
+                        editBtn.style.opacity = '';
+                    });
                 }
             };
             setTimeout(() => {
