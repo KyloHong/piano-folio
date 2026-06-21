@@ -945,7 +945,7 @@
             border: 1px solid var(--border-subtle);
             border-radius: 2px;
             padding: 4px;
-            z-index: 500;
+            z-index: 10000;
             min-width: 120px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         }
@@ -1059,6 +1059,8 @@
             align-items: stretch;
             gap: 8px;
             width: 100%;
+            position: relative;
+            z-index: 500;
         }
 
         .lyric-edit-input {
