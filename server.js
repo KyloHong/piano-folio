@@ -677,7 +677,9 @@ ${lyricsText}
         }
 
         const data = await response.json();
-        const aiContent = data.choices?.[0]?.message?.content;
+        const message = data.choices?.[0]?.message;
+        // GLM-4.7-Flash 可能返回 content 或 reasoning_content
+        let aiContent = message?.content || message?.reasoning_content || '';
 
         if (!aiContent) {
             throw new Error('智谱 AI 未返回有效内容');
