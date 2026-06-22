@@ -14,7 +14,8 @@ const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
+// 只在直接运行时检查，Vercel Serverless 不在这里检查
+if (!JWT_SECRET && require.main === module) {
     console.error('❌ 错误：JWT_SECRET 环境变量未设置');
     console.error('   请在 .env 或 Vercel Environment Variables 中设置 JWT_SECRET=<随机字符串>');
     process.exit(1);
