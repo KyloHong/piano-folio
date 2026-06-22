@@ -649,7 +649,8 @@ ${lyricsText}
 1. 根据歌词内容智能识别段落（前奏、主歌、副歌、桥段、尾奏）
 2. 每个段落的 chords 数组应该与该段落的歌词行数匹配
 3. 和弦应使用标准命名（如 C, Am, F, G, Cmaj7, Dm7 等）
-4. 只返回 JSON，不要包含其他文字`;
+4. 过滤掉歌词中可能包含的元信息（如作词、作曲、编曲、制作人等），只分析歌曲正文内容
+5. 只返回 JSON，不要包含其他文字`;
 
         // 调用智谱 AI API
         const zhipuApiKey = process.env.ZHIPU_API_KEY || '5fb97c25c3694b209d0ca5d45c591b17.rAvFbIZS3eLoWORz';
