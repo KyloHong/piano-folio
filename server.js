@@ -652,23 +652,39 @@ ${lyricsText}
 4. 过滤掉歌词中可能包含的元信息（如作词、作曲、编曲、制作人等），只分析歌曲正文内容
 5. 只返回 JSON，不要包含其他文字`;
 
-        // 调用智谱 AI API (GLM-4.7-Flash - 免费高性能模型)
+        // 调用智谱 AI API
         const zhipuApiKey = process.env.ZHIPU_API_KEY || '5fb97c25c3694b209d0ca5d45c591b17.rAvFbIZS3eLoWORz';
-        const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${zhipuApiKey}`
-            },
-            body: JSON.stringify({
-                model: 'glm-4-flash',
-                messages: [
-                    { role: 'user', content: prompt }
-                ],
-                temperature: 0.7,
-                max_tokens: 2000
-            })
-        });
+        
+        // 使用 AbortController 设置超时
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+        
+        let response;
+        try {
+            response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${zhipuApiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'glm-4-flash',
+                    messages: [
+                        { role: 'user', content: prompt }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 2000
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+        } catch (fetchError) {
+            clearTimeout(timeoutId);
+            if (fetchError.name === 'AbortError') {
+                throw new Error('AI API 请求超时，请稍后重试');
+            }
+            throw new Error(`AI API 连接失败: ${fetchError.message}`);
+        }
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -680,7 +696,7 @@ ${lyricsText}
         console.log('智谱 AI 返回数据:', JSON.stringify(data, null, 2));
         
         const message = data.choices?.[0]?.message;
-        // GLM-4.7-Flash 可能返回 content 或 reasoning_content
+        // GLM-4-Flash 返回 content
         let aiContent = message?.content || message?.reasoning_content || '';
 
         if (!aiContent) {
