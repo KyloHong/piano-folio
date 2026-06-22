@@ -661,7 +661,7 @@ ${lyricsText}
                 'Authorization': `Bearer ${zhipuApiKey}`
             },
             body: JSON.stringify({
-                model: 'glm-4.7-flash',
+                model: 'glm-4-flash',
                 messages: [
                     { role: 'user', content: prompt }
                 ],
@@ -673,15 +673,18 @@ ${lyricsText}
         if (!response.ok) {
             const errorText = await response.text();
             console.error('智谱 AI API 错误:', errorText);
-            throw new Error(`智谱 AI API 返回错误: ${response.status}`);
+            throw new Error(`智谱 AI API 返回错误: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('智谱 AI 返回数据:', JSON.stringify(data, null, 2));
+        
         const message = data.choices?.[0]?.message;
         // GLM-4.7-Flash 可能返回 content 或 reasoning_content
         let aiContent = message?.content || message?.reasoning_content || '';
 
         if (!aiContent) {
+            console.error('智谱 AI 返回内容为空:', JSON.stringify(data));
             throw new Error('智谱 AI 未返回有效内容');
         }
 
