@@ -385,7 +385,307 @@ app.get('/api/charts/public/:id', async (req, res) => {
     }
 });
 
-// --------------------- Fallback for SPA ---------------------
+// --------------------- Music Search API (NetEase Cloud Music) ---------------------
+
+// 搜索歌曲（使用网易云官方 API）
+app.get('/api/music/search', async (req, res) => {
+    const { q } = req.query;
+    if (!q || q.trim().length === 0) {
+        return res.status(400).json({ error: '请输入搜索关键词' });
+    }
+
+    try {
+        // 使用网易云音乐官方搜索 API
+        const searchUrl = `https://music.163.com/api/search/get/?s=${encodeURIComponent(q.trim())}&type=1&limit=20`;
+        const response = await fetch(searchUrl, {
+            headers: {
+                'Referer': 'https://music.163.com',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`搜索 API 返回 ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.code !== 200 || !data.result || !data.result.songs) {
+            throw new Error('搜索结果格式错误');
+        }
+
+        // 网易云返回格式: { result: { songs: [{ id, name, artists, album }] } }
+        const songs = data.result.songs.map(item => ({
+            id: item.id,
+            name: item.name || '未知歌曲',
+            artist: item.artists && item.artists.length > 0 ? item.artists.map(a => a.name).join('/') : '未知歌手',
+            album: item.album ? item.album.name : '未知专辑'
+        }));
+
+        res.json({ songs });
+    } catch (error) {
+        console.error('音乐搜索错误:', error.message);
+        res.status(500).json({ error: '搜索失败，请稍后重试' });
+    }
+});
+
+// 获取歌词（使用网易云官方 API）
+app.get('/api/music/lyric', async (req, res) => {
+    const { id } = req.query;
+    if (!id) {
+        return res.status(400).json({ error: '缺少歌曲 ID' });
+    }
+
+    try {
+        // 使用网易云音乐官方歌词 API
+        const lyricUrl = `https://music.163.com/api/song/lyric?os=pc&id=${id}&lv=-1`;
+        const response = await fetch(lyricUrl, {
+            headers: {
+                'Referer': 'https://music.163.com',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`歌词 API 返回 ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.code !== 200) {
+            throw new Error('获取歌词失败');
+        }
+
+        // 网易云返回格式: { lrc: { lyric: "歌词文本" } }
+        let lyricText = '';
+        if (data.lrc && data.lrc.lyric) {
+            lyricText = data.lrc.lyric;
+        }
+
+        res.json({ lyric: lyricText });
+    } catch (error) {
+        console.error('歌词获取错误:', error.message);
+        res.status(500).json({ error: '获取歌词失败' });
+    }
+});
+
+// --------------------- Chord Database API ---------------------
+
+// 和弦数据库（示例数据）
+const chordDatabase = {
+    "修炼爱情": {
+        title: "修炼爱情",
+        artist: "林俊杰",
+        key: "C",
+        capo: 3,
+        sections: {
+            "前奏": ["Cmaj7", "Fmaj7", "Cmaj7", "Fmaj7"],
+            "主歌1": ["Cmaj7", "Fmaj7", "Cmaj7", "Fmaj7", "Am7", "Em", "Fmaj7", "Am7", "Em", "Fmaj7", "Gsus4", "G"],
+            "副歌": ["Fmaj7", "G/F", "Em7", "Am7", "Dm7", "Dm7/G", "C", "C7", "Fmaj7", "G/F", "Em7", "Am7", "Dm7", "Dm7/G", "Gsus4", "G"],
+            "主歌2": ["Cmaj7", "Fmaj7", "Cmaj7", "Fmaj7", "Am7", "Em", "Fmaj7", "Am7", "Em", "Fmaj7", "Gsus4", "G"],
+            "桥段": ["F", "G", "E7", "Am7", "Dm7", "Gsus4", "G"],
+            "副歌转调": ["#F", "#G", "Fm7", "#Am7", "#Dm7", "#G", "#C", "#C7"]
+        },
+        lyrics: [
+            "凭什么要失望 藏眼泪到心脏",
+            "往事不会说谎别跟它为难",
+            "我们两人之间不需要这样 我想",
+            "修炼爱情的心酸 学会放好以前的渴望",
+            "我们那些信仰 要忘记多难",
+            "远距离的欣赏 近距离的迷惘",
+            "谁说太阳会找到月亮 别人有的爱",
+            "我们不可能模仿",
+            "修炼爱情的悲欢 我们这些努力不简单",
+            "快乐炼成泪水 是一种勇敢",
+            "几年前的幻想 几年后的原谅",
+            "为一张脸去养一身伤",
+            "别讲想念我 我会受不了这样",
+            "记忆它真嚣张 路灯把痛点亮",
+            "情人一起看过多少次月亮",
+            "他在天空看过多少次遗忘 多少心慌",
+            "笑着说爱让人疯狂",
+            "哭着说爱让人紧张",
+            "忘不了那个人就投降"
+        ]
+    },
+    "晴天": {
+        title: "晴天",
+        artist: "周杰伦",
+        key: "G",
+        capo: 0,
+        sections: {
+            "前奏": ["G", "Em", "C", "D"],
+            "主歌": ["G", "Em", "C", "D", "G", "Em", "C", "D"],
+            "副歌": ["C", "G", "Am", "Em", "F", "C", "D", "G"]
+        },
+        lyrics: ["故事的小黄花", "从出生那年就飘着", "童年的荡秋千", "随记忆一直晃到现在"]
+    },
+    "七里香": {
+        title: "七里香",
+        artist: "周杰伦",
+        key: "A",
+        capo: 2,
+        sections: {
+            "前奏": ["Am", "F", "C", "G"],
+            "主歌": ["Am", "F", "C", "G", "Am", "F", "C", "G"],
+            "副歌": ["F", "C", "G", "Am", "F", "C", "G", "C"]
+        },
+        lyrics: ["窗外的麻雀在电线杆上多嘴", "你说这一句很有夏天的感觉"]
+    }
+};
+
+// 搜索和弦
+app.get('/api/chords/search', async (req, res) => {
+    const { q } = req.query;
+    if (!q || q.trim().length === 0) {
+        return res.status(400).json({ error: '请输入歌曲名称' });
+    }
+
+    const query = q.trim().toLowerCase();
+    const results = Object.keys(chordDatabase).filter(title => 
+        title.toLowerCase().includes(query)
+    ).map(title => ({
+        title: chordDatabase[title].title,
+        artist: chordDatabase[title].artist,
+        key: chordDatabase[title].key,
+        capo: chordDatabase[title].capo
+    }));
+
+    res.json({ songs: results });
+});
+
+// 获取歌曲和弦详情
+app.get('/api/chords/detail', async (req, res) => {
+    const { title } = req.query;
+    if (!title) {
+        return res.status(400).json({ error: '缺少歌曲名称' });
+    }
+
+    const song = chordDatabase[title.trim()];
+    if (!song) {
+        return res.status(404).json({ error: '未找到该歌曲的和弦信息' });
+    }
+
+    res.json(song);
+});
+
+// --------------------- AI 和弦分析接口 (智谱 AI) ---------------------
+
+app.post('/api/chords/analyze', async (req, res) => {
+    const { songName, artist, lyrics } = req.body;
+    
+    if (!songName) {
+        return res.status(400).json({ error: '请提供歌曲名称' });
+    }
+
+    try {
+        // 准备发送给智谱 AI 的 prompt
+        const lyricsText = Array.isArray(lyrics) ? lyrics.join('\n') : (lyrics || '');
+        const prompt = `你是专业的音乐和弦分析专家。请分析以下歌曲的和弦进行。
+
+歌曲信息：
+- 歌名：${songName}
+- 歌手：${artist || '未知'}
+
+歌词内容：
+${lyricsText}
+
+请根据歌曲的调式、风格、情感，分析每个段落应该使用的和弦。
+
+请返回严格的 JSON 格式，包含以下结构：
+{
+  "key": "C",  // 歌曲调式
+  "tempo": "中等速度",  // 节奏描述
+  "sections": {
+    "前奏": {
+      "duration": 8,  // 持续小节数
+      "chords": ["C", "G", "Am", "F"]  // 和弦序列
+    },
+    "主歌": {
+      "lyrics": "凭什么要失望 藏眼泪到心脏",  // 对应的歌词
+      "chords": ["Cmaj7", "Fmaj7", "Cmaj7", "Fmaj7"]  // 与歌词对应的和弦
+    },
+    "副歌": {
+      "lyrics": "修炼爱情的心酸 学会放好以前的渴望",  // 对应的歌词
+      "chords": ["Fmaj7", "G/F", "Em7", "Am7", "Dm7", "Dm7/G", "C", "C7"]
+    },
+    "桥段": {
+      "chords": ["F", "G", "E7", "Am7"]
+    },
+    "尾奏": {
+      "chords": ["C", "G"]
+    }
+  },
+  "beatPerMeasure": 4,  // 每小节拍数
+  "chordDuration": "1beat"  // 每个和弦持续时长（1beat 或 2beats）
+}
+
+注意事项：
+1. 根据歌词内容智能识别段落（前奏、主歌、副歌、桥段、尾奏）
+2. 每个段落的 chords 数组应该与该段落的歌词行数匹配
+3. 和弦应使用标准命名（如 C, Am, F, G, Cmaj7, Dm7 等）
+4. 只返回 JSON，不要包含其他文字`;
+
+        // 调用智谱 AI API
+        const zhipuApiKey = process.env.ZHIPU_API_KEY || '5fb97c25c3694b209d0ca5d45c591b17.rAvFbIZS3eLoWORz';
+        const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${zhipuApiKey}`
+            },
+            body: JSON.stringify({
+                model: 'glm-4-flash',
+                messages: [
+                    { role: 'user', content: prompt }
+                ],
+                temperature: 0.7,
+                max_tokens: 2000
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('智谱 AI API 错误:', errorText);
+            throw new Error(`智谱 AI API 返回错误: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const aiContent = data.choices?.[0]?.message?.content;
+
+        if (!aiContent) {
+            throw new Error('智谱 AI 未返回有效内容');
+        }
+
+        // 提取 JSON 部分（可能包含在 markdown 代码块中）
+        let jsonStr = aiContent.trim();
+        const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (jsonMatch) {
+            jsonStr = jsonMatch[1];
+        }
+
+        // 尝试解析 JSON
+        let analysisResult;
+        try {
+            analysisResult = JSON.parse(jsonStr);
+        } catch (parseError) {
+            console.error('JSON 解析错误:', parseError);
+            // 尝试修复常见的 JSON 问题
+            jsonStr = jsonStr.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+            analysisResult = JSON.parse(jsonStr);
+        }
+
+        res.json({
+            success: true,
+            analysis: analysisResult
+        });
+
+    } catch (error) {
+        console.error('AI 和弦分析错误:', error.message);
+        res.status(500).json({ 
+            error: 'AI 分析失败，请稍后重试',
+            details: error.message 
+        });
+    }
+});
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));

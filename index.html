@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>钢琴曲目练习 - 和弦标记工具</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -137,6 +140,15 @@
 
         .btn-primary:hover {
             background: var(--text-secondary);
+        }
+
+        .btn-danger {
+            background: var(--accent-rose);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #a05060;
         }
 
         .btn-secondary {
@@ -334,6 +346,175 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 28px;
+            gap: 16px;
+        }
+
+        .lyrics-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* ========== AI 智能和弦按钮样式 ========== */
+        .ai-chord-analyzer {
+            position: relative;
+        }
+
+        .ai-chord-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 4px 15px rgba(102, 126, 234, 0.4),
+                0 0 30px rgba(102, 126, 234, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .ai-chord-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 6px 20px rgba(102, 126, 234, 0.5),
+                0 0 40px rgba(102, 126, 234, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-chord-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* 发光效果 */
+        .ai-btn-glow {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+            animation: ai-pulse 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes ai-pulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        /* 按钮内容 */
+        .ai-btn-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-btn-icon {
+            width: 18px;
+            height: 18px;
+            animation: ai-icon-float 3s ease-in-out infinite;
+        }
+
+        @keyframes ai-icon-float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-2px) rotate(5deg); }
+            75% { transform: translateY(2px) rotate(-5deg); }
+        }
+
+        .ai-btn-text {
+            white-space: nowrap;
+        }
+
+        /* 粒子效果 */
+        .ai-btn-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .ai-btn-particles::before,
+        .ai-btn-particles::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: ai-particle 1.5s ease-in-out infinite;
+        }
+
+        .ai-btn-particles::before {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .ai-btn-particles::after {
+            top: 60%;
+            right: 15%;
+            animation-delay: 0.75s;
+        }
+
+        @keyframes ai-particle {
+            0% { opacity: 0; transform: scale(0) translateY(0); }
+            50% { opacity: 1; transform: scale(1) translateY(-10px); }
+            100% { opacity: 0; transform: scale(0) translateY(-20px); }
+        }
+
+        /* Loading 状态 */
+        .ai-chord-btn.loading {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: ai-gradient-shift 1.5s ease infinite;
+            pointer-events: none;
+        }
+
+        @keyframes ai-gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .ai-chord-btn.loading .ai-btn-icon {
+            animation: ai-spin 1s linear infinite;
+        }
+
+        @keyframes ai-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-chord-btn.loading .ai-btn-glow {
+            animation: ai-pulse-fast 0.5s ease-in-out infinite;
+        }
+
+        @keyframes ai-pulse-fast {
+            0%, 100% { opacity: 0.5; transform: scale(0.9); }
+            50% { opacity: 0.8; transform: scale(1.2); }
+        }
+
+        /* 提示文字 */
+        .ai-analyze-tip {
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            margin-top: 6px;
+            opacity: 0.8;
         }
 
         .section-title {
@@ -887,9 +1068,15 @@
             opacity: 1;
         }
 
-        /* When a section dropdown is open, force line-actions visible */
+        /* When a section dropdown is open, force line-actions visible and on top */
         .line-actions.section-dropdown-active {
             opacity: 1 !important;
+            z-index: 10000;
+        }
+
+        /* Ensure the entire lyric line is on top when dropdown is open (Safari stacking context fix) */
+        .lyric-line.line-with-active-dropdown {
+            z-index: 10000;
         }
 
         .section-selector {
@@ -1115,6 +1302,116 @@
         .summary-count {
             font-size: 0.75rem;
             color: var(--text-dim);
+        }
+
+        /* Section Progression */
+        .summary-progressions {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .progression-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+            padding: 16px 18px;
+        }
+        .progression-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .progression-section-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 3px 10px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+        }
+        .progression-loop-badge {
+            font-size: 0.72rem;
+            color: var(--accent-color, #7d6a3d);
+            background: var(--bg-secondary);
+            padding: 3px 8px;
+            border-radius: 2px;
+        }
+        .progression-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .progression-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+            padding: 10px 12px 8px;
+            text-align: center;
+            min-width: 88px;
+        }
+        .progression-chord {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .progression-arrow {
+            font-size: 1rem;
+            color: var(--text-dim);
+            opacity: 0.55;
+        }
+
+        /* Mini Piano Keyboard */
+        .mini-piano {
+            display: flex;
+            gap: 1px;
+            justify-content: center;
+            position: relative;
+            width: 84px;
+            height: 28px;
+            margin: 0 auto;
+        }
+        .mini-key {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #444;
+            border-radius: 0 0 3px 3px;
+            position: relative;
+            height: 28px;
+        }
+        .mini-key.highlight {
+            background: var(--accent-color, #f3c747);
+            border-color: var(--accent-color, #c49a2b);
+        }
+        .mini-blackkeys {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            height: 17px;
+            pointer-events: none;
+        }
+        .mini-black-slot {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        .mini-black-slot.empty {
+            visibility: hidden;
+        }
+        .mini-black {
+            width: 62%;
+            height: 100%;
+            background: #333;
+            border-radius: 0 0 2px 2px;
+        }
+        .mini-black-slot.highlight .mini-black {
+            background: var(--accent-color, #a18225) !important;
         }
 
         /* Bottom CTA Section */
@@ -1972,6 +2269,73 @@
         .modal-footer a { color: var(--accent-gold); text-decoration: none; }
         .modal-footer a:hover { text-decoration: underline; }
 
+        /* Search Results Modal */
+        .search-results-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+            transition: border-color 0.2s;
+        }
+        .search-result-item:hover {
+            border-color: var(--text-secondary);
+        }
+        .search-result-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .search-result-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .search-result-chords-badge {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 4px;
+            margin-left: 6px;
+        }
+        .search-result-meta {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+        }
+        .search-result-artist {
+            color: var(--text-secondary);
+        }
+        .search-result-album {
+            color: var(--text-dim);
+        }
+        .search-result-btn {
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+        .search-result-loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-dim);
+        }
+        .search-result-empty {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
         /* ============== Form ============== */
         .form-group { margin-bottom: 12px; }
         .form-label {
@@ -2729,9 +3093,27 @@
             <section class="lyrics-section">
                 <div class="section-title-row">
                     <h2 class="section-title">歌词与和弦</h2>
-                    <div class="mode-toggle">
-                        <button class="mode-btn active" data-mode="name" aria-label="和弦名模式">和弦名模式</button>
-                        <button class="mode-btn" data-mode="tab" aria-label="弹唱标记">弹唱标记</button>
+                    <div class="lyrics-header-actions">
+                        <!-- AI 智能和弦分析按钮 -->
+                        <div id="aiChordAnalyzer" class="ai-chord-analyzer" style="display:none;">
+                            <button class="ai-chord-btn" id="aiAnalyzeBtn">
+                                <span class="ai-btn-glow"></span>
+                                <span class="ai-btn-content">
+                                    <svg class="ai-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                        <path d="M2 17l10 5 10-5"/>
+                                        <path d="M2 12l10 5 10-5"/>
+                                    </svg>
+                                    <span class="ai-btn-text" id="aiAnalyzeBtnText">AI 智能分析和弦</span>
+                                </span>
+                                <span class="ai-btn-particles"></span>
+                            </button>
+                            <p id="aiAnalyzeTip" class="ai-analyze-tip">由智谱 AI 自动分析</p>
+                        </div>
+                        <div class="mode-toggle">
+                            <button class="mode-btn active" data-mode="name" aria-label="和弦名模式">和弦名模式</button>
+                            <button class="mode-btn" data-mode="tab" aria-label="弹唱标记">弹唱标记</button>
+                        </div>
                     </div>
                 </div>
                 <div id="lyricsContainer">
@@ -2742,7 +3124,12 @@
             <!-- Chord Summary -->
             <section class="chord-summary" id="chordSummary" style="display: none;">
                 <div class="section-title-row">
-                    <h2 class="section-title">和弦总结</h2>
+                    <h2 class="section-title">段落和弦走向</h2>
+                </div>
+                <div class="summary-progressions" id="summaryProgressions"></div>
+
+                <div class="section-title-row" style="margin-top: 36px;">
+                    <h2 class="section-title">和弦统计</h2>
                 </div>
                 <div class="summary-grid" id="summaryGrid"></div>
             </section>
@@ -2752,6 +3139,19 @@
     <!-- 占位：保留旧ID兼容 -->
     <div id="pagePublic" style="display:none;"></div>
     <div id="publicChartList" style="display:none;"></div>
+
+    <!-- 搜索结果弹窗 -->
+    <div class="modal-overlay" id="searchResultsModal">
+        <div class="modal-card" style="width:480px;max-width:90vw;max-height:70vh;">
+            <div class="modal-header">
+                <h3 class="modal-title">搜索结果</h3>
+                <button class="modal-close" id="searchResultsClose">&times;</button>
+            </div>
+            <div class="search-results-content" id="searchResultsContent" style="padding:12px 20px 20px;overflow-y:auto;max-height:calc(70vh - 60px);">
+                <!-- 搜索结果列表将动态填充 -->
+            </div>
+        </div>
+    </div>
 
     <!-- 通用确认弹窗 -->
     <div class="modal-overlay confirm-modal" id="confirmModal">
@@ -2944,6 +3344,7 @@
 
             <!-- 操作按钮 -->
             <div class="chord-actions">
+                <button class="btn btn-danger" id="chordDelete">删除</button>
                 <button class="btn btn-primary" id="chordConfirm">确认</button>
             </div>
         </div>
@@ -3402,6 +3803,7 @@
             // Chord panel
             document.getElementById('panelClose').addEventListener('click', closeChordPanel);
             document.getElementById('chordConfirm').addEventListener('click', confirmChord);
+            document.getElementById('chordDelete').addEventListener('click', deleteChord);
 
             // Confirm dialog
             document.getElementById('confirmOk').addEventListener('click', confirmDialogOk);
@@ -3620,28 +4022,179 @@
             });
         }
 
-        // Search song (using lyrics.ovh API)
+        // Search song (using backend music search API)
         async function searchSong() {
             const query = searchInput.value.trim();
             if (!query) return;
 
-            searchBtn.textContent = '搜索中...';
+            searchBtn.innerHTML = '<span>🔍</span> 搜索中...';
             searchBtn.disabled = true;
 
+            // 显示搜索结果弹窗（加载状态）
+            const searchResultsModal = document.getElementById('searchResultsModal');
+            const searchResultsContent = document.getElementById('searchResultsContent');
+            searchResultsContent.innerHTML = '<div class="search-result-loading">正在搜索...</div>';
+            searchResultsModal.classList.add('visible');
+
             try {
-                // Try to get lyrics from lyrics.ovh
-                const response = await fetch(`https://api.lyrics.ovh/v1/${encodeURIComponent(query)}`);
-                if (!response.ok) throw new Error('API Error');
+                // 同时调用音乐搜索 API 和和弦搜索 API
+                const [musicResponse, chordsResponse] = await Promise.all([
+                    fetch(`/api/music/search?q=${encodeURIComponent(query)}`),
+                    fetch(`/api/chords/search?q=${encodeURIComponent(query)}`)
+                ]);
+
+                // 获取歌词搜索结果
+                const musicData = musicResponse.ok ? await musicResponse.json() : { songs: [] };
+                // 获取和弦搜索结果
+                const chordsData = chordsResponse.ok ? await chordsResponse.json() : { songs: [] };
+
+                // 合并结果（有和弦的数据优先显示）
+                const songs = [];
+                const seenTitles = new Set();
+
+                // 先添加有和弦的歌曲
+                chordsData.songs.forEach(song => {
+                    if (!seenTitles.has(song.title)) {
+                        seenTitles.add(song.title);
+                        songs.push({ ...song, hasChords: true });
+                    }
+                });
+
+                // 再添加无和弦的歌曲
+                musicData.songs.forEach(song => {
+                    if (!seenTitles.has(song.name)) {
+                        seenTitles.add(song.name);
+                        songs.push({ ...song, title: song.name, hasChords: false });
+                    }
+                });
+
+                if (songs.length === 0) {
+                    searchResultsContent.innerHTML = '<div class="search-result-empty">未找到相关歌曲，请尝试其他关键词</div>';
+                    return;
+                }
+
+                // 渲染搜索结果列表
+                renderSearchResults(songs);
+            } catch (error) {
+                searchResultsContent.innerHTML = `<div class="search-result-empty">${escapeHtml(error.message)}</div>`;
+            } finally {
+                searchBtn.innerHTML = '<span>🔍</span> 搜索';
+                searchBtn.disabled = false;
+            }
+        }
+
+        // 渲染搜索结果列表
+        function renderSearchResults(songs) {
+            const searchResultsContent = document.getElementById('searchResultsContent');
+            searchResultsContent.innerHTML = songs.map(song => {
+                const hasChordsBadge = song.hasChords ? '<span class="search-result-chords-badge">🎸 有和弦</span>' : '';
+                const capoInfo = song.capo && song.capo > 0 ? `变调夹${song.capo}品` : '';
+                const keyInfo = song.key ? `调:${song.key}` : '';
+                const extraInfo = [capoInfo, keyInfo].filter(Boolean).join(' / ');
+                
+                return `
+                    <div class="search-result-item">
+                        <div class="search-result-info">
+                            <div class="search-result-name">${escapeHtml(song.title)} ${hasChordsBadge}</div>
+                            <div class="search-result-meta">
+                                <span class="search-result-artist">${escapeHtml(song.artist)}</span>
+                                ${song.album ? `<span style="margin-left: 8px;" class="search-result-album">专辑：${escapeHtml(song.album)}</span>` : ''}
+                                ${extraInfo ? `<span style="margin-left: 8px;" class="search-result-album">${extraInfo}</span>` : ''}
+                            </div>
+                        </div>
+                        <button class="btn btn-primary search-result-btn" 
+                                data-song-id="${escapeHtml(song.id || '')}" 
+                                data-song-name="${escapeHtml(song.title)}" 
+                                data-song-artist="${escapeHtml(song.artist)}"
+                                data-has-chords="${song.hasChords ? 'true' : 'false'}">选择</button>
+                    </div>
+                `;
+            }).join('');
+
+            // 绑定选择按钮事件
+            searchResultsContent.querySelectorAll('.search-result-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const songId = btn.dataset.songId;
+                    const songName = btn.dataset.songName;
+                    const songArtist = btn.dataset.songArtist;
+                    const hasChords = btn.dataset.hasChords === 'true';
+                    await selectSong(songId, songName, songArtist, hasChords);
+                });
+            });
+        }
+
+        // 选择歌曲并获取歌词/和弦
+        async function selectSong(songId, songName, songArtist, hasChords) {
+            const searchResultsContent = document.getElementById('searchResultsContent');
+            searchResultsContent.innerHTML = '<div class="search-result-loading">正在获取歌曲信息...</div>';
+
+            try {
+                // 如果有和弦数据，优先从和弦数据库获取
+                if (hasChords) {
+                    const chordsResponse = await fetch(`/api/chords/detail?title=${encodeURIComponent(songName)}`);
+                    if (chordsResponse.ok) {
+                        const chordsData = await chordsResponse.json();
+                        
+                        // 填充到 state.song（使用数据库中的歌词和和弦）
+                        state.song = {
+                            title: chordsData.title,
+                            artist: chordsData.artist,
+                            lyrics: chordsData.lyrics || [],
+                            sections: chordsData.sections || {}
+                        };
+                        
+                        // 将和弦数据填充到 state.chordData
+                        state.chordData = {};
+                        let lineIndex = 0;
+                        Object.values(chordsData.sections || {}).forEach(chords => {
+                            chords.forEach((chord, i) => {
+                                if (!state.chordData[lineIndex]) {
+                                    state.chordData[lineIndex] = {};
+                                }
+                                // 将和弦放在每行的第一个位置
+                                state.chordData[lineIndex][`chord_${i}`] = {
+                                    chord: chord,
+                                    left: '1',
+                                    right: '1',
+                                    position: 'current'
+                                };
+                                if (i % 4 === 3) lineIndex++; // 每4个和弦换一行
+                            });
+                            lineIndex++;
+                        });
+                        
+                        // 关闭弹窗并更新 UI
+                        document.getElementById('searchResultsModal').classList.remove('visible');
+                        updateSongInfo();
+                        renderLyrics();
+                        updateSummary();
+                        updateSaveMenuText();
+                        saveToStorage();
+                        // 有和弦数据时不显示 AI 按钮
+                        document.getElementById('aiChordAnalyzer').style.display = 'none';
+                        return;
+                    }
+                }
+
+                // 如果没有和弦或获取失败，尝试获取歌词
+                const response = await fetch(`/api/music/lyric?id=${encodeURIComponent(songId)}`);
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || '获取歌词失败');
+                }
 
                 const data = await response.json();
-                if (data.error) throw new Error('Not found');
+                if (!data.lyric) {
+                    throw new Error('该歌曲暂无歌词');
+                }
 
-                // Parse lyrics
-                const lyrics = data.lyrics.split('\n').filter(line => line.trim());
-                
+                // 解析 LRC 格式歌词
+                const lyrics = parseLrcLyric(data.lyric);
+
+                // 填充到 state.song
                 state.song = {
-                    title: query,
-                    artist: data.artist || '未知艺术家',
+                    title: songName,
+                    artist: songArtist,
                     lyrics: lyrics,
                     sections: {}
                 };
@@ -3650,21 +4203,391 @@
                 state.currentChartName = null;
                 state.isDirty = false;
 
+                // 关闭弹窗
+                document.getElementById('searchResultsModal').classList.remove('visible');
+
+                // 更新 UI
                 updateSongInfo();
                 renderLyrics();
                 updateSummary();
                 updateSaveMenuText();
                 saveToStorage();
+                
+                // 显示 AI 和弦分析按钮（没有和弦数据时显示）
+                document.getElementById('aiChordAnalyzer').style.display = 'block';
             } catch (error) {
-                // Show error message when song not found
-                alert('未找到该歌曲，请尝试搜索其他歌曲或直接在下方输入歌词');
-            } finally {
-                searchBtn.innerHTML = '<span>🔍</span> 搜索';
-                searchBtn.disabled = false;
+                searchResultsContent.innerHTML = `<div class="search-result-empty">${escapeHtml(error.message)}</div>`;
             }
         }
 
-        
+        // 解析 LRC 格式歌词，去除时间标签
+        function parseLrcLyric(lrcText) {
+            return lrcText.split('\n')
+                .map(line => {
+                    // 去除所有时间标签 [mm:ss.xx] 或 [mm:ss]
+                    return line.replace(/\[\d{2}:\d{2}(\.\d{2,3})?\]/g, '').trim();
+                })
+                .filter(line => {
+                    // 过滤空行和元数据行（如歌曲名、歌手名等）
+                    if (line.length === 0) return false;
+                    // 过滤纯元数据行（如 "晴天 - 呼杰伦" 这种标题行）
+                    if (line.match(/^.{1,30}\s*-\s*.{1,30}$/) && !line.match(/[a-zA-Z\u4e00-\u9fa5]{3,}/)) {
+                        // 如果是 "歌名 - 歌手" 格式且没有实际歌词内容，跳过
+                        return false;
+                    }
+                    return true;
+                });
+        }
+
+        // 关闭搜索结果弹窗
+        document.getElementById('searchResultsClose').addEventListener('click', () => {
+            document.getElementById('searchResultsModal').classList.remove('visible');
+        });
+        document.getElementById('searchResultsModal').addEventListener('click', e => {
+            if (e.target === document.getElementById('searchResultsModal')) {
+                document.getElementById('searchResultsModal').classList.remove('visible');
+            }
+        });
+
+        // ========== AI 智能和弦分析 ==========
+
+        // 当前选择的歌曲信息（用于 AI 分析）
+        let currentSelectedSong = null;
+
+        // AI 分析按钮点击事件
+        document.getElementById('aiAnalyzeBtn').addEventListener('click', async () => {
+            if (!currentSelectedSong) {
+                alert('请先选择一首歌曲');
+                return;
+            }
+
+            const btn = document.getElementById('aiAnalyzeBtn');
+            const btnText = document.getElementById('aiAnalyzeBtnText');
+            const aiTip = document.getElementById('aiAnalyzeTip');
+
+            // 显示加载状态
+            btn.classList.add('loading');
+            btnText.textContent = '智谱 AI 分析中...';
+            aiTip.innerHTML = '正在分析歌曲结构，请稍候...';
+
+            try {
+                // 调用 AI 分析接口
+                const response = await fetch('/api/chords/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        songName: currentSelectedSong.title,
+                        artist: currentSelectedSong.artist,
+                        lyrics: currentSelectedSong.lyrics || []
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || 'AI 分析失败');
+                }
+
+                const data = await response.json();
+                if (!data.success || !data.analysis) {
+                    throw new Error('AI 返回数据格式错误');
+                }
+
+                // 处理 AI 返回的和弦分析结果
+                applyAIChordAnalysis(currentSelectedSong, data.analysis);
+
+                // 恢复按钮状态
+                btn.classList.remove('loading');
+                btnText.textContent = 'AI 智能分析和弦';
+                aiTip.innerHTML = '由智谱 AI 自动分析歌曲并生成和弦';
+
+            } catch (error) {
+                btn.classList.remove('loading');
+                btnText.textContent = 'AI 智能分析和弦';
+                aiTip.innerHTML = `分析失败: ${escapeHtml(error.message)}`;
+            }
+        });
+
+        // 应用 AI 和弦分析结果
+        function applyAIChordAnalysis(songData, analysis) {
+            const lyrics = songData.lyrics || [];
+            const sections = analysis.sections || {};
+
+            // 清空现有和弦
+            state.chordData = {};
+
+            // 尝试匹配歌词与和弦
+            lyrics.forEach((line, lineIndex) => {
+                const lineChords = [];
+
+                // 遍历所有段落，查找匹配的歌词
+                for (const [sectionName, sectionData] of Object.entries(sections)) {
+                    if (!sectionData || !sectionData.chords) continue;
+
+                    // 检查歌词是否包含该段落的特征歌词
+                    const sectionLyrics = sectionData.lyrics || '';
+                    if (sectionLyrics && line.includes(sectionLyrics.substring(0, Math.min(10, sectionLyrics.length)))) {
+                        // 找到了匹配的段落，使用该段落的前几个和弦
+                        const chords = sectionData.chords;
+                        const chordPerBeat = Math.ceil(chords.length / Math.max(1, line.length));
+                        
+                        for (let i = 0; i < chords.length; i++) {
+                            const charIndex = Math.min(Math.floor(i / chordPerBeat), line.length - 1);
+                            if (charIndex >= 0 && charIndex < line.length) {
+                                lineChords.push({
+                                    charIndex,
+                                    chord: chords[i]
+                                });
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                // 如果没有匹配到，尝试使用通用和弦分配
+                if (lineChords.length === 0) {
+                    const keyChords = getChordsForKey(analysis.key || 'C');
+                    const sectionIndex = getSectionIndex(lineIndex, lyrics.length);
+                    const chordsForSection = keyChords[sectionIndex] || keyChords[1];
+
+                    // 平均分配和弦到歌词字符
+                    const chordCount = chordsForSection.length;
+                    for (let i = 0; i < chordCount && i < line.length; i++) {
+                        const charIndex = Math.floor((i / chordCount) * line.length);
+                        lineChords.push({
+                            charIndex,
+                            chord: chordsForSection[i % chordCount]
+                        });
+                    }
+                }
+
+                // 写入和弦数据
+                if (lineChords.length > 0) {
+                    state.chordData[lineIndex] = {};
+                    lineChords.forEach((item, idx) => {
+                        const key = `${item.charIndex}_current`;
+                        state.chordData[lineIndex][key] = {
+                            chord: item.chord,
+                            left: String(item.charIndex + 1),
+                            right: '1',
+                            position: 'current'
+                        };
+                    });
+                }
+            });
+
+            // 更新 UI
+            updateSongInfo();
+            renderLyrics();
+            updateSummary();
+            updateSaveMenuText();
+            saveToStorage();
+
+            // 显示成功提示
+            showToast(`🎉 AI 分析完成！检测到 ${Object.keys(sections).length} 个段落，已自动插入和弦`);
+        }
+
+        // 根据调式获取推荐和弦
+        function getChordsForKey(key) {
+            const keyMap = {
+                'C': [['C', 'G', 'Am', 'F'], ['C', 'G', 'Am', 'F'], ['F', 'G', 'Em', 'Am', 'Dm', 'G', 'C'], ['F', 'G', 'Em', 'Am']],
+                'G': [['G', 'D', 'Em', 'C'], ['G', 'D', 'Em', 'C'], ['C', 'D', 'Bm', 'Em', 'Am', 'D', 'G'], ['C', 'D', 'Bm', 'Em']],
+                'D': [['D', 'A', 'Bm', 'G'], ['D', 'A', 'Bm', 'G'], ['G', 'A', 'F#m', 'Bm', 'Em', 'A', 'D'], ['G', 'A', 'F#m', 'Bm']],
+                'A': [['A', 'E', 'F#m', 'D'], ['A', 'E', 'F#m', 'D'], ['D', 'E', 'C#m', 'F#m', 'Bm', 'E', 'A'], ['D', 'E', 'C#m', 'F#m']],
+                'E': [['E', 'B', 'C#m', 'A'], ['E', 'B', 'C#m', 'A'], ['A', 'B', 'G#m', 'C#m', 'F#m', 'B', 'E'], ['A', 'B', 'G#m', 'C#m']],
+                'F': [['F', 'C', 'Dm', 'Bb'], ['F', 'C', 'Dm', 'Bb'], ['Bb', 'C', 'Am', 'Dm', 'Gm', 'C', 'F'], ['Bb', 'C', 'Am', 'Dm']]
+            };
+            return keyMap[key] || keyMap['C'];
+        }
+
+        // 根据歌词位置判断段落
+        function getSectionIndex(lineIndex, totalLines) {
+            const ratio = lineIndex / Math.max(1, totalLines);
+            if (ratio < 0.15) return 0; // 前奏
+            if (ratio < 0.45) return 1; // 主歌
+            if (ratio < 0.75) return 2; // 副歌
+            if (ratio < 0.9) return 3;  // 桥段
+            return 4; // 尾奏
+        }
+
+        // 显示 Toast 提示
+        function showToast(message, duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.innerHTML = `<div class="toast-content">${escapeHtml(message)}</div>`;
+            toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10b981,#059669);color:white;padding:14px 24px;border-radius:8px;font-size:0.9rem;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.2);max-width:90vw;';
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // 显示搜索结果
+        function renderSearchResults(songs) {
+            const searchResultsContent = document.getElementById('searchResultsContent');
+            
+            searchResultsContent.innerHTML = songs.map(song => {
+                const hasChordsBadge = song.hasChords ? '<span class="search-result-chords-badge">🎸 有和弦</span>' : '';
+                const capoInfo = song.capo && song.capo > 0 ? `变调夹${song.capo}品` : '';
+                const keyInfo = song.key ? `调:${song.key}` : '';
+                const extraInfo = [capoInfo, keyInfo].filter(Boolean).join(' / ');
+                
+                return `
+                    <div class="search-result-item">
+                        <div class="search-result-info">
+                            <div class="search-result-name">${escapeHtml(song.title)} ${hasChordsBadge}</div>
+                            <div class="search-result-meta">
+                                <span class="search-result-artist">${escapeHtml(song.artist)}</span>
+                                ${song.album ? `<span style="margin-left: 8px;" class="search-result-album">专辑：${escapeHtml(song.album)}</span>` : ''}
+                                ${extraInfo ? `<span style="margin-left: 8px;" class="search-result-album">${extraInfo}</span>` : ''}
+                            </div>
+                        </div>
+                        <button class="btn btn-primary search-result-btn" 
+                                data-song-id="${escapeHtml(song.id || '')}" 
+                                data-song-name="${escapeHtml(song.title)}" 
+                                data-song-artist="${escapeHtml(song.artist)}"
+                                data-has-chords="${song.hasChords ? 'true' : 'false'}">选择</button>
+                    </div>
+                `;
+            }).join('');
+            
+            // 存储第一个歌曲作为 AI 分析的候选（用于 AI 分析）
+            if (songs.length > 0 && !songs[0].hasChords) {
+                currentSelectedSong = {
+                    title: songs[0].title,
+                    artist: songs[0].artist,
+                    lyrics: []  // 先存储基本信息，歌词会在选择歌曲时填充
+                };
+            }
+
+            // 绑定选择按钮事件
+            searchResultsContent.querySelectorAll('.search-result-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const songId = btn.dataset.songId;
+                    const songName = btn.dataset.songName;
+                    const songArtist = btn.dataset.songArtist;
+                    const hasChords = btn.dataset.hasChords === 'true';
+                    
+                    // 存储当前选择的歌曲信息
+                    currentSelectedSong = {
+                        title: songName,
+                        artist: songArtist,
+                        lyrics: []
+                    };
+                    
+                    await selectSong(songId, songName, songArtist, hasChords);
+                });
+            });
+        }
+
+        // 选择歌曲并获取歌词/和弦
+        async function selectSong(songId, songName, songArtist, hasChords) {
+            const searchResultsContent = document.getElementById('searchResultsContent');
+            searchResultsContent.innerHTML = '<div class="search-result-loading">正在获取歌曲信息...</div>';
+
+            try {
+                // 如果有和弦数据，优先从和弦数据库获取
+                if (hasChords) {
+                    const chordsResponse = await fetch(`/api/chords/detail?title=${encodeURIComponent(songName)}`);
+                    if (chordsResponse.ok) {
+                        const chordsData = await chordsResponse.json();
+                        
+                        // 填充到 state.song（使用数据库中的歌词和和弦）
+                        state.song = {
+                            title: chordsData.title,
+                            artist: chordsData.artist,
+                            lyrics: chordsData.lyrics || [],
+                            sections: chordsData.sections || {}
+                        };
+                        
+                        // 将和弦数据填充到 state.chordData
+                        state.chordData = {};
+                        let lineIndex = 0;
+                        Object.values(chordsData.sections || {}).forEach(chords => {
+                            chords.forEach((chord, i) => {
+                                if (!state.chordData[lineIndex]) {
+                                    state.chordData[lineIndex] = {};
+                                }
+                                // 将和弦放在每行的第一个位置
+                                state.chordData[lineIndex][`chord_${i}`] = {
+                                    chord: chord,
+                                    left: '1',
+                                    right: '1',
+                                    position: 'current'
+                                };
+                                if (i % 4 === 3) lineIndex++; // 每4个和弦换一行
+                            });
+                            lineIndex++;
+                        });
+                        
+                        // 关闭弹窗并更新 UI
+                        document.getElementById('searchResultsModal').classList.remove('visible');
+                        updateSongInfo();
+                        renderLyrics();
+                        updateSummary();
+                        updateSaveMenuText();
+                        saveToStorage();
+                        // 有和弦数据时不显示 AI 按钮
+                        document.getElementById('aiChordAnalyzer').style.display = 'none';
+                        return;
+                    }
+                }
+
+                // 如果没有和弦或获取失败，尝试获取歌词
+                const response = await fetch(`/api/music/lyric?id=${encodeURIComponent(songId)}`);
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || '获取歌词失败');
+                }
+
+                const data = await response.json();
+                
+                // 更新当前选择的歌曲信息（包含歌词）
+                currentSelectedSong = {
+                    title: songName,
+                    artist: songArtist,
+                    lyrics: data.lyric ? parseLrcLyric(data.lyric) : []
+                };
+
+                // 如果没有歌词，抛出错误
+                if (!data.lyric) {
+                    throw new Error('该歌曲暂无歌词');
+                }
+
+                // 解析 LRC 格式歌词
+                const lyrics = parseLrcLyric(data.lyric);
+
+                // 填充到 state.song
+                state.song = {
+                    title: songName,
+                    artist: songArtist,
+                    lyrics: lyrics,
+                    sections: {}
+                };
+                state.chordData = {};
+                state.currentChartId = null;
+                state.currentChartName = null;
+                state.isDirty = false;
+
+                // 关闭弹窗
+                document.getElementById('searchResultsModal').classList.remove('visible');
+
+                // 更新 UI
+                updateSongInfo();
+                renderLyrics();
+                updateSummary();
+                updateSaveMenuText();
+                saveToStorage();
+                
+                // 显示 AI 和弦分析按钮（没有和弦数据时显示）
+                document.getElementById('aiChordAnalyzer').style.display = 'block';
+            } catch (error) {
+                searchResultsContent.innerHTML = `<div class="search-result-empty">${escapeHtml(error.message)}</div>`;
+            }
+        }
 
         // Update song info display
         function updateSongInfo() {
@@ -3688,6 +4611,25 @@
             if (saveBtn) {
                 saveBtn.style.display = state.isReadOnly ? 'none' : 'inline-flex';
             }
+        }
+
+        // 解析 LRC 格式歌词，去除时间标签
+        function parseLrcLyric(lrcText) {
+            return lrcText.split('\n')
+                .map(line => {
+                    // 去除所有时间标签 [mm:ss.xx] 或 [mm:ss]
+                    return line.replace(/\[\d{2}:\d{2}(\.\d{2,3})?\]/g, '').trim();
+                })
+                .filter(line => {
+                    // 过滤空行和元数据行（如歌曲名、歌手名等）
+                    if (line.length === 0) return false;
+                    // 过滤纯元数据行（如 "晴天 - 呼杰伦" 这种标题行）
+                    if (line.match(/^.{1,30}\s*-\s*.{1,30}$/) && !line.match(/[a-zA-Z\u4e00-\u9fa5]{3,}/)) {
+                        // 如果是 "歌名 - 歌手" 格式且没有实际歌词内容，跳过
+                        return false;
+                    }
+                    return true;
+                });
         }
 
         // Fix overlapping chords - ensure ALL chords display completely without overlap
@@ -3827,7 +4769,7 @@
                         <div class="line-actions">
                             <button class="line-edit-btn" data-line="${lineIndex}" title="编辑歌词">✏️ 编辑</button>
                             <div class="section-selector">
-                                <button class="section-btn" data-line="${lineIndex}">${state.song.sections && state.song.sections[lineIndex] ? '更换段落' : '+ 段落'}</button>
+                                <button class="section-btn" data-line="${lineIndex}">${state.song.sections && state.song.sections[lineIndex] ? escapeHtml(state.song.sections[lineIndex]) : '+ 段落'}</button>
                             </div>
                         </div>
                         `}
@@ -3874,6 +4816,9 @@
                 document.querySelectorAll('.section-dropdown').forEach(el => el.remove());
                 document.querySelectorAll('.line-actions.section-dropdown-active').forEach(el => {
                     el.classList.remove('section-dropdown-active');
+                });
+                document.querySelectorAll('.lyric-line.line-with-active-dropdown').forEach(el => {
+                    el.classList.remove('line-with-active-dropdown');
                 });
                 if (sectionDropdownOutsideHandler) {
                     document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
@@ -4078,6 +5023,9 @@
             document.querySelectorAll('.line-actions.section-dropdown-active').forEach(el => {
                 el.classList.remove('section-dropdown-active');
             });
+            document.querySelectorAll('.lyric-line.line-with-active-dropdown').forEach(el => {
+                el.classList.remove('line-with-active-dropdown');
+            });
             if (sectionDropdownOutsideHandler) {
                 document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
                 sectionDropdownOutsideHandler = null;
@@ -4098,6 +5046,20 @@
                 }
                 if (chord.right && chord.right !== '-') {
                     document.getElementById('tabRightInput').value = chord.right;
+                }
+            }
+
+            // Enable/disable delete button based on whether chord exists
+            const deleteBtn = document.getElementById('chordDelete');
+            if (deleteBtn) {
+                if (chord && chord.chord) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.style.opacity = '1';
+                    deleteBtn.style.cursor = 'pointer';
+                } else {
+                    deleteBtn.disabled = true;
+                    deleteBtn.style.opacity = '0.5';
+                    deleteBtn.style.cursor = 'not-allowed';
                 }
             }
 
@@ -4309,6 +5271,9 @@
                 document.querySelectorAll('.line-actions.section-dropdown-active').forEach(el => {
                     el.classList.remove('section-dropdown-active');
                 });
+                document.querySelectorAll('.lyric-line.line-with-active-dropdown').forEach(el => {
+                    el.classList.remove('line-with-active-dropdown');
+                });
                 document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
                 sectionDropdownOutsideHandler = null;
                 return;
@@ -4318,6 +5283,9 @@
             document.querySelectorAll('.section-dropdown').forEach(el => el.remove());
             document.querySelectorAll('.line-actions.section-dropdown-active').forEach(el => {
                 el.classList.remove('section-dropdown-active');
+            });
+            document.querySelectorAll('.lyric-line.line-with-active-dropdown').forEach(el => {
+                el.classList.remove('line-with-active-dropdown');
             });
             if (sectionDropdownOutsideHandler) {
                 document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
@@ -4329,6 +5297,12 @@
             const dropdown = document.createElement('div');
             dropdown.className = 'section-dropdown';
 
+            // Custom section name input
+            const customInputHtml = `<div style="padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 4px;">
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px;">自定义段落</div>
+                <input type="text" class="custom-section-input" placeholder="输入段落名称..." style="width: 100%; padding: 6px 8px; font-size: 0.85rem; border: 1px solid var(--border-subtle); border-radius: 4px; background: var(--bg-secondary); color: var(--text-primary); box-sizing: border-box;">
+            </div>`;
+
             const tagButtons = sectionTags.map(tag =>
                 `<button class="section-dropdown-btn" data-tag="${tag}">${escapeHtml(tag)}${tag === currentTag ? ' <span style="color: var(--accent-color, #7d6a3d); float: right; margin-left: 8px;">✓</span>' : ''}</button>`
             ).join('');
@@ -4337,12 +5311,24 @@
                 ? `<div style="border-top: 1px solid var(--border-subtle); margin: 4px 0;"></div><button class="section-dropdown-btn section-clear" data-action="clear">清除段落</button>`
                 : '';
 
-            dropdown.innerHTML = tagButtons + clearBtn;
+            dropdown.innerHTML = customInputHtml + tagButtons + clearBtn;
             parentSelector.appendChild(dropdown);
 
             // Force line-actions visible while dropdown is open
             const lineActions = btn.closest('.line-actions');
             if (lineActions) lineActions.classList.add('section-dropdown-active');
+            // Also lift the entire lyric line to ensure dropdown sits above other lines (Safari stacking context fix)
+            const parentLine = btn.closest('.lyric-line');
+            if (parentLine) parentLine.classList.add('line-with-active-dropdown');
+
+            // CRITICAL: Block ALL mouse events on the dropdown to prevent them from reaching lyrics
+            // Use a named function so we can remove it later
+            const dropdownMousedownHandler = e => e.stopPropagation();
+            const dropdownMouseupHandler = e => e.stopPropagation();
+            const dropdownClickHandler = e => e.stopPropagation();
+            dropdown.addEventListener('mousedown', dropdownMousedownHandler);
+            dropdown.addEventListener('mouseup', dropdownMouseupHandler);
+            dropdown.addEventListener('click', dropdownClickHandler);
 
             // Disable ALL edit buttons in lyrics container while dropdown is open
             // This prevents clicking edit buttons on other lines
@@ -4353,20 +5339,56 @@
                 editBtn.style.opacity = '0.3';
             });
 
-            // Bind tag selection - use click only (prevent mousedown interference)
+            // Function to update section display in real-time without full re-render
+            function updateSectionDisplay(tagValue) {
+                // 1. Update section button text
+                const sectionBtn = parentSelector.querySelector('.section-btn');
+                if (sectionBtn) {
+                    sectionBtn.textContent = tagValue ? tagValue : '+ 段落';
+                }
+
+                // 2. Update section label above the lyric line
+                const existingLabel = parentLine ? parentLine.previousElementSibling : null;
+                const hasLabel = existingLabel && existingLabel.classList.contains('line-section-label');
+
+                if (tagValue) {
+                    if (hasLabel) {
+                        existingLabel.textContent = tagValue;
+                    } else {
+                        const newLabel = document.createElement('div');
+                        newLabel.className = 'line-section-label';
+                        newLabel.textContent = tagValue;
+                        parentLine.parentNode.insertBefore(newLabel, parentLine);
+                    }
+                } else {
+                    if (hasLabel) {
+                        existingLabel.remove();
+                    }
+                }
+            }
+
+            // Bind tag selection
             dropdown.querySelectorAll('.section-dropdown-btn').forEach(tagBtn => {
                 tagBtn.addEventListener('click', e => {
                     e.stopPropagation();
                     e.preventDefault();
+
+                    let selectedTag = null;
                     if (tagBtn.dataset.action === 'clear') {
                         delete state.song.sections[lineIndex];
                     } else {
-                        const tag = tagBtn.dataset.tag;
-                        state.song.sections[lineIndex] = tag;
+                        selectedTag = tagBtn.dataset.tag;
+                        state.song.sections[lineIndex] = selectedTag;
                     }
+
+                    // Remove event listeners before removing dropdown
+                    dropdown.removeEventListener('mousedown', dropdownMousedownHandler);
+                    dropdown.removeEventListener('mouseup', dropdownMouseupHandler);
+                    dropdown.removeEventListener('click', dropdownClickHandler);
                     // Close dropdown
                     dropdown.remove();
                     if (lineActions) lineActions.classList.remove('section-dropdown-active');
+                    if (parentLine) parentLine.classList.remove('line-with-active-dropdown');
                     if (sectionDropdownOutsideHandler) {
                         document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
                         sectionDropdownOutsideHandler = null;
@@ -4378,20 +5400,66 @@
                     });
                     markDirty();
                     saveToStorage();
-                    // Do NOT call renderLyrics() here to avoid DOM rebuild
-                    // Just update the section button text without full re-render
-                    const sectionBtn = parentSelector.querySelector('.section-btn');
-                    if (sectionBtn) {
-                        sectionBtn.textContent = state.song.sections[lineIndex] ? '更换段落' : '+ 段落';
-                    }
+                    // Real-time update of section label and button text
+                    updateSectionDisplay(selectedTag);
                 });
             });
 
-            // Close on outside click
+            // Custom section input - Enter key to apply
+            const customInput = dropdown.querySelector('.custom-section-input');
+            if (customInput) {
+                // Pre-fill with current section name for editing
+                if (currentTag) {
+                    customInput.value = currentTag;
+                }
+
+                // Stop mousedown propagation to prevent outside click handler
+                customInput.addEventListener('mousedown', e => e.stopPropagation());
+                customInput.addEventListener('mouseup', e => e.stopPropagation());
+                customInput.addEventListener('click', e => e.stopPropagation());
+
+                // Apply on Enter
+                customInput.addEventListener('keydown', e => {
+                    e.stopPropagation();
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const customTag = customInput.value.trim();
+                        if (customTag) {
+                            state.song.sections[lineIndex] = customTag;
+                        } else {
+                            delete state.song.sections[lineIndex];
+                        }
+                        dropdown.removeEventListener('mousedown', dropdownMousedownHandler);
+                        dropdown.removeEventListener('mouseup', dropdownMouseupHandler);
+                        dropdown.removeEventListener('click', dropdownClickHandler);
+                        dropdown.remove();
+                        if (lineActions) lineActions.classList.remove('section-dropdown-active');
+                        if (parentLine) parentLine.classList.remove('line-with-active-dropdown');
+                        if (sectionDropdownOutsideHandler) {
+                            document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
+                            sectionDropdownOutsideHandler = null;
+                        }
+                        allEditBtns.forEach(editBtn => {
+                            editBtn.style.pointerEvents = '';
+                            editBtn.style.opacity = '';
+                        });
+                        markDirty();
+                        saveToStorage();
+                        updateSectionDisplay(customTag || null);
+                    }
+                });
+            }
+
+            // Close on outside click (dropdown.contains already covers input clicks)
             sectionDropdownOutsideHandler = function (e) {
                 if (!dropdown.contains(e.target) && e.target !== btn) {
+                    // Remove event listeners before removing dropdown
+                    dropdown.removeEventListener('mousedown', dropdownMousedownHandler);
+                    dropdown.removeEventListener('mouseup', dropdownMouseupHandler);
+                    dropdown.removeEventListener('click', dropdownClickHandler);
                     dropdown.remove();
                     if (lineActions) lineActions.classList.remove('section-dropdown-active');
+                    if (parentLine) parentLine.classList.remove('line-with-active-dropdown');
                     document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
                     sectionDropdownOutsideHandler = null;
                     // Re-enable all edit buttons
@@ -4408,33 +5476,322 @@
 
         var sectionDropdownOutsideHandler = null;
 
-        // Update chord summary
-        function updateSummary() {
-            const chordCount = {};
+        // Parse chord name into its constituent semitone positions (mod 12)
+        // Returns { rootSemitone: number, pitches: [number, ...] } or null
+        function parseChordToPitches(chordName) {
+            if (!chordName) return null;
+            const name = chordName.trim();
 
-            Object.values(state.chordData).forEach(charData => {
-                Object.values(charData).forEach(data => {
-                    if (data.chord) {
-                        const name = data.chord.replace(/[0-9]/g, '').trim();
-                        chordCount[name] = (chordCount[name] || 0) + 1;
-                    }
-                });
+            // 1. Extract root note (supports C, C#, Cb, Db, etc.)
+            const rootMatch = name.match(/^([A-G])([#b]?)/);
+            if (!rootMatch) return null;
+
+            const rootLetter = rootMatch[1];
+            const rootAccidental = rootMatch[2];
+            let rootSemitone = noteToSemitone[rootLetter];
+            if (rootAccidental === '#') rootSemitone = (rootSemitone + 1) % 12;
+            if (rootAccidental === 'b') rootSemitone = (rootSemitone + 11) % 12;
+
+            // 2. Determine chord quality / type from the remainder
+            const remainder = name.substring(rootMatch[0].length);
+
+            // Ordered mapping of string-pattern -> quality key (longest-match first)
+            const qualityPatterns = [
+                ['maj7', 'maj7'],
+                ['Maj7', 'maj7'],
+                ['m7b5', 'dim'],     // half-diminished treated as dim for pitch display
+                ['m7', 'm7'],
+                ['dim7', 'dim7'],
+                ['dim', 'dim'],
+                ['aug', 'aug'],
+                ['sus4', 'sus4'],
+                ['sus2', 'sus2'],
+                ['7', '7'],
+                ['maj', 'major'],
+                ['M', 'major'],
+                ['m', 'minor']
+            ];
+
+            let selectedQuality = 'major';
+            for (const [pat, key] of qualityPatterns) {
+                if (remainder.indexOf(pat) !== -1) {
+                    selectedQuality = key;
+                    break;
+                }
+            }
+
+            // 3. Lookup intervals
+            let intervals = chordIntervals[selectedQuality]
+                ? [...chordIntervals[selectedQuality]]
+                : [...chordIntervals['major']];
+
+            // 4. Detect extension (7, 9, add9, add2, sus4 handled above)
+            // remainder may have "7" "9" "add9" etc.
+            // If selectedQuality already produced "7" chord, skip adding again.
+            const alreadyHas7 = ['7', 'maj7', 'm7', 'dim7'].includes(selectedQuality);
+            if (!alreadyHas7) {
+                if (remainder.indexOf('add9') !== -1 && intervals.indexOf(14) === -1) {
+                    intervals.push(14);
+                } else if (remainder.indexOf('add2') !== -1 && intervals.indexOf(2) === -1) {
+                    intervals.push(2);
+                } else if (remainder.indexOf('9') !== -1) {
+                    // Treat as 7 + 9th color note
+                    if (intervals.indexOf(10) === -1) intervals.push(10);
+                    if (intervals.indexOf(14) === -1) intervals.push(14);
+                } else if (remainder.indexOf('7') !== -1 && intervals.indexOf(10) === -1) {
+                    intervals.push(10);
+                }
+            }
+
+            // 5. Dedupe pitches within one octave
+            const pitchSet = new Set();
+            intervals.forEach(semi => {
+                pitchSet.add((rootSemitone + semi) % 12);
             });
 
-            const chords = Object.entries(chordCount).sort((a, b) => b[1] - a[1]);
+            return {
+                rootSemitone: rootSemitone,
+                pitches: Array.from(pitchSet).sort((a, b) => a - b)
+            };
+        }
 
-            if (chords.length === 0) {
+        // Render a mini one-octave piano keyboard with highlighted pitches
+        // pitches: array of 0..11 semitones from C
+        function renderMiniPiano(pitches) {
+            if (!pitches || pitches.length === 0) return '';
+            const pitchSet = new Set(pitches);
+
+            // White keys in order: C (0), D (2), E (4), F (5), G (7), A (9), B (11)
+            const whiteKeys = [
+                { semi: 0,  hasBlack: true },  // C, next is C#
+                { semi: 2,  hasBlack: true },  // D, next is D#
+                { semi: 4,  hasBlack: false }, // E, no black key after
+                { semi: 5,  hasBlack: true },  // F, next is F#
+                { semi: 7,  hasBlack: true },  // G, next is G#
+                { semi: 9,  hasBlack: true },  // A, next is A#
+                { semi: 11, hasBlack: false }  // B, no black key after
+            ];
+            // Black keys: C#(1), D#(3), F#(6), G#(8), A#(10)
+            const blackSemitones = [1, 3, 6, 8, 10];
+
+            const whiteHtml = whiteKeys.map(w => {
+                const isHL = pitchSet.has(w.semi) ? ' highlight' : '';
+                return `<div class="mini-key${isHL}"></div>`;
+            }).join('');
+
+            // Black key slots: one slot between each pair of white keys = 6 slots
+            // Slot i (0-indexed between white keys i and i+1) has black key if:
+            //   slot 0 (between C-D): C# -> semi 1
+            //   slot 1 (between D-E): D# -> semi 3
+            //   slot 2 (between E-F): empty
+            //   slot 3 (between F-G): F# -> semi 6
+            //   slot 4 (between G-A): G# -> semi 8
+            //   slot 5 (between A-B): A# -> semi 10
+            const blackSlots = [1, 3, null, 6, 8, 10];
+            const blackHtml = blackSlots.map(semi => {
+                if (semi === null) {
+                    return `<div class="mini-black-slot empty"><div class="mini-black"></div></div>`;
+                }
+                const isHL = pitchSet.has(semi) ? ' highlight' : '';
+                return `<div class="mini-black-slot${isHL}"><div class="mini-black"></div></div>`;
+            }).join('');
+
+            return `<div class="mini-piano">
+                ${whiteHtml}
+                <div class="mini-blackkeys">${blackHtml}</div>
+            </div>`;
+        }
+
+        // Build a flat ordered list of all chord occurrences:
+        // [{ lineIndex, charIndex, pos, chord }]
+        function collectChordOccurrences() {
+            const list = [];
+            if (!state.chordData) return list;
+            Object.keys(state.chordData).forEach(lineIdxKey => {
+                const lineIndex = parseInt(lineIdxKey);
+                const charData = state.chordData[lineIdxKey];
+                if (!charData) return;
+                Object.keys(charData).forEach(posKey => {
+                    const data = charData[posKey];
+                    if (!data || !data.chord) return;
+                    // posKey format: "charIndex_position" (e.g. "0_current", "3_pre")
+                    const parts = posKey.split('_');
+                    const charIndex = parseInt(parts[0]);
+                    const pos = parts[1] || 'current';
+                    list.push({
+                        lineIndex,
+                        charIndex,
+                        pos,
+                        chord: data.chord.trim()
+                    });
+                });
+            });
+            // Sort by line, then by char position, then by "pos" order: pre < current < post
+            const posRank = { pre: 0, current: 1, post: 2 };
+            list.sort((a, b) => {
+                if (a.lineIndex !== b.lineIndex) return a.lineIndex - b.lineIndex;
+                if (a.charIndex !== b.charIndex) return a.charIndex - b.charIndex;
+                return (posRank[a.pos] || 1) - (posRank[b.pos] || 1);
+            });
+            return list;
+        }
+
+        // Try to detect a repeating chord-loop pattern
+        // e.g. [C, G, Am, F, C, G, Am, F] -> loop=[C, G, Am, F], repeat=2
+        function detectLoop(sequence) {
+            const n = sequence.length;
+            if (n < 2) return { loop: sequence, repeat: 1 };
+            // Try loop length L from 1 to n/2, that evenly divides n
+            for (let L = 1; L <= Math.floor(n / 2); L++) {
+                if (n % L !== 0) continue;
+                const rep = n / L;
+                const candidate = sequence.slice(0, L);
+                let ok = true;
+                for (let r = 1; r < rep; r++) {
+                    for (let i = 0; i < L; i++) {
+                        if (sequence[r * L + i] !== candidate[i]) {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if (!ok) break;
+                }
+                if (ok) return { loop: candidate, repeat: rep };
+            }
+            return { loop: sequence, repeat: 1 };
+        }
+
+        // Update chord summary
+        function updateSummary() {
+            const occurrences = collectChordOccurrences();
+
+            // ===== 1. 和弦统计（保留原有功能） =====
+            const chordCount = {};
+            occurrences.forEach(occ => {
+                const name = occ.chord;
+                chordCount[name] = (chordCount[name] || 0) + 1;
+            });
+            const chordStats = Object.entries(chordCount).sort((a, b) => b[1] - a[1]);
+
+            if (chordStats.length === 0) {
                 chordSummary.style.display = 'none';
                 return;
             }
-
             chordSummary.style.display = 'block';
-            summaryGrid.innerHTML = chords.map(([chord, count]) => `
-                <div class="summary-item">
-                    <div class="summary-chord">${chord}</div>
+
+            // Render statistics grid
+            summaryGrid.innerHTML = chordStats.map(([chord, count]) => {
+                const pitches = parseChordToPitches(chord);
+                const piano = pitches ? renderMiniPiano(pitches.pitches) : '';
+                return `<div class="summary-item">
+                    <div class="summary-chord">${escapeHtml(chord)}</div>
+                    ${piano}
                     <div class="summary-count">出现 ${count} 次</div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
+
+            // ===== 2. 段落和弦走向 =====
+            const summaryProg = document.getElementById('summaryProgressions');
+            if (!summaryProg) {
+                // fall back
+                return;
+            }
+
+            // Group occurrences by section
+            // Sections live in state.song.sections = { lineIndex: "段落名" }
+            // Sections are declared at a starting line, and apply until the next declared section.
+            const sectionsMap = (state.song && state.song.sections) ? state.song.sections : {};
+            // Collect sorted list of section starting lines
+            const sortedSectionLines = Object.keys(sectionsMap)
+                .map(k => parseInt(k))
+                .sort((a, b) => a - b);
+
+            if (sortedSectionLines.length === 0) {
+                // No sections defined - show all chords as a single progression
+                const allSequence = occurrences.map(o => o.chord);
+                if (allSequence.length === 0) {
+                    summaryProg.innerHTML = '<div style="color: var(--text-dim); font-size: 0.85rem;">请先在"编辑模式"中为每一行标记段落（前奏 / 主歌 / 副歌 / 桥段 / 尾奏 等）</div>';
+                } else {
+                    const { loop, repeat } = detectLoop(allSequence);
+                    summaryProg.innerHTML = `<div class="progression-block">
+                        <div class="progression-header">
+                            <span class="progression-section-name">整曲</span>
+                            ${repeat > 1 ? `<span class="progression-loop-badge">循环 × ${repeat}</span>` : ''}
+                        </div>
+                        <div class="progression-row">
+                            ${renderProgressionRow(loop)}
+                        </div>
+                    </div>`;
+                }
+                return;
+            }
+
+            // Assign each chord occurrence to a section (nearest section-start at or before the line)
+            function findSectionForLine(lineIndex) {
+                let section = null;
+                let sectionStart = -1;
+                for (const sLine of sortedSectionLines) {
+                    if (sLine <= lineIndex) {
+                        section = sectionsMap[sLine];
+                        sectionStart = sLine;
+                    } else {
+                        break;
+                    }
+                }
+                return { section, sectionStart };
+            }
+
+            // Group occurrences by section name (preserving section order)
+            const orderedSections = []; // [{name, sequence:[chord...]}]
+            const sectionByNameIdx = {};
+            for (const sLine of sortedSectionLines) {
+                const secName = sectionsMap[sLine];
+                if (sectionByNameIdx[secName] === undefined) {
+                    sectionByNameIdx[secName] = orderedSections.length;
+                    orderedSections.push({ name: secName, sequence: [] });
+                }
+            }
+            occurrences.forEach(occ => {
+                const { section } = findSectionForLine(occ.lineIndex);
+                if (section === null) return; // before first section - skip from section breakdown
+                const idx = sectionByNameIdx[section];
+                if (idx !== undefined) orderedSections[idx].sequence.push(occ.chord);
+            });
+
+            // Build HTML blocks
+            const blocksHtml = orderedSections
+                .filter(sec => sec.sequence.length > 0)
+                .map(sec => {
+                    const { loop, repeat } = detectLoop(sec.sequence);
+                    return `<div class="progression-block">
+                        <div class="progression-header">
+                            <span class="progression-section-name">${escapeHtml(sec.name)}</span>
+                            <span style="font-size: 0.75rem; color: var(--text-dim);">共 ${sec.sequence.length} 个和弦</span>
+                            ${repeat > 1 ? `<span class="progression-loop-badge">循环 × ${repeat}</span>` : ''}
+                        </div>
+                        <div class="progression-row">
+                            ${renderProgressionRow(loop)}
+                        </div>
+                    </div>`;
+                }).join('');
+
+            if (!blocksHtml) {
+                summaryProg.innerHTML = '<div style="color: var(--text-dim); font-size: 0.85rem;">标记段落并添加和弦后，此处会显示每段的和弦走向</div>';
+            } else {
+                summaryProg.innerHTML = blocksHtml;
+            }
+        }
+
+        // Render a progression loop row: [chord] → [chord] → ...
+        function renderProgressionRow(chordSequence) {
+            return chordSequence.map((chord, i) => {
+                const arrow = (i < chordSequence.length - 1)
+                    ? `<span class="progression-arrow">→</span>`
+                    : '';
+                return `<div class="progression-card">
+                    <div class="progression-chord">${escapeHtml(chord)}</div>
+                </div>${arrow}`;
+            }).join('');
         }
 
         // Local Storage
