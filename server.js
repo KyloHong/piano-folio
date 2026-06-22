@@ -603,9 +603,11 @@ app.post('/api/chords/analyze', async (req, res) => {
         return res.status(400).json({ error: '请提供歌曲名称' });
     }
 
+    // 准备歌词文本
+    const lyricsText = Array.isArray(lyrics) ? lyrics.join('\n') : (lyrics || '');
+
     try {
         // 准备发送给智谱 AI 的 prompt
-        const lyricsText = Array.isArray(lyrics) ? lyrics.join('\n') : (lyrics || '');
         const prompt = `你是专业的音乐和弦分析专家。请分析以下歌曲的和弦进行。
 
 歌曲信息：
@@ -729,9 +731,28 @@ ${lyricsText}
 
     } catch (error) {
         console.error('AI 和弦分析错误:', error.message);
-        res.status(500).json({ 
-            error: 'AI 分析失败，请稍后重试',
-            details: error.message 
+        
+        // 备用方案：使用本地和弦数据库生成结果
+        const fallbackResult = {
+            key: 'C',
+            tempo: '中等速度',
+            sections: {
+                '前奏': { duration: 4, chords: ['C', 'G', 'Am', 'F'] },
+                '主歌': { lyrics: lyricsText.substring(0, 50), chords: ['C', 'G', 'Am', 'F', 'C', 'G', 'Am', 'F'] },
+                '副歌': { lyrics: lyricsText.substring(0, 50), chords: ['F', 'G', 'Em', 'Am', 'Dm', 'G', 'C', 'C7'] },
+                '桥段': { chords: ['Am', 'Em', 'F', 'G'] },
+                '尾奏': { chords: ['C', 'G', 'C'] }
+            },
+            beatPerMeasure: 4,
+            chordDuration: '1beat'
+        };
+        
+        console.log('使用备用和弦方案');
+        res.json({
+            success: true,
+            analysis: fallbackResult,
+            fallback: true,
+            message: 'AI 服务暂时不可用，已使用默认和弦方案'
         });
     }
 });
