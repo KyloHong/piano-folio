@@ -603,63 +603,28 @@ app.post('/api/chords/analyze', async (req, res) => {
         return res.status(400).json({ error: '请提供歌曲名称' });
     }
 
-    // 准备歌词文本
+    // 准备歌词文本（限制长度以加快响应）
     const lyricsText = Array.isArray(lyrics) ? lyrics.join('\n') : (lyrics || '');
+    const truncatedLyrics = lyricsText.substring(0, 500); // 限制歌词长度
 
     try {
-        // 准备发送给智谱 AI 的 prompt
-        const prompt = `你是专业的音乐和弦分析专家。请分析以下歌曲的和弦进行。
+        // 简化 prompt 以加快 AI 响应
+        const prompt = `分析歌曲和弦，返回JSON格式。
 
-歌曲信息：
-- 歌名：${songName}
-- 歌手：${artist || '未知'}
+歌曲：${songName} - ${artist || '未知'}
+歌词：${truncatedLyrics}
 
-歌词内容：
-${lyricsText}
+返回格式：
+{"key":"C","sections":{"主歌":{"chords":["C","G","Am","F"]},"副歌":{"chords":["F","G","Em","Am"]}}}
 
-请根据歌曲的调式、风格、情感，分析每个段落应该使用的和弦。
-
-请返回严格的 JSON 格式，包含以下结构：
-{
-  "key": "C",  // 歌曲调式
-  "tempo": "中等速度",  // 节奏描述
-  "sections": {
-    "前奏": {
-      "duration": 8,  // 持续小节数
-      "chords": ["C", "G", "Am", "F"]  // 和弦序列
-    },
-    "主歌": {
-      "lyrics": "凭什么要失望 藏眼泪到心脏",  // 对应的歌词
-      "chords": ["Cmaj7", "Fmaj7", "Cmaj7", "Fmaj7"]  // 与歌词对应的和弦
-    },
-    "副歌": {
-      "lyrics": "修炼爱情的心酸 学会放好以前的渴望",  // 对应的歌词
-      "chords": ["Fmaj7", "G/F", "Em7", "Am7", "Dm7", "Dm7/G", "C", "C7"]
-    },
-    "桥段": {
-      "chords": ["F", "G", "E7", "Am7"]
-    },
-    "尾奏": {
-      "chords": ["C", "G"]
-    }
-  },
-  "beatPerMeasure": 4,  // 每小节拍数
-  "chordDuration": "1beat"  // 每个和弦持续时长（1beat 或 2beats）
-}
-
-注意事项：
-1. 根据歌词内容智能识别段落（前奏、主歌、副歌、桥段、尾奏）
-2. 每个段落的 chords 数组应该与该段落的歌词行数匹配
-3. 和弦应使用标准命名（如 C, Am, F, G, Cmaj7, Dm7 等）
-4. 过滤掉歌词中可能包含的元信息（如作词、作曲、编曲、制作人等），只分析歌曲正文内容
-5. 只返回 JSON，不要包含其他文字`;
+只返回JSON，不要其他文字。`;
 
         // 调用智谱 AI API
         const zhipuApiKey = process.env.ZHIPU_API_KEY || '5fb97c25c3694b209d0ca5d45c591b17.rAvFbIZS3eLoWORz';
         
-        // Vercel Hobby 计划函数超时限制为 10 秒，设置 8 秒超时
+        // 设置 7 秒超时，确保在 Vercel 10 秒限制内完成
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
         
         let response;
         try {
@@ -675,8 +640,8 @@ ${lyricsText}
                     messages: [
                         { role: 'user', content: prompt }
                     ],
-                    temperature: 0.7,
-                    max_tokens: 1500  // 减少 token 数量以加快响应
+                    temperature: 0.3,  // 降低温度以加快响应
+                    max_tokens: 500    // 大幅减少 token 数量
                 }),
                 signal: controller.signal
             });
@@ -686,7 +651,7 @@ ${lyricsText}
             clearTimeout(timeoutId);
             console.error('智谱 AI API fetch 错误:', fetchError.name, fetchError.message);
             if (fetchError.name === 'AbortError') {
-                throw new Error('AI API 请求超时（8秒），请稍后重试');
+                throw new Error('AI API 请求超时（7秒）');
             }
             throw new Error(`AI API 连接失败: ${fetchError.message}`);
         }
