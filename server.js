@@ -461,7 +461,33 @@ app.get('/api/music/lyric', async (req, res) => {
             lyricText = data.lrc.lyric;
         }
 
-        res.json({ lyric: lyricText });
+        // 过滤掉作词、作曲等元信息
+        const lines = lyricText.split('\n');
+        const filteredLines = lines.filter(line => {
+            // 移除时间轴 [00:xx.xx]
+            const timeMatch = line.match(/^\[\d{2}:\d{2}(.\d{2})?\]/);
+            const content = timeMatch ? line.substring(line.indexOf(']') + 1).trim() : line.trim();
+
+            // 如果只是时间轴，继续判断下一行
+            if (!content) return false;
+
+            // 过滤掉包含以下关键词的行
+            const metaKeywords = ['作词', '作曲', '编曲', '制作', '监制', '制作人', '吉他', '贝斯', '鼓', '键盘', '和声', '混音', '录音', '版权', '发行'];
+            for (const kw of metaKeywords) {
+                if (content.includes(kw + '：') || content.includes(kw + ':')) {
+                    return false;
+                }
+            }
+
+            // 过滤掉纯符号或空内容
+            if (!content || /^[\s\d.。,，、；;：:\-\[\]]+$/.test(content)) {
+                return false;
+            }
+
+            return true;
+        });
+
+        res.json({ lyric: filteredLines.join('\n') });
     } catch (error) {
         console.error('歌词获取错误:', error.message);
         res.status(500).json({ error: '获取歌词失败' });
