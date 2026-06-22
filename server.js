@@ -657,12 +657,13 @@ ${lyricsText}
         // 调用智谱 AI API
         const zhipuApiKey = process.env.ZHIPU_API_KEY || '5fb97c25c3694b209d0ca5d45c591b17.rAvFbIZS3eLoWORz';
         
-        // 使用 AbortController 设置超时
+        // Vercel Hobby 计划函数超时限制为 10 秒，设置 8 秒超时
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
         
         let response;
         try {
+            console.log('开始调用智谱 AI API...');
             response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -675,15 +676,17 @@ ${lyricsText}
                         { role: 'user', content: prompt }
                     ],
                     temperature: 0.7,
-                    max_tokens: 2000
+                    max_tokens: 1500  // 减少 token 数量以加快响应
                 }),
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
+            console.log('智谱 AI API 响应状态:', response.status);
         } catch (fetchError) {
             clearTimeout(timeoutId);
+            console.error('智谱 AI API fetch 错误:', fetchError.name, fetchError.message);
             if (fetchError.name === 'AbortError') {
-                throw new Error('AI API 请求超时，请稍后重试');
+                throw new Error('AI API 请求超时（8秒），请稍后重试');
             }
             throw new Error(`AI API 连接失败: ${fetchError.message}`);
         }
