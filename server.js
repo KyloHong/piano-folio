@@ -471,10 +471,15 @@ app.get('/api/music/lyric', async (req, res) => {
             // 如果只是时间轴，继续判断下一行
             if (!content) return false;
 
-            // 过滤掉包含以下关键词的行
-            const metaKeywords = ['作词', '作曲', '编曲', '制作', '监制', '制作人', '吉他', '贝斯', '鼓', '键盘', '和声', '混音', '录音', '版权', '发行'];
+            // 过滤掉包含以下关键词的行（支持多种格式：作词：、作词:、作词_:_）
+            const metaKeywords = ['作词', '作曲', '编曲', '制作', '监制', '制作人', '吉他', '贝斯', '鼓', '键盘', '和声', '混音', '录音', '版权', '发行', '演唱', '原唱'];
             for (const kw of metaKeywords) {
-                if (content.includes(kw + '：') || content.includes(kw + ':')) {
+                // 支持多种分隔符格式
+                if (content.includes(kw + '：') ||      // 中文冒号
+                    content.includes(kw + ':') ||       // 英文冒号
+                    content.includes(kw + '_:_') ||     // 下划线格式
+                    content.includes(kw + ' _ ') ||     // 空格下划线空格
+                    content.startsWith(kw)) {           // 以关键词开头的行
                     return false;
                 }
             }
