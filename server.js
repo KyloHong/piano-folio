@@ -652,7 +652,7 @@ ${lyricsText}
 4. 过滤掉歌词中可能包含的元信息（如作词、作曲、编曲、制作人等），只分析歌曲正文内容
 5. 只返回 JSON，不要包含其他文字`;
 
-        // 调用智谱 AI API
+        // 调用智谱 AI API (GLM-4.7-Flash - 免费高性能模型)
         const zhipuApiKey = process.env.ZHIPU_API_KEY || '5fb97c25c3694b209d0ca5d45c591b17.rAvFbIZS3eLoWORz';
         const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
             method: 'POST',
@@ -661,7 +661,7 @@ ${lyricsText}
                 'Authorization': `Bearer ${zhipuApiKey}`
             },
             body: JSON.stringify({
-                model: 'glm-4-flash',
+                model: 'glm-4.7-flash',
                 messages: [
                     { role: 'user', content: prompt }
                 ],

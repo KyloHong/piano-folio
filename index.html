@@ -4316,6 +4316,31 @@
 
             // 清空现有和弦
             state.chordData = {};
+            // 清空现有段落标记
+            if (!state.song.sections) {
+                state.song.sections = {};
+            }
+
+            // 将 AI 返回的段落信息写入歌词
+            const lyricsText = lyrics.join('\n');
+            for (const [sectionName, sectionData] of Object.entries(sections)) {
+                if (!sectionData || !sectionData.lyrics) continue;
+                
+                // 查找该段落歌词在整体歌词中的位置
+                const sectionLyrics = sectionData.lyrics;
+                const startIndex = lyricsText.indexOf(sectionLyrics.substring(0, Math.min(20, sectionLyrics.length)));
+                if (startIndex !== -1) {
+                    // 计算对应的行号
+                    let charCount = 0;
+                    for (let i = 0; i < lyrics.length; i++) {
+                        charCount += lyrics[i].length + 1; // +1 是换行符
+                        if (charCount > startIndex) {
+                            state.song.sections[i] = sectionName;
+                            break;
+                        }
+                    }
+                }
+            }
 
             // 尝试匹配歌词与和弦
             lyrics.forEach((line, lineIndex) => {
