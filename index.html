@@ -308,6 +308,11 @@
             border-bottom-color: var(--accent-color);
         }
 
+        .song-title-input[readonly] {
+            cursor: default;
+            border-bottom-color: transparent;
+        }
+
         .song-meta {
             display: flex;
             align-items: center;
@@ -334,6 +339,11 @@
         .song-artist-input:focus {
             outline: none;
             border-bottom-color: var(--accent-color);
+        }
+
+        .song-artist-input[readonly] {
+            cursor: default;
+            border-bottom-color: transparent;
         }
 
         .song-author {
@@ -4795,9 +4805,11 @@
 
             if (titleInput) {
                 titleInput.value = state.song.title || '';
+                titleInput.readOnly = state.isReadOnly;
             }
             if (artistInput) {
                 artistInput.value = state.song.artist || '';
+                artistInput.readOnly = state.isReadOnly;
             }
             // 只读模式下单独显示作者信息在歌手名下方
             if (authorDisplay) {
