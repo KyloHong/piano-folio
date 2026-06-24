@@ -336,6 +336,12 @@
             border-bottom-color: var(--accent-color);
         }
 
+        .song-author {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-left: 8px;
+        }
+
         .song-artist {
             color: var(--text-secondary);
             font-size: 0.95rem;
@@ -3111,6 +3117,7 @@
                 </div>
                 <div class="song-meta">
                     <input type="text" class="song-artist-input" id="songArtistInput" placeholder="请输入歌手名称" aria-label="歌手名称">
+                    <span class="song-author" id="songAuthorDisplay" style="display: none;"></span>
                 </div>
                 <div class="song-divider"></div>
             </section>
@@ -4784,18 +4791,24 @@
             songInfo.style.display = 'block';
             const titleInput = document.getElementById('songTitleInput');
             const artistInput = document.getElementById('songArtistInput');
-            
+            const authorDisplay = document.getElementById('songAuthorDisplay');
+
             if (titleInput) {
                 titleInput.value = state.song.title || '';
             }
             if (artistInput) {
                 artistInput.value = state.song.artist || '';
-                // 只读模式下显示作者信息
+            }
+            // 只读模式下单独显示作者信息在歌手名下方
+            if (authorDisplay) {
                 if (state.isReadOnly && state.chartAuthor) {
-                    artistInput.value += ' · 作者: @' + state.chartAuthor;
+                    authorDisplay.textContent = '作者: @' + state.chartAuthor;
+                    authorDisplay.style.display = 'inline';
+                } else {
+                    authorDisplay.style.display = 'none';
                 }
             }
-            
+
             // 只读模式下隐藏保存按钮
             const saveBtn = document.getElementById('homeSaveBtn');
             if (saveBtn) {
