@@ -7034,8 +7034,8 @@
                         </div>
                         <div>
                             <div class="grid-card-title">${escapeHtml(c.name)}</div>
-                            <div class="grid-card-artist">@ ${escapeHtml(c.author)}</div>
                             <div class="grid-card-meta">${escapeHtml(c.song_artist || 'Various')}</div>
+                            <div class="grid-card-artist">@ ${escapeHtml(c.author)}</div>
                             <span class="grid-card-time">${formatDate(c.updated_at)}</span>
                             <div class="grid-card-actions">
                                 ${authToken ? '<button class="grid-action-btn save" onclick="event.stopPropagation(); saveAsChart(\'' + c.id + '\')">SAVE</button>' : ''}
