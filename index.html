@@ -3638,22 +3638,8 @@
             const slashSection = document.getElementById('slashSection');
             const slashGroup = document.getElementById('slashGroup');
             
-            // 根据根音生成转位选项
-            const slashOptions = {
-                'C': ['E', 'G'],
-                'D': ['F', 'A'],
-                'E': ['G', 'B'],
-                'F': ['A', 'C'],
-                'G': ['B', 'D'],
-                'A': ['C', 'E'],
-                'B': ['D', 'F']
-            };
-            
-            const options = slashOptions[root] || [];
-            if (options.length === 0) {
-                slashSection.style.display = 'none';
-                return;
-            }
+            const allNaturalNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const options = allNaturalNotes.filter(note => note !== root);
             
             slashGroup.innerHTML = `<button class="slash-btn selected" data-slash="none">无转位</button>` +
                 options.map(note => `<button class="slash-btn" data-slash="${note}">${root}/${note}</button>`).join('');
