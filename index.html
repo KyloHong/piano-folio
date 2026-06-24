@@ -163,6 +163,42 @@
             color: var(--text-primary);
         }
 
+        /* Key Selector */
+        .key-selector {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .key-label {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .key-select {
+            padding: 6px 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+            color: var(--text-primary);
+            font-size: 0.72rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            outline: none;
+        }
+
+        .key-select:hover {
+            border-color: var(--text-secondary);
+        }
+
+        .key-select:focus {
+            border-color: var(--text-primary);
+        }
+
         /* Mode Toggle */
         .mode-toggle {
             display: inline-flex;
@@ -3094,6 +3130,23 @@
                 <div class="section-title-row">
                     <h2 class="section-title">歌词与和弦</h2>
                     <div class="lyrics-header-actions">
+                        <div class="key-selector">
+                            <span class="key-label">调式：</span>
+                            <select class="key-select" id="keySelect">
+                                <option value="0">C</option>
+                                <option value="1">C# / Db</option>
+                                <option value="2">D</option>
+                                <option value="3">D# / Eb</option>
+                                <option value="4">E</option>
+                                <option value="5">F</option>
+                                <option value="6">F# / Gb</option>
+                                <option value="7">G</option>
+                                <option value="8">G# / Ab</option>
+                                <option value="9">A</option>
+                                <option value="10">A# / Bb</option>
+                                <option value="11">B</option>
+                            </select>
+                        </div>
                         <!-- AI 智能和弦分析按钮 -->
                         <div id="aiChordAnalyzer" class="ai-chord-analyzer" style="display:none;">
                             <button class="ai-chord-btn" id="aiAnalyzeBtn">
@@ -3387,6 +3440,7 @@
             displayMode: 'name', // 'name' or 'tab'
             selectedChar: null,
             chordData: {}, // { lineIndex: { charIndex: { chord: 'C', left: '1', right: '135' } } }
+            keyOffset: 0, // 转调半音数，0 = C调
             // 图谱管理相关
             currentChartId: null,      // 当前打开的图谱ID
             currentChartName: null,    // 当前图谱名称
@@ -3438,6 +3492,104 @@
             0: '1', 1: '1#', 2: '2', 3: '2#', 4: '3', 5: '4', 6: '4#',
             7: '5', 8: '#5', 9: '6', 10: 'b7', 11: '7'
         };
+
+        // 半音到音名映射（升号优先）
+        const semitoneToNoteSharp = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const semitoneToNoteFlat = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+        // 解析音名（含升降号）为半音数
+        function parseNoteToSemitone(noteStr) {
+            if (!noteStr) return null;
+            const match = noteStr.match(/^([A-G])([#b]?)/);
+            if (!match) return null;
+            const base = match[1];
+            const accidental = match[2];
+            let semitone = noteToSemitone[base];
+            if (accidental === '#') semitone += 1;
+            if (accidental === 'b') semitone -= 1;
+            return (semitone + 12) % 12;
+        }
+
+        // 转调单个音名
+        function transposeNote(noteStr, offset) {
+            const semitone = parseNoteToSemitone(noteStr);
+            if (semitone == null) return noteStr;
+            const newSemitone = (semitone + offset + 12) % 12;
+            const useFlat = noteStr.includes('b');
+            return useFlat ? semitoneToNoteFlat[newSemitone] : semitoneToNoteSharp[newSemitone];
+        }
+
+        // 转调整个和弦名
+        function transposeChordName(chordName, offset) {
+            if (!chordName || offset === 0) return chordName;
+
+            const slashMatch = chordName.match(/^(.+)\/([A-G][#b]?)$/);
+            let mainPart = chordName;
+            let bassNote = null;
+
+            if (slashMatch) {
+                mainPart = slashMatch[1];
+                bassNote = slashMatch[2];
+            }
+
+            const rootMatch = mainPart.match(/^([A-G][#b]?)(.*)$/);
+            if (!rootMatch) return chordName;
+
+            const rootNote = rootMatch[1];
+            const suffix = rootMatch[2];
+            const newRoot = transposeNote(rootNote, offset);
+            let result = newRoot + suffix;
+
+            if (bassNote) {
+                const newBass = transposeNote(bassNote, offset);
+                result += '/' + newBass;
+            }
+
+            return result;
+        }
+
+        // 转调弹唱标记（数字）
+        function transposeTabNumber(numStr, offset) {
+            if (!numStr || offset === 0) return numStr;
+            const numMap = { '1': 0, '2': 2, '3': 4, '4': 5, '5': 7, '6': 9, '7': 11 };
+            const reverseMap = { 0: '1', 2: '2', 4: '3', 5: '4', 7: '5', 9: '6', 11: '7' };
+
+            let result = '';
+            let i = 0;
+            while (i < numStr.length) {
+                const ch = numStr[i];
+                if (numMap[ch] != null) {
+                    let semitone = numMap[ch];
+                    let accidental = '';
+                    if (i + 1 < numStr.length && (numStr[i + 1] === '#' || numStr[i + 1] === 'b')) {
+                        accidental = numStr[i + 1];
+                        semitone += accidental === '#' ? 1 : -1;
+                        i++;
+                    }
+                    const newSemitone = (semitone + offset + 12) % 12;
+                    const baseNote = reverseMap[newSemitone];
+                    if (baseNote != null) {
+                        result += baseNote;
+                    } else {
+                        const lower = newSemitone - 1;
+                        const higher = (newSemitone + 1) % 12;
+                        if (reverseMap[lower] != null) {
+                            result += reverseMap[lower] + '#';
+                        } else if (reverseMap[higher] != null) {
+                            result += reverseMap[higher] + 'b';
+                        } else {
+                            result += ch + accidental;
+                        }
+                    }
+                } else if (ch === '(' || ch === ')' || ch === '，' || ch === '、' || /\d/.test(ch)) {
+                    result += ch;
+                } else {
+                    result += ch;
+                }
+                i++;
+            }
+            return result;
+        }
 
         // 和弦性质音程结构（半音）
         const chordIntervals = {
@@ -3785,6 +3937,16 @@
                     updateSummary();
                 });
             });
+
+            // Key selector (调式选择)
+            const keySelect = document.getElementById('keySelect');
+            if (keySelect) {
+                keySelect.addEventListener('change', function() {
+                    state.keyOffset = parseInt(this.value) || 0;
+                    renderLyrics();
+                    updateSummary();
+                });
+            }
 
             // Chord panel
             document.getElementById('panelClose').addEventListener('click', closeChordPanel);
@@ -5018,10 +5180,15 @@
         function formatChord(chord) {
             if (!chord || !chord.chord) return '';
 
+            const offset = state.keyOffset || 0;
+            const displayChord = transposeChordName(chord.chord, offset);
+
             if (state.displayMode === 'tab' && chord.left && chord.right) {
-                return `<span class="fc-chord">${chord.chord}</span><span class="fc-tab">${chord.left}(${chord.right})</span>`;
+                const displayLeft = transposeTabNumber(chord.left, offset);
+                const displayRight = transposeTabNumber(chord.right, offset);
+                return `<span class="fc-chord">${displayChord}</span><span class="fc-tab">${displayLeft}(${displayRight})</span>`;
             }
-            return `<span class="fc-chord">${chord.chord}</span>`;
+            return `<span class="fc-chord">${displayChord}</span>`;
         }
 
         // Open chord panel
@@ -5691,11 +5858,13 @@
             chordSummary.style.display = 'block';
 
             // Render statistics grid
+            const offset = state.keyOffset || 0;
             summaryGrid.innerHTML = chordStats.map(([chord, count]) => {
+                const displayChord = transposeChordName(chord, offset);
                 const pitches = parseChordToPitches(chord);
                 const piano = pitches ? renderMiniPiano(pitches.pitches) : '';
                 return `<div class="summary-item">
-                    <div class="summary-chord">${escapeHtml(chord)}</div>
+                    <div class="summary-chord">${escapeHtml(displayChord)}</div>
                     ${piano}
                     <div class="summary-count">出现 ${count} 次</div>
                 </div>`;
@@ -5795,12 +5964,14 @@
 
         // Render a progression loop row: [chord] → [chord] → ...
         function renderProgressionRow(chordSequence) {
+            const offset = state.keyOffset || 0;
             return chordSequence.map((chord, i) => {
+                const displayChord = transposeChordName(chord, offset);
                 const arrow = (i < chordSequence.length - 1)
                     ? `<span class="progression-arrow">→</span>`
                     : '';
                 return `<div class="progression-card">
-                    <div class="progression-chord">${escapeHtml(chord)}</div>
+                    <div class="progression-chord">${escapeHtml(displayChord)}</div>
                 </div>${arrow}`;
             }).join('');
         }
@@ -5812,7 +5983,8 @@
                 chordData: state.chordData,
                 currentChartId: state.currentChartId,
                 currentChartName: state.currentChartName,
-                favorites: state.favorites
+                favorites: state.favorites,
+                keyOffset: state.keyOffset
             }));
         }
 
@@ -5827,6 +5999,9 @@
                     state.currentChartId = data.currentChartId || null;
                     state.currentChartName = data.currentChartName || null;
                     state.favorites = data.favorites || {};
+                    state.keyOffset = data.keyOffset || 0;
+                    const keySelect = document.getElementById('keySelect');
+                    if (keySelect) keySelect.value = state.keyOffset;
                     updateSongInfo();
                     renderLyrics();
                     updateSummary();
