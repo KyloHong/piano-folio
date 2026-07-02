@@ -2730,6 +2730,20 @@
             margin-bottom: 12px;
         }
 
+        .library-card-meta {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
+        }
+
+        .library-card-author {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+        }
+
         .library-tags {
             display: flex;
             gap: 8px;
@@ -5419,16 +5433,20 @@
         }
 
         // Custom Confirm Dialog
-        function showConfirmDialog(title, message) {
+        function showConfirmDialog(title, message, hideCancel = false, confirmText = '确认') {
             return new Promise((resolve) => {
                 const modal = document.getElementById('confirmModal');
                 const titleEl = document.getElementById('confirmTitle');
                 const messageEl = document.getElementById('confirmMessage');
-                
+                const cancelBtn = document.getElementById('confirmCancel');
+                const okBtn = document.getElementById('confirmOk');
+
                 titleEl.textContent = title;
                 messageEl.textContent = message;
+                okBtn.textContent = confirmText;
+                cancelBtn.style.display = hideCancel ? 'none' : 'block';
                 confirmCallback = resolve;
-                
+
                 modal.classList.add('visible');
             });
         }
@@ -6855,7 +6873,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="library-card-artist">${escapeHtml(c.song_artist || '—')}</div>
+                            <div class="library-card-meta">${escapeHtml(c.song_artist || '—')}</div>
+                            <div class="library-card-author">@ ${escapeHtml(currentUser || '我')}</div>
                             <div class="library-tags">
                                 <span class="tag-pill">${formatDate(c.updated_at)}</span>
                             </div>
@@ -7096,8 +7115,9 @@
         async function saveAsChart(publicId) {
             try {
                 const chart = await apiRequest('/api/charts/public/' + publicId);
-                const name = prompt('请输入图谱名称：', chart.name + ' (副本)');
-                if (!name) return;
+                const confirmed = await showConfirmDialog('保存图谱', '是否将「' + chart.name + '」保存到我的图谱？', true, '保存到我的图谱');
+                if (!confirmed) return;
+                const name = chart.name + ' (副本)';
                 await apiRequest('/api/charts/my', {
                     method: 'POST',
                     body: JSON.stringify({
@@ -7107,9 +7127,9 @@
                         display_mode: chart.display_mode || 'name'
                     })
                 });
-                alert('已保存到我的图谱！');
+                showToast('已保存到我的图谱！');
                 switchPage('my');
-            } catch (e) { alert(e.message); }
+            } catch (e) { showToast(e.message); }
         }
 
         let viewerChartData = null;
