@@ -199,6 +199,64 @@
             border-color: var(--text-primary);
         }
 
+        /* Auto Scroll Control */
+        .auto-scroll-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .auto-scroll-btn {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .auto-scroll-btn:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+        }
+
+        .auto-scroll-btn.active {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
+        }
+
+        .auto-scroll-speed {
+            padding: 6px 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+            color: var(--text-primary);
+            font-size: 0.72rem;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            outline: none;
+        }
+
+        .auto-scroll-speed:hover {
+            border-color: var(--text-secondary);
+        }
+
+        .auto-scroll-speed:focus {
+            border-color: var(--text-primary);
+        }
+
         /* Mode Toggle */
         .mode-toggle {
             display: inline-flex;
@@ -3184,6 +3242,16 @@
                             <button class="mode-btn active" data-mode="name" aria-label="和弦名模式">和弦名模式</button>
                             <button class="mode-btn" data-mode="tab" aria-label="弹唱标记">弹唱标记</button>
                         </div>
+                        <!-- 自动翻谱控制 -->
+                        <div class="auto-scroll-control">
+                            <button class="auto-scroll-btn" id="autoScrollBtn" title="自动翻谱">&#9654;</button>
+                            <select class="auto-scroll-speed" id="autoScrollSpeed" title="翻谱速度">
+                                <option value="80">极慢</option>
+                                <option value="50">慢</option>
+                                <option value="30" selected>中等</option>
+                                <option value="16">快</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div id="lyricsContainer">
@@ -3481,6 +3549,42 @@
 
         let authToken = safeGet('authToken') || null;
         let currentUser = null;
+
+        // Auto scroll state (自动翻谱)
+        let autoScrollTimer = null;
+        let autoScrollActive = false;
+        let autoScrollSpeedVal = 30;
+
+        function startAutoScroll() {
+            if (autoScrollTimer) clearInterval(autoScrollTimer);
+            autoScrollActive = true;
+            const btn = document.getElementById('autoScrollBtn');
+            if (btn) {
+                btn.textContent = '\u23F8';
+                btn.classList.add('active');
+            }
+            autoScrollTimer = setInterval(() => {
+                const atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 2;
+                if (atBottom) {
+                    stopAutoScroll();
+                    return;
+                }
+                window.scrollBy(0, 1);
+            }, autoScrollSpeedVal);
+        }
+
+        function stopAutoScroll() {
+            if (autoScrollTimer) {
+                clearInterval(autoScrollTimer);
+                autoScrollTimer = null;
+            }
+            autoScrollActive = false;
+            const btn = document.getElementById('autoScrollBtn');
+            if (btn) {
+                btn.textContent = '\u25B6';
+                btn.classList.remove('active');
+            }
+        }
 
         // Chord Builder State
         const chordBuilderState = {
@@ -3976,6 +4080,41 @@
                     updateSummary();
                 });
             }
+
+            // Auto scroll (自动翻谱) - 事件绑定
+            const autoScrollBtn = document.getElementById('autoScrollBtn');
+            const autoScrollSpeedEl = document.getElementById('autoScrollSpeed');
+
+            if (autoScrollBtn) {
+                autoScrollBtn.addEventListener('click', () => {
+                    if (autoScrollActive) {
+                        stopAutoScroll();
+                    } else {
+                        startAutoScroll();
+                    }
+                });
+            }
+
+            if (autoScrollSpeedEl) {
+                autoScrollSpeedEl.addEventListener('change', function() {
+                    autoScrollSpeedVal = parseInt(this.value) || 30;
+                    if (autoScrollActive) {
+                        startAutoScroll(); // 重启以应用新速度
+                    }
+                });
+            }
+
+            // 用户手动滚动时暂停自动翻谱
+            let autoScrollLastY = window.scrollY;
+            window.addEventListener('scroll', () => {
+                if (!autoScrollActive) return;
+                const delta = Math.abs(window.scrollY - autoScrollLastY);
+                // 自动翻谱每次只滚动 1px，如果偏差过大说明是用户手动滚动
+                if (delta > 5) {
+                    stopAutoScroll();
+                }
+                autoScrollLastY = window.scrollY;
+            }, { passive: true });
 
             // Chord panel
             document.getElementById('panelClose').addEventListener('click', closeChordPanel);
@@ -6976,6 +7115,7 @@
 
         function exitChartView() {
             // 退出编辑器视图，返回来源页面
+            stopAutoScroll(); // 停止自动翻谱
             const backBtn = document.getElementById('backFromChartBtn');
             const searchSection = document.getElementById('homeSearchSection');
             const targetPage = state.lastSource || 'home';
