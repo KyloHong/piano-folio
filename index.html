@@ -3137,10 +3137,10 @@
                         <div class="auto-scroll-control">
                             <button class="auto-scroll-btn" id="autoScrollBtn" title="自动翻谱">&#9654;</button>
                             <select class="auto-scroll-speed" id="autoScrollSpeed" title="翻谱速度">
-                                <option value="80">极慢</option>
-                                <option value="50">慢</option>
-                                <option value="30" selected>中等</option>
-                                <option value="16">快</option>
+                                <option value="200">极慢</option>
+                                <option value="100">慢</option>
+                                <option value="50" selected>中等</option>
+                                <option value="25">快</option>
                             </select>
                         </div>
                         <!-- AI 智能和弦分析按钮 -->
@@ -3456,7 +3456,7 @@
         // Auto scroll state (自动翻谱)
         let autoScrollTimer = null;
         let autoScrollActive = false;
-        let autoScrollSpeedVal = 30;
+        let autoScrollSpeedVal = 50;
 
         function startAutoScroll() {
             if (autoScrollTimer) clearInterval(autoScrollTimer);
