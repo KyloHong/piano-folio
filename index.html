@@ -471,133 +471,49 @@
             position: relative;
         }
 
+        /* 黑白线框风格按钮 */
         .ai-chord-btn {
-            position: relative;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 0.88rem;
-            font-weight: 600;
+            gap: 8px;
+            padding: 7px 18px;
+            background: transparent;
+            border: 1px solid var(--text-primary);
+            border-radius: 2px;
+            color: var(--text-primary);
+            font-size: 0.72rem;
+            font-family: inherit;
+            font-weight: 500;
             cursor: pointer;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 
-                0 4px 15px rgba(102, 126, 234, 0.4),
-                0 0 30px rgba(102, 126, 234, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.15s ease;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
         }
 
         .ai-chord-btn:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 
-                0 6px 20px rgba(102, 126, 234, 0.5),
-                0 0 40px rgba(102, 126, 234, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            background: var(--text-primary);
+            color: #fff;
         }
 
         .ai-chord-btn:active {
-            transform: translateY(0) scale(0.98);
-        }
-
-        /* 发光效果 */
-        .ai-btn-glow {
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
-            animation: ai-pulse 2s ease-in-out infinite;
-            pointer-events: none;
-        }
-
-        @keyframes ai-pulse {
-            0%, 100% { opacity: 0.3; transform: scale(0.8); }
-            50% { opacity: 0.6; transform: scale(1.1); }
-        }
-
-        /* 按钮内容 */
-        .ai-btn-content {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            opacity: 0.85;
         }
 
         .ai-btn-icon {
-            width: 18px;
-            height: 18px;
-            animation: ai-icon-float 3s ease-in-out infinite;
-        }
-
-        @keyframes ai-icon-float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(-2px) rotate(5deg); }
-            75% { transform: translateY(2px) rotate(-5deg); }
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
         }
 
         .ai-btn-text {
             white-space: nowrap;
         }
 
-        /* 粒子效果 */
-        .ai-btn-particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .ai-btn-particles::before,
-        .ai-btn-particles::after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            animation: ai-particle 1.5s ease-in-out infinite;
-        }
-
-        .ai-btn-particles::before {
-            top: 20%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .ai-btn-particles::after {
-            top: 60%;
-            right: 15%;
-            animation-delay: 0.75s;
-        }
-
-        @keyframes ai-particle {
-            0% { opacity: 0; transform: scale(0) translateY(0); }
-            50% { opacity: 1; transform: scale(1) translateY(-10px); }
-            100% { opacity: 0; transform: scale(0) translateY(-20px); }
-        }
-
         /* Loading 状态 */
         .ai-chord-btn.loading {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            background-size: 200% 200%;
-            animation: ai-gradient-shift 1.5s ease infinite;
             pointer-events: none;
-        }
-
-        @keyframes ai-gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            opacity: 0.6;
         }
 
         .ai-chord-btn.loading .ai-btn-icon {
@@ -609,21 +525,12 @@
             to { transform: rotate(360deg); }
         }
 
-        .ai-chord-btn.loading .ai-btn-glow {
-            animation: ai-pulse-fast 0.5s ease-in-out infinite;
-        }
-
-        @keyframes ai-pulse-fast {
-            0%, 100% { opacity: 0.5; transform: scale(0.9); }
-            50% { opacity: 0.8; transform: scale(1.2); }
-        }
-
         /* 提示文字 */
         .ai-analyze-tip {
             text-align: center;
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             color: var(--text-dim);
-            margin-top: 6px;
+            margin-top: 4px;
             opacity: 0.8;
         }
 
@@ -3222,22 +3129,6 @@
                                 <option value="11">B</option>
                             </select>
                         </div>
-                        <!-- AI 智能和弦分析按钮 -->
-                        <div id="aiChordAnalyzer" class="ai-chord-analyzer" style="display:none;">
-                            <button class="ai-chord-btn" id="aiAnalyzeBtn">
-                                <span class="ai-btn-glow"></span>
-                                <span class="ai-btn-content">
-                                    <svg class="ai-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                                        <path d="M2 17l10 5 10-5"/>
-                                        <path d="M2 12l10 5 10-5"/>
-                                    </svg>
-                                    <span class="ai-btn-text" id="aiAnalyzeBtnText">AI 智能分析和弦</span>
-                                </span>
-                                <span class="ai-btn-particles"></span>
-                            </button>
-                            <p id="aiAnalyzeTip" class="ai-analyze-tip">由智谱 AI 自动分析</p>
-                        </div>
                         <div class="mode-toggle">
                             <button class="mode-btn active" data-mode="name" aria-label="和弦名模式">和弦名模式</button>
                             <button class="mode-btn" data-mode="tab" aria-label="弹唱标记">弹唱标记</button>
@@ -3251,6 +3142,18 @@
                                 <option value="30" selected>中等</option>
                                 <option value="16">快</option>
                             </select>
+                        </div>
+                        <!-- AI 智能和弦分析按钮 -->
+                        <div id="aiChordAnalyzer" class="ai-chord-analyzer" style="display:none;">
+                            <button class="ai-chord-btn" id="aiAnalyzeBtn">
+                                <svg class="ai-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                    <path d="M2 17l10 5 10-5"/>
+                                    <path d="M2 12l10 5 10-5"/>
+                                </svg>
+                                <span class="ai-btn-text" id="aiAnalyzeBtnText">AI 智能分析和弦</span>
+                            </button>
+                            <p id="aiAnalyzeTip" class="ai-analyze-tip">由智谱 AI 自动分析</p>
                         </div>
                     </div>
                 </div>
