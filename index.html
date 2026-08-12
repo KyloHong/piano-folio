@@ -2216,6 +2216,7 @@
         /* ============== Page Sections ============== */
         #pageHome { display: block; }
         #pageMy { display: none; }
+        #pageChords { display: none; }
 
         .confirm-modal {
             z-index: 3000;
@@ -3033,6 +3034,382 @@
         .save-label {
             letter-spacing: 0.3px;
         }
+
+        /* ===========================================
+           Chord Knowledge Base (子菜单 + 图文)
+           =========================================== */
+        #pageChords { display: none; }
+        #pageChords .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 120px; }
+
+        .chords-header { margin-bottom: 28px; }
+        .chords-title {
+            font-family: 'Playfair Display', 'Noto Serif SC', serif;
+            font-size: 2rem; font-weight: 700; margin-bottom: 6px;
+        }
+        .chords-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .chords-submenu {
+            display: flex; gap: 2px; margin-bottom: 28px;
+            border-bottom: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+        }
+        .chords-submenu .submenu-btn {
+            background: none; border: none; padding: 10px 18px;
+            font-family: inherit; font-size: 0.82rem; color: var(--text-secondary);
+            cursor: pointer; border-bottom: 2px solid transparent;
+            margin-bottom: -1px; transition: all 0.15s; letter-spacing: 0.3px;
+        }
+        .chords-submenu .submenu-btn:hover { color: var(--text-primary); }
+        .chords-submenu .submenu-btn.active {
+            color: var(--text-primary); font-weight: 600;
+            border-bottom-color: var(--text-primary);
+        }
+
+        .chords-tab-panel {
+            display: none; animation: fadeIn 0.25s ease;
+        }
+        .chords-tab-panel.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chords-search-bar {
+            display: flex; gap: 12px; margin-bottom: 24px; align-items: center; flex-wrap: wrap;
+        }
+        .chords-search-bar .search-input {
+            flex: 1; min-width: 200px; padding: 9px 16px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px; background: var(--bg-card);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem; color: var(--text-primary);
+            outline: none; transition: border-color 0.15s;
+        }
+        .chords-search-bar .search-input:focus { border-color: var(--text-primary); }
+        .chords-search-bar .search-input::placeholder { color: var(--text-dim); }
+
+        .chords-filters {
+            display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 36px;
+        }
+        .chords-filters .filter-btn {
+            padding: 5px 14px; border: 1px solid var(--border-subtle);
+            border-radius: 2px; background: transparent;
+            font-family: inherit; font-size: 0.75rem; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.15s; letter-spacing: 0.3px;
+        }
+        .chords-filters .filter-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+        .chords-filters .filter-btn.active {
+            background: var(--text-primary); color: #fff; border-color: var(--text-primary);
+        }
+
+        .chords-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 20px;
+        }
+        .chord-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 4px; padding: 20px; transition: box-shadow 0.2s;
+        }
+        .chord-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .chord-card-header {
+            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;
+        }
+        .chord-name {
+            font-family: 'Playfair Display', 'Noto Serif SC', serif;
+            font-size: 1.5rem; font-weight: 700; line-height: 1.2;
+        }
+        .chord-type-label {
+            font-size: 0.68rem; color: var(--text-dim);
+            text-transform: uppercase; letter-spacing: 0.8px;
+            padding: 2px 8px; border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+        }
+        .chord-notes {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem; color: var(--text-primary); margin-bottom: 6px;
+        }
+        .chord-notes-label {
+            font-size: 0.7rem; color: var(--text-dim); margin-right: 6px;
+        }
+        .chord-numbers {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;
+        }
+        .chord-intervals-text {
+            font-size: 0.72rem; color: var(--text-dim); margin-bottom: 14px;
+        }
+
+        /* 钢琴键位图 2 八度 */
+        .piano-keys {
+            position: relative; height: 120px; margin: 16px 0 12px; user-select: none;
+            border-radius: 12px; background: #1a1a1a; padding: 10px 10px 8px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .piano-keys-inner {
+            position: relative; width: 100%; height: 100%;
+            border-radius: 6px; overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .pwk {
+            position: absolute; top: 0; bottom: 0;
+            background: #f7f3ea; border-right: 1px solid #c4bfb3;
+            display: flex; align-items: flex-end; justify-content: center;
+            padding-bottom: 9px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem; color: #9e9789; cursor: pointer;
+            transition: all 0.1s ease; border-radius: 0 0 4px 4px;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+        .pwk:last-child { border-right: none; }
+        .pwk:hover { background: #eee8da; }
+        .pwk.active {
+            background: linear-gradient(180deg, #ffe8cc 0%, #ffc078 40%, #ff922b 100%);
+            color: #5a3a00;
+            box-shadow: inset 0 -2px 0 rgba(180,90,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5),
+                        0 0 0 1px rgba(225,130,30,0.4);
+        }
+        .pwk.active::after {
+            content: ''; position: absolute; top: 6px; left: 50%;
+            transform: translateX(-50%);
+            width: 9px; height: 9px; border-radius: 50%;
+            background: #e67e22; box-shadow: 0 0 6px rgba(230,126,34,0.7);
+        }
+        .pwk.bass-note.active {
+            background: linear-gradient(180deg, #d4eccf 0%, #9dd7a8 40%, #67b87c 100%);
+            color: #1a3a20;
+            box-shadow: inset 0 -2px 0 rgba(50,120,60,0.35), inset 0 1px 0 rgba(255,255,255,0.5),
+                        0 0 0 1px rgba(80,160,100,0.5);
+        }
+        .pwk.bass-note.active::after {
+            background: #2e8a4a; box-shadow: 0 0 8px rgba(46,138,74,0.7);
+        }
+        .pbk {
+            position: absolute; top: 0; height: 60%;
+            background: linear-gradient(180deg, #3d3d3d 0%, #1a1a1a 45%, #0d0d0d 100%);
+            border-radius: 0 0 4px 4px; z-index: 10; cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.5),
+                        0 1px 0 rgba(255,255,255,0.08) inset,
+                        0 -3px 2px rgba(255,255,255,0.04) inset,
+                        -1px 0 0 rgba(255,255,255,0.04) inset,
+                        1px 0 0 rgba(0,0,0,0.3) inset;
+        }
+        .pbk:hover { background: linear-gradient(180deg, #4e4e4e 0%, #2a2a2a 45%, #181818 100%); }
+        .pbk.active {
+            background: linear-gradient(180deg, #ffdca8 0%, #ffae58 35%, #f48c1c 100%);
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.35), 0 0 0 1px rgba(230,126,34,0.6),
+                        inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        .pbk.bass-note.active {
+            background: linear-gradient(180deg, #c6e6c2 0%, #8ec99a 35%, #57a96e 100%);
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(60,140,80,0.6),
+                        inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .chord-inversions {
+            display: flex; gap: 4px; margin-top: 10px;
+            border-top: 1px solid var(--border-subtle); padding-top: 12px;
+        }
+        .inv-btn {
+            flex: 1; padding: 5px 8px;
+            border: 1px solid var(--border-subtle); border-radius: 2px;
+            background: transparent;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.15s;
+        }
+        .inv-btn:hover { border-color: var(--text-primary); }
+        .inv-btn.active {
+            background: var(--text-primary); color: #fff; border-color: var(--text-primary);
+        }
+        .chord-tab-display {
+            display: flex; gap: 16px; margin-top: 8px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+        }
+        .tab-hand { display: flex; align-items: center; gap: 4px; }
+        .tab-hand-label { color: var(--text-dim); font-size: 0.68rem; }
+        .tab-hand-val { color: var(--text-primary); font-weight: 500; }
+
+        .play-btn-sm {
+            width: 28px; height: 28px;
+            border: 1px solid var(--border-subtle); border-radius: 50%;
+            background: transparent;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+        }
+        .play-btn-sm:hover { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+        .play-btn-sm svg { width: 12px; height: 12px; }
+
+        .empty-state {
+            grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-dim);
+        }
+        .empty-state-icon { font-size: 2rem; margin-bottom: 12px; }
+
+        /* ===== 知识面板通用样式 ===== */
+        .knowledge-hero {
+            background: linear-gradient(135deg, #111 0%, #2a2a2a 100%);
+            color: #fff; border-radius: 6px; padding: 40px 36px; margin-bottom: 36px;
+        }
+        .knowledge-hero h2 {
+            font-family: 'Playfair Display', 'Noto Serif SC', serif;
+            font-size: 1.8rem; font-weight: 700; margin-bottom: 10px;
+        }
+        .knowledge-hero p { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.8; }
+
+        .k-section {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 4px; padding: 28px 28px; margin-bottom: 20px;
+        }
+        .k-section h3 {
+            font-family: 'Playfair Display', 'Noto Serif SC', serif;
+            font-size: 1.25rem; font-weight: 700; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .k-section h3 .sec-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem; background: var(--text-primary); color: #fff;
+            padding: 3px 8px; border-radius: 2px; font-weight: 500;
+        }
+        .k-section p {
+            font-size: 0.88rem; color: var(--text-secondary);
+            line-height: 1.85; margin-bottom: 12px;
+        }
+        .k-section p:last-child { margin-bottom: 0; }
+
+        .k-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px; align-items: start;
+        }
+        .k-col-text h4 {
+            font-size: 0.95rem; font-weight: 600;
+            margin-bottom: 10px; color: var(--text-primary);
+        }
+        .k-col-visual {
+            background: var(--bg-secondary);
+            border-radius: 4px; padding: 20px; min-height: 160px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .mini-note-row {
+            display: flex; gap: 4px; margin: 10px 0; flex-wrap: wrap;
+        }
+        .mini-note {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem; padding: 4px 9px; border-radius: 2px;
+            border: 1px solid var(--border-subtle); background: var(--bg-card);
+        }
+        .mini-note.hl {
+            background: #ffe8cc; border-color: #ff922b;
+            color: #5a3a00; font-weight: 500;
+        }
+        .mini-note.root {
+            background: #d4eccf; border-color: #2e8a4a;
+            color: #1a3a20; font-weight: 600;
+        }
+
+        .interval-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .interval-table th, .interval-table td {
+            padding: 10px 14px; text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .interval-table th {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.6px;
+            color: var(--text-dim); font-weight: 600; background: var(--bg-secondary);
+        }
+        .interval-table td {
+            font-family: 'JetBrains Mono', monospace; color: var(--text-primary);
+        }
+        .interval-table tr:last-child td { border-bottom: none; }
+        .interval-table .num-col {
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center; color: var(--text-secondary);
+        }
+
+        .chord-build-diagram { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+        .cbd-row {
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+        }
+        .cbd-label { width: 70px; color: var(--text-dim); font-size: 0.7rem; }
+        .cbd-bar {
+            flex: 1; height: 24px; display: flex;
+            position: relative; border-radius: 3px; overflow: hidden;
+        }
+        .cbd-cell {
+            flex: 1; border-right: 1px solid rgba(0,0,0,0.05);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.62rem; color: var(--text-dim); background: #f5f3ee;
+        }
+        .cbd-cell.filled {
+            background: linear-gradient(180deg, #ffe8cc 0%, #ffb86b 100%);
+            color: #5a3a00; font-weight: 600;
+        }
+        .cbd-cell.root {
+            background: linear-gradient(180deg, #d4eccf 0%, #67b87c 100%);
+            color: #1a3a20;
+        }
+
+        .inv-diagram { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+        .inv-step { display: flex; align-items: center; gap: 16px; }
+        .inv-step-label { font-size: 0.75rem; font-weight: 600; width: 56px; flex-shrink: 0; }
+        .inv-step-notes { display: flex; gap: 6px; flex-wrap: wrap; }
+        .inv-note {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem; padding: 5px 10px; border-radius: 3px;
+            border: 1px solid var(--border-subtle); background: #fff;
+        }
+        .inv-note.moved {
+            background: #fff1e0; border-color: #ffc078; color: #a05a00;
+        }
+        .inv-note.bass {
+            background: #e3f2e1; border-color: #67b87c;
+            color: #1a3a20; font-weight: 600;
+        }
+
+        .tip-box {
+            background: #fff8e6; border-left: 3px solid #ffc078;
+            padding: 14px 18px; border-radius: 0 3px 3px 0; margin: 16px 0;
+        }
+        .tip-box .tip-title {
+            font-size: 0.75rem; font-weight: 600; color: #a05a00;
+            margin-bottom: 4px; letter-spacing: 0.5px;
+        }
+        .tip-box p { font-size: 0.82rem; color: #7a5020; margin: 0; }
+
+        .kp-demo {
+            width: 100%; height: 90px; position: relative;
+            border-radius: 8px; background: #1a1a1a; padding: 8px 8px 6px;
+        }
+        .kp-inner { position: relative; width: 100%; height: 100%; border-radius: 4px; overflow: hidden; }
+        .kp-wk {
+            position: absolute; top: 0; bottom: 0; background: #f7f3ea;
+            border-right: 1px solid #c4bfb3;
+            display: flex; align-items: flex-end; justify-content: center;
+            padding-bottom: 6px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: #9e9789;
+            border-radius: 0 0 3px 3px;
+        }
+        .kp-wk.hl { background: linear-gradient(180deg, #ffe8cc, #ff922b); color: #5a3a00; }
+        .kp-wk.root { background: linear-gradient(180deg, #d4eccf, #67b87c); color: #1a3a20; }
+        .kp-bk {
+            position: absolute; top: 0; height: 60%;
+            background: linear-gradient(180deg, #3d3d3d, #0d0d0d);
+            border-radius: 0 0 3px 3px; z-index: 10;
+        }
+        .kp-bk.hl { background: linear-gradient(180deg, #ffdca8, #f48c1c); }
+
+        @media (max-width: 640px) {
+            .k-two-col { grid-template-columns: 1fr; }
+            .knowledge-hero { padding: 28px 22px; }
+            .k-section { padding: 22px 18px; }
+            .chords-submenu .submenu-btn { padding: 8px 12px; font-size: 0.78rem; }
+            #pageChords .container { padding: 20px 14px 100px; }
+            .chords-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -3042,7 +3419,7 @@
         <div class="nav-links">
             <button class="nav-btn active" data-page="home" id="navHome">首页</button>
             <button class="nav-btn" data-page="my" id="navMy">我的图谱</button>
-            <button class="nav-btn" onclick="location.href='chords-preview.html'">和弦知识</button>
+            <button class="nav-btn" data-page="chords" id="navChords">和弦知识</button>
         </div>
         <div class="nav-auth" id="navAuth">
             <button class="nav-auth-btn" id="navLoginBtn">登录</button>
@@ -3085,6 +3462,671 @@
                 </div>
             </header>
             <div id="myChartList" class="chart-grid chart-grid-2"></div>
+        </div>
+    </div>
+
+    <!-- 和弦知识 -->
+    <div id="pageChords" class="page-section">
+        <div class="container">
+            <header class="chords-header">
+                <h1 class="chords-title">Chord Library</h1>
+                <p class="chords-subtitle">120 个和弦 · 点击钢琴键试听音效 · 切换转位查看左右手标记</p>
+            </header>
+
+            <nav class="chords-submenu" id="chordsSubmenu">
+                <button class="submenu-btn active" data-tab="chart">和弦图</button>
+                <button class="submenu-btn" data-tab="basic">乐理基础</button>
+                <button class="submenu-btn" data-tab="structure">和弦构成</button>
+                <button class="submenu-btn" data-tab="inversion">转位原理</button>
+                <button class="submenu-btn" data-tab="slash">斜杠和弦</button>
+                <button class="submenu-btn" data-tab="strum">分解弹法</button>
+                <button class="submenu-btn" data-tab="interval">音程表</button>
+            </nav>
+
+            <!-- TAB 1: 和弦图 -->
+            <div class="chords-tab-panel active" id="chordTab-chart">
+                <div class="chords-search-bar">
+                    <input type="text" class="search-input" id="chordSearchInput" placeholder="搜索和弦，如 Cmaj7、Dm、sus4..." autocomplete="off">
+                </div>
+                <div class="chords-filters" id="chordFilterBar">
+                    <button class="filter-btn active" data-cat="all">全部</button>
+                    <button class="filter-btn" data-cat="major">大三和弦</button>
+                    <button class="filter-btn" data-cat="minor">小三和弦</button>
+                    <button class="filter-btn" data-cat="7">七和弦</button>
+                    <button class="filter-btn" data-cat="sus">挂留和弦</button>
+                    <button class="filter-btn" data-cat="dim">减增和弦</button>
+                </div>
+                <div class="chords-grid" id="chordsGrid"></div>
+            </div>
+
+            <!-- TAB 2: 乐理基础 -->
+            <div class="chords-tab-panel" id="chordTab-basic">
+                <div class="knowledge-hero">
+                    <h2>Music Theory Fundamentals</h2>
+                    <p>从认识音名、音级到理解音阶结构，建立学习和弦的乐理基础。系统掌握十二平均律、音程关系与大调小调的核心逻辑。</p>
+                </div>
+                <section class="k-section">
+                    <h3><span class="sec-num">01</span>音名与十二平均律</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>什么是音名？</h4>
+                            <p>西方音乐使用 <strong>C D E F G A B</strong> 七个字母命名基本音级，对应简谱的 1 2 3 4 5 6 7。在它们之间还存在 5 个升降音（黑键），总共 12 个音构成一个八度。</p>
+                            <p>相邻两个音（如 C→C#、E→F）之间的距离称为<strong>半音</strong>，两个半音等于一个<strong>全音</strong>。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;">
+                                <div class="mini-note-row" style="justify-content:center;">
+                                    <span class="mini-note root">C</span><span class="mini-note hl">C#</span><span class="mini-note">D</span><span class="mini-note hl">D#</span><span class="mini-note">E</span><span class="mini-note">F</span><span class="mini-note hl">F#</span><span class="mini-note">G</span><span class="mini-note hl">G#</span><span class="mini-note">A</span><span class="mini-note hl">A#</span><span class="mini-note">B</span>
+                                </div>
+                                <div style="margin-top:18px;"><div class="kp-demo" id="kpBasic"></div></div>
+                                <p style="text-align:center;margin-top:10px;font-size:0.72rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;">一个八度 = 12 个半音</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="k-section">
+                    <h3><span class="sec-num">02</span>音级与简谱数字</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>大调的音级关系</h4>
+                            <p>以 C 大调为例，各音级之间的距离遵循<strong>"全全半全全全半"</strong>的固定模式。3 到 4、7 到 1 之间是半音，其余相邻音级之间是全音。无论移到哪个调，这个相对关系<strong>保持不变</strong>。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;font-family:'JetBrains Mono',monospace;font-size:0.75rem;">
+                                <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;text-align:center;">
+                                    <div style="padding:6px 2px;background:#f5f3ee;border-radius:3px 0 0 3px;">音名</div>
+                                    <div style="padding:6px 2px;background:#d4eccf;">C</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;">D</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;">E</div>
+                                    <div style="padding:6px 2px;background:#d4eccf;">F</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;">G</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;">A</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;border-radius:0 3px 3px 0;">B</div>
+                                </div>
+                                <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;text-align:center;margin-top:3px;">
+                                    <div style="padding:6px 2px;background:#f5f3ee;border-radius:3px 0 0 3px;">简谱</div>
+                                    <div style="padding:6px 2px;background:#d4eccf;">1</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;">2</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;">3</div>
+                                    <div style="padding:6px 2px;background:#d4eccf;">4</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;">5</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;">6</div>
+                                    <div style="padding:6px 2px;background:#ffe8cc;border-radius:0 3px 3px 0;">7</div>
+                                </div>
+                                <div style="margin-top:12px;padding:12px;background:var(--bg-secondary);border-radius:4px;font-size:0.7rem;color:var(--text-secondary);line-height:1.7;">
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>C → D</span><span style="color:var(--text-primary);">全音 (2半音)</span></div>
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>D → E</span><span style="color:var(--text-primary);">全音 (2半音)</span></div>
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>E → F</span><span style="color:#2e8a4a;font-weight:600;">半音 ★</span></div>
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>F → G</span><span style="color:var(--text-primary);">全音 (2半音)</span></div>
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>G → A</span><span style="color:var(--text-primary);">全音 (2半音)</span></div>
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>A → B</span><span style="color:var(--text-primary);">全音 (2半音)</span></div>
+                                    <div style="display:flex;justify-content:space-between;"><span>B → C'</span><span style="color:#2e8a4a;font-weight:600;">半音 ★</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="k-section">
+                    <h3><span class="sec-num">03</span>大调与小调</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>两种基础调性色彩</h4>
+                            <p><strong>大调 (Major)</strong>：明亮、开阔、愉悦。主和弦为大三和弦。</p>
+                            <p><strong>小调 (Minor)</strong>：柔和、忧郁、深沉。主和弦为小三和弦。</p>
+                            <p>小调的三级音比大调<strong>低半音</strong>，这是两者最核心的听觉差异。自然小调的音级关系为："全半全全半全全"。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;font-family:'JetBrains Mono',monospace;">
+                                <div style="background:var(--bg-secondary);padding:14px;border-radius:4px;margin-bottom:10px;">
+                                    <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:6px;">C 大调 (C Major)</div>
+                                    <div style="font-size:0.95rem;letter-spacing:2px;font-weight:600;">C — D — E — F — G — A — B</div>
+                                    <div style="font-size:0.78rem;color:#ff922b;margin-top:4px;">☼ 明亮开朗</div>
+                                </div>
+                                <div style="background:var(--bg-secondary);padding:14px;border-radius:4px;">
+                                    <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:6px;">A 小调 (A Minor, C大调关系小调)</div>
+                                    <div style="font-size:0.95rem;letter-spacing:2px;font-weight:600;">A — B — C — D — E — F — G</div>
+                                    <div style="font-size:0.78rem;color:#67b87c;margin-top:4px;">☾ 柔和深沉</div>
+                                </div>
+                                <div class="tip-box" style="margin-top:12px;">
+                                    <div class="tip-title">KEY POINT</div>
+                                    <p>关系大小调共用相同的调号（升降号），但主音不同。C大调的关系小调是A小调。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 3: 和弦构成 -->
+            <div class="chords-tab-panel" id="chordTab-structure">
+                <div class="knowledge-hero">
+                    <h2>Chord Structure</h2>
+                    <p>和弦是三个或以上不同音高按一定音程关系叠置而成的组合。掌握和弦构成原理，就能从「背和弦」进阶到「推和弦」。</p>
+                </div>
+                <section class="k-section">
+                    <h3><span class="sec-num">01</span>三和弦的基本构成</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>根音 + 三度 + 五度</h4>
+                            <p>最基础的和弦是<strong>三和弦</strong>，由三个音组成：<strong>根音 (Root)</strong>、<strong>三音 (3rd)</strong>、<strong>五音 (5th)</strong>。三音决定和弦是大还是小，五音提供稳定性。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;">
+                                <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:0.8rem;margin-bottom:12px;color:var(--text-secondary);">C 大三和弦构成示意</div>
+                                <div class="chord-build-diagram">
+                                    <div class="cbd-row"><span class="cbd-label">简谱</span><div class="cbd-bar"><div class="cbd-cell root">1</div><div class="cbd-cell"></div><div class="cbd-cell filled">3</div><div class="cbd-cell"></div><div class="cbd-cell filled">5</div><div class="cbd-cell"></div><div class="cbd-cell"></div></div></div>
+                                    <div class="cbd-row"><span class="cbd-label">音名</span><div class="cbd-bar"><div class="cbd-cell root">C</div><div class="cbd-cell"></div><div class="cbd-cell filled">E</div><div class="cbd-cell"></div><div class="cbd-cell filled">G</div><div class="cbd-cell"></div><div class="cbd-cell"></div></div></div>
+                                    <div class="cbd-row"><span class="cbd-label">半音距</span><div class="cbd-bar"><div class="cbd-cell root">0</div><div class="cbd-cell">1</div><div class="cbd-cell filled">+4</div><div class="cbd-cell"></div><div class="cbd-cell filled">+7</div><div class="cbd-cell"></div><div class="cbd-cell"></div></div></div>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+                                    <div style="background:#fff8e6;padding:10px;border-radius:3px;font-size:0.72rem;">
+                                        <div style="font-weight:600;color:#a05a00;margin-bottom:2px;">根音 → 三音</div>
+                                        <div style="font-family:'JetBrains Mono',monospace;color:#7a5020;">C → E = 4半音 = 大三度</div>
+                                    </div>
+                                    <div style="background:#fff8e6;padding:10px;border-radius:3px;font-size:0.72rem;">
+                                        <div style="font-weight:600;color:#a05a00;margin-bottom:2px;">三音 → 五音</div>
+                                        <div style="font-family:'JetBrains Mono',monospace;color:#7a5020;">E → G = 3半音 = 小三度</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tip-box">
+                        <div class="tip-title">记忆口诀</div>
+                        <p><strong>大三和弦</strong> = 大三度 + 小三度（下大上小）。<strong>小三和弦</strong> = 小三度 + 大三度（下小上大）。区别就在三音，降半音就变小。</p>
+                    </div>
+                </section>
+                <section class="k-section">
+                    <h3><span class="sec-num">02</span>四种基础三和弦对比</h3>
+                    <div class="chord-build-diagram" style="gap:16px;">
+                        <div>
+                            <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px;color:var(--text-primary);">大三和弦 (Major) · C</div>
+                            <div class="cbd-row"><span class="cbd-label">简谱</span><div class="cbd-bar"><div class="cbd-cell root">1</div><div class="cbd-cell"></div><div class="cbd-cell filled">3</div><div class="cbd-cell"></div><div class="cbd-cell filled">5</div><div class="cbd-cell"></div><div class="cbd-cell"></div></div></div>
+                            <div class="cbd-row"><span class="cbd-label">音程</span><div style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text-secondary);">根音 + 大三度(4) + 纯五度(7)</div></div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px;color:var(--text-primary);">小三和弦 (Minor) · Cm</div>
+                            <div class="cbd-row"><span class="cbd-label">简谱</span><div class="cbd-bar"><div class="cbd-cell root">1</div><div class="cbd-cell filled">b3</div><div class="cbd-cell"></div><div class="cbd-cell"></div><div class="cbd-cell filled">5</div><div class="cbd-cell"></div><div class="cbd-cell"></div></div></div>
+                            <div class="cbd-row"><span class="cbd-label">音程</span><div style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text-secondary);">根音 + 小三度(3) + 纯五度(7)</div></div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px;color:var(--text-primary);">减三和弦 (Diminished) · Cdim</div>
+                            <div class="cbd-row"><span class="cbd-label">简谱</span><div class="cbd-bar"><div class="cbd-cell root">1</div><div class="cbd-cell filled">b3</div><div class="cbd-cell"></div><div class="cbd-cell filled">b5</div><div class="cbd-cell"></div><div class="cbd-cell"></div><div class="cbd-cell"></div></div></div>
+                            <div class="cbd-row"><span class="cbd-label">音程</span><div style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text-secondary);">根音 + 小三度(3) + 减五度(6)</div></div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px;color:var(--text-primary);">增三和弦 (Augmented) · Caug</div>
+                            <div class="cbd-row"><span class="cbd-label">简谱</span><div class="cbd-bar"><div class="cbd-cell root">1</div><div class="cbd-cell"></div><div class="cbd-cell filled">3</div><div class="cbd-cell"></div><div class="cbd-cell"></div><div class="cbd-cell filled">#5</div><div class="cbd-cell"></div></div></div>
+                            <div class="cbd-row"><span class="cbd-label">音程</span><div style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text-secondary);">根音 + 大三度(4) + 增五度(8)</div></div>
+                        </div>
+                    </div>
+                </section>
+                <section class="k-section">
+                    <h3><span class="sec-num">03</span>七和弦：再加一个三度</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>在三和弦上叠置第七音</h4>
+                            <p>七和弦由 <strong>四个音</strong> 组成：根音、三音、五音、<strong>七音</strong>。根据七音的性质形成不同类型：<strong>大七(maj7)</strong>、<strong>属七(7)</strong>、<strong>小七(m7)</strong>。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;font-family:'JetBrains Mono',monospace;">
+                                <table style="width:100%;border-collapse:collapse;font-size:0.72rem;">
+                                    <thead><tr style="background:var(--bg-secondary);"><th style="padding:8px;text-align:left;font-weight:600;color:var(--text-dim);font-size:0.68rem;">和弦</th><th style="padding:8px;text-align:center;font-weight:600;color:var(--text-dim);font-size:0.68rem;">构成音</th><th style="padding:8px;text-align:center;font-weight:600;color:var(--text-dim);font-size:0.68rem;">七音距</th></tr></thead>
+                                    <tbody>
+                                        <tr style="border-bottom:1px solid var(--border-subtle);"><td style="padding:8px;font-weight:600;">Cmaj7</td><td style="padding:8px;text-align:center;">C E G <span style="color:#ff922b;font-weight:600;">B</span></td><td style="padding:8px;text-align:center;color:#2e8a4a;">+11 大七度</td></tr>
+                                        <tr style="border-bottom:1px solid var(--border-subtle);"><td style="padding:8px;font-weight:600;">C7</td><td style="padding:8px;text-align:center;">C E G <span style="color:#ff922b;font-weight:600;">Bb</span></td><td style="padding:8px;text-align:center;color:#ff922b;">+10 小七度</td></tr>
+                                        <tr style="border-bottom:1px solid var(--border-subtle);"><td style="padding:8px;font-weight:600;">Cm7</td><td style="padding:8px;text-align:center;">C Eb G <span style="color:#ff922b;font-weight:600;">Bb</span></td><td style="padding:8px;text-align:center;color:#ff922b;">+10 小七度</td></tr>
+                                        <tr><td style="padding:8px;font-weight:600;">Cdim7</td><td style="padding:8px;text-align:center;">C Eb Gb <span style="color:#ff922b;font-weight:600;">Bbb(A)</span></td><td style="padding:8px;text-align:center;color:#7a5020;">+9 减七度</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 4: 转位原理 -->
+            <div class="chords-tab-panel" id="chordTab-inversion">
+                <div class="knowledge-hero">
+                    <h2>Chord Inversions</h2>
+                    <p>转位是和弦演奏的核心技巧。通过改变低音的位置，让和声连接更流畅，左右手分配更合理。理解转位，才能真正弹好钢琴伴奏。</p>
+                </div>
+                <section class="k-section">
+                    <h3><span class="sec-num">01</span>什么是转位？</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>换一个音做低音</h4>
+                            <p><strong>原位和弦</strong>：根音在最低音位置。</p>
+                            <p><strong>转位和弦</strong>：三音或五音作为最低音。和弦的<strong>构成音不变</strong>，只是<strong>排列顺序和高低位置</strong>改变了。</p>
+                            <p>• <strong>第一转位（六和弦）</strong>：三音在最低音</p>
+                            <p>• <strong>第二转位（四六和弦）</strong>：五音在最低音</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;">
+                                <div style="text-align:center;font-size:0.8rem;margin-bottom:12px;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">C 和弦的三种形态</div>
+                                <div class="inv-diagram">
+                                    <div class="inv-step"><span class="inv-step-label">原位</span><div class="inv-step-notes"><span class="inv-note bass">C (1, 低音)</span><span class="inv-note">E (3)</span><span class="inv-note">G (5)</span></div></div>
+                                    <div class="inv-step"><span class="inv-step-label">第一转位</span><div class="inv-step-notes"><span class="inv-note bass">E (3, 低音)</span><span class="inv-note">G (5)</span><span class="inv-note moved">C (1, 升高八度→C5)</span></div></div>
+                                    <div class="inv-step"><span class="inv-step-label">第二转位</span><div class="inv-step-notes"><span class="inv-note bass">G (5, 低音)</span><span class="inv-note moved">C (1, 升高八度→C5)</span><span class="inv-note moved">E (3, 升高八度→E5)</span></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tip-box">
+                        <div class="tip-title">为什么需要转位？</div>
+                        <p>① <strong>保持低音平稳</strong>：避免频繁大跳，让连接更流畅。② <strong>适应手型</strong>：转位后的音排列更集中，手指更舒适。③ <strong>声部平衡</strong>：控制高低音区的分布。</p>
+                    </div>
+                </section>
+                <section class="k-section">
+                    <h3><span class="sec-num">02</span>转位在键盘上的变化</h3>
+                    <p>以 C 大三和弦为例，观察转位时各音在键盘上的位置移动。<strong style="color:#2e8a4a;">绿色</strong>表示当前低音，<strong style="color:#ff922b;">橙色</strong>表示其他和弦音。</p>
+                    <div style="display:grid;gap:20px;margin-top:18px;">
+                        <div>
+                            <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;"><span>原位：C — E — G （低音 C）</span><span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-dim);">1 3 5</span></div>
+                            <div class="kp-demo" id="kpInv0"></div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;"><span>第一转位：E — G — C5 （低音 E，C 升高八度）</span><span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-dim);">3 5 1</span></div>
+                            <div class="kp-demo" id="kpInv1"></div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;"><span>第二转位：G — C5 — E5 （低音 G，C、E 均升高八度）</span><span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-dim);">5 1 3</span></div>
+                            <div class="kp-demo" id="kpInv2"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 5: 斜杠和弦 C/B G/B -->
+            <div class="chords-tab-panel" id="chordTab-slash">
+                <div class="knowledge-hero">
+                    <h2>Slash Chords · 斜杠和弦</h2>
+                    <p>C/B、G/B 这种写法叫"斜杠和弦"（Slash Chord），格式是 <strong>和弦 / 低音</strong>。左边是弹什么和弦，右边指定<strong>左手最低音</strong>是什么。常用于低音旋律化、转位标记和连接过渡。</p>
+                </div>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">01</span>斜杠和弦怎么读？</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>格式：<code style="background:#fff1e0;padding:2px 6px;border-radius:3px;">和弦 / 低音</code></h4>
+                            <p><strong>C / B</strong> 读作 "C over B" 或 "C on B"，意思是：<span style="color:var(--text-primary);font-weight:600;">右手弹 C 和弦（C E G）</span>，<span style="color:#2e8a4a;font-weight:600;">左手低音弹 B</span>。</p>
+                            <p><strong>G / B</strong> 读作 "G over B"：右手弹 G 和弦（G B D），左手低音弹 B。</p>
+                            <p>斜线<strong>左边</strong>永远是和弦本体，<strong>右边</strong>是左手单独指定的低音。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;font-family:'JetBrains Mono',monospace;">
+                                <div style="background:var(--bg-secondary);padding:16px;border-radius:4px;margin-bottom:12px;">
+                                    <div style="font-size:1.4rem;font-weight:700;text-align:center;">C / B</div>
+                                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:0.75rem;">
+                                        <div style="background:#fff;border:1px solid var(--border-subtle);border-radius:3px;padding:10px;text-align:center;">
+                                            <div style="color:var(--text-dim);font-size:0.65rem;letter-spacing:0.5px;margin-bottom:6px;">右手 (和弦)</div>
+                                            <div style="font-weight:600;color:var(--text-primary);">C + E + G</div>
+                                        </div>
+                                        <div style="background:#e3f2e1;border:1px solid #67b87c;border-radius:3px;padding:10px;text-align:center;">
+                                            <div style="color:#2e8a4a;font-size:0.65rem;letter-spacing:0.5px;margin-bottom:6px;">左手 (低音)</div>
+                                            <div style="font-weight:700;color:#1a3a20;font-size:1.1rem;">B</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="background:var(--bg-secondary);padding:16px;border-radius:4px;">
+                                    <div style="font-size:1.4rem;font-weight:700;text-align:center;">G / B</div>
+                                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:0.75rem;">
+                                        <div style="background:#fff;border:1px solid var(--border-subtle);border-radius:3px;padding:10px;text-align:center;">
+                                            <div style="color:var(--text-dim);font-size:0.65px;margin-bottom:6px;">右手 (和弦)</div>
+                                            <div style="font-weight:600;color:var(--text-primary);">G + B + D</div>
+                                        </div>
+                                        <div style="background:#e3f2e1;border:1px solid #67b87c;border-radius:3px;padding:10px;text-align:center;">
+                                            <div style="color:#2e8a4a;font-size:0.65rem;letter-spacing:0.5px;margin-bottom:6px;">左手 (低音)</div>
+                                            <div style="font-weight:700;color:#1a3a20;font-size:1.1rem;">B</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">02</span>两种常见用法</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>用法 A：记写"转位和弦"</h4>
+                            <p>当低音=某个和弦音时，斜杠和弦等价于"转位"：</p>
+                            <div class="inv-diagram" style="margin-top:10px;">
+                                <div class="inv-step"><span class="inv-step-label" style="width:88px;">C / E</span><div class="inv-step-notes"><span class="inv-note bass">E (低音)</span><span class="inv-note">G</span><span class="inv-note">C5</span></div></div>
+                                <div class="inv-step"><span class="inv-step-label" style="width:88px;">= C 第一转位</span><div class="inv-step-notes"><span class="inv-note">3 5 1</span></div></div>
+                                <div style="height:10px;"></div>
+                                <div class="inv-step"><span class="inv-step-label" style="width:88px;">C / G</span><div class="inv-step-notes"><span class="inv-note bass">G (低音)</span><span class="inv-note">C5</span><span class="inv-note">E5</span></div></div>
+                                <div class="inv-step"><span class="inv-step-label" style="width:88px;">= C 第二转位</span><div class="inv-step-notes"><span class="inv-note">5 1 3</span></div></div>
+                            </div>
+                            <div class="tip-box" style="margin-top:16px;">
+                                <div class="tip-title">结论</div>
+                                <p>如果<strong>斜杠右边的低音是左边和弦的组成音</strong>，那这个斜杠和弦就是一次标准转位。</p>
+                            </div>
+                        </div>
+                        <div class="k-col-text">
+                            <h4>用法 B：低音<strong>不在</strong>和弦里（最常见！）</h4>
+                            <p>这就是 C/B 这种写法的意义——低音 B 并<strong>不是</strong> C 和弦的音（C E G）。它的作用是：<strong>让低音线变成一条独立的旋律</strong>。</p>
+                            <p>经典案例（卡农/流行）：</p>
+                            <div style="margin-top:12px;padding:14px;background:var(--bg-secondary);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;">
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
+                                    <span style="font-weight:600;">C</span><span style="color:var(--text-dim);">低音 C（原位）</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
+                                    <span style="font-weight:600;color:#d4380d;">C / B</span><span style="color:#d4380d;">低音 B ↓（旋律下降过渡）</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
+                                    <span style="font-weight:600;">Am</span><span style="color:var(--text-dim);">低音 A（原位）</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
+                                    <span style="font-weight:600;">Am / G</span><span style="color:#d4380d;">低音 G ↓（继续下降）</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
+                                    <span style="font-weight:600;">F</span><span style="color:var(--text-dim);">低音 F（原位）</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;">
+                                    <span style="font-weight:600;color:#d4380d;">G / B</span><span style="color:#d4380d;">低音 B ↑（回到G和弦前的经过低音）</span>
+                                </div>
+                            </div>
+                            <div class="tip-box" style="margin-top:14px;">
+                                <div class="tip-title">C / B 的真相</div>
+                                <p>在 C → C/B → Am 这条经典下行中，右手其实都按 C 和弦或 Am（差不多的音），<strong>只有左手低音走了 C → B → A 这条旋律线</strong>，听感立刻变得高级。这就是斜杠和弦最实用的场景。</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">03</span>常见斜杠和弦速查</h3>
+                    <table class="interval-table" style="margin-top:16px;">
+                        <thead>
+                            <tr>
+                                <th>和弦</th>
+                                <th>右手和弦音</th>
+                                <th>左手低音</th>
+                                <th>等价 / 用法</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>C / E</td><td>C E G</td><td style="color:#2e8a4a;font-weight:600;">E</td><td>C 大三 第一转位</td></tr>
+                            <tr><td>C / G</td><td>C E G</td><td style="color:#2e8a4a;font-weight:600;">G</td><td>C 大三 第二转位</td></tr>
+                            <tr style="background:#fffaf0;"><td style="font-weight:600;">C / B</td><td>C E G</td><td style="color:#d4380d;font-weight:600;">B</td><td>★ 经典经过低音（卡农下行）</td></tr>
+                            <tr style="background:#fffaf0;"><td style="font-weight:600;">G / B</td><td>G B D</td><td style="color:#2e8a4a;font-weight:600;">B</td><td>★ 上行至G的过渡低音 / G第一转位</td></tr>
+                            <tr><td>D / F#</td><td>D F# A</td><td style="color:#2e8a4a;font-weight:600;">F#</td><td>D 大三 第一转位</td></tr>
+                            <tr><td>D / A</td><td>D F# A</td><td style="color:#2e8a4a;font-weight:600;">A</td><td>D 大三 第二转位</td></tr>
+                            <tr><td>Am / C</td><td>A C E</td><td style="color:#2e8a4a;font-weight:600;">C</td><td>Am 小三 第一转位</td></tr>
+                            <tr style="background:#fffaf0;"><td style="font-weight:600;">Am / G</td><td>A C E</td><td style="color:#d4380d;font-weight:600;">G</td><td>★ 卡农下行 C→C/B→Am/G</td></tr>
+                            <tr><td>F / A</td><td>F A C</td><td style="color:#2e8a4a;font-weight:600;">A</td><td>F 大三 第一转位</td></tr>
+                            <tr><td>F / C</td><td>F A C</td><td style="color:#2e8a4a;font-weight:600;">C</td><td>F 大三 第二转位</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- TAB 6: 分解弹法 -->
+            <div class="chords-tab-panel" id="chordTab-strum">
+                <div class="knowledge-hero">
+                    <h2>Arpeggio Patterns · 分解和弦弹法</h2>
+                    <p>把和弦音依次弹出来叫"分解和弦"（琶音 / Arpeggio）。钢琴伴奏的灵魂就是分解。从最简单的逐个按音，到复杂的双手交替，下面按难度从 Lv.1 到 Lv.5 渐进学习。</p>
+                </div>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">Lv.1</span>单音逐个按（入门）</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>最基础的"爬音"</h4>
+                            <p>左手：只弹根音（一个八度或两个八度）。</p>
+                            <p>右手：从低到高依次弹 1 3 5，再从高到低回来。</p>
+                            <p>适合<strong>超慢速抒情曲</strong>，比如《小星星》《月亮代表我的心》开头。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;font-family:'JetBrains Mono',monospace;font-size:0.82rem;">
+                                <div style="background:var(--bg-secondary);padding:14px;border-radius:4px;">
+                                    <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;">以 C 和弦为例</div>
+                                    <div style="letter-spacing:2px;font-weight:600;color:var(--text-primary);">1 → 3 → 5 → 1' → 5 → 3 → 1</div>
+                                    <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:8px;">
+                                        对应：C → E → G → C5 → G → E → C
+                                    </div>
+                                    <div style="margin-top:12px;display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;">
+                                        <div style="padding:5px;background:#d4eccf;border-radius:3px;">1</div>
+                                        <div style="padding:5px;background:#ffe8cc;border-radius:3px;">3</div>
+                                        <div style="padding:5px;background:#ffe8cc;border-radius:3px;">5</div>
+                                        <div style="padding:5px;background:#d4eccf;border-radius:3px;">1'</div>
+                                        <div style="padding:5px;background:#ffe8cc;border-radius:3px;">5</div>
+                                        <div style="padding:5px;background:#ffe8cc;border-radius:3px;">3</div>
+                                        <div style="padding:5px;background:#d4eccf;border-radius:3px;">1</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">Lv.2</span>左手八度 + 右手三和弦（经典流行）</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>"阿尔贝蒂"简化版</h4>
+                            <p>左手：每拍弹一次<strong>根音+五度+八度</strong>（低音 C → G → C）。</p>
+                            <p>右手：同时按三和弦，每拍一次或每半拍一次。</p>
+                            <p>这种弹法<strong>节奏感强</strong>，适合大多数流行歌的副歌。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;font-family:'JetBrains Mono',monospace;font-size:0.75rem;">
+                                <div style="background:var(--bg-secondary);padding:14px;border-radius:4px;margin-bottom:10px;">
+                                    <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:8px;">左手 4/4 拍（每小节 8 个八分音符）</div>
+                                    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;text-align:center;">
+                                        <div style="padding:6px 2px;background:#d4eccf;border-radius:3px;">C</div>
+                                        <div style="padding:6px 2px;background:#f5f3ee;border-radius:3px;">—</div>
+                                        <div style="padding:6px 2px;background:#ffe8cc;border-radius:3px;">G</div>
+                                        <div style="padding:6px 2px;background:#f5f3ee;border-radius:3px;">—</div>
+                                        <div style="padding:6px 2px;background:#d4eccf;border-radius:3px;">C</div>
+                                        <div style="padding:6px 2px;background:#f5f3ee;border-radius:3px;">—</div>
+                                        <div style="padding:6px 2px;background:#ffe8cc;border-radius:3px;">G</div>
+                                        <div style="padding:6px 2px;background:#f5f3ee;border-radius:3px;">—</div>
+                                    </div>
+                                </div>
+                                <div style="background:var(--bg-secondary);padding:14px;border-radius:4px;">
+                                    <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:8px;">右手（每拍一次）</div>
+                                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;text-align:center;">
+                                        <div style="padding:8px 2px;background:linear-gradient(180deg,#d4eccf,#9dd7a8);border-radius:3px;font-weight:600;">CEG</div>
+                                        <div style="padding:8px 2px;background:linear-gradient(180deg,#d4eccf,#9dd7a8);border-radius:3px;font-weight:600;">CEG</div>
+                                        <div style="padding:8px 2px;background:linear-gradient(180deg,#d4eccf,#9dd7a8);border-radius:3px;font-weight:600;">CEG</div>
+                                        <div style="padding:8px 2px;background:linear-gradient(180deg,#d4eccf,#9dd7a8);border-radius:3px;font-weight:600;">CEG</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">Lv.3</span>阿尔贝蒂低音（莫扎特式优雅）</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>分解和弦的入门标配</h4>
+                            <p>左手按固定顺序弹：<strong>最低音 → 最高音 → 中音 → 最高音</strong>（即 低-高-中-高）。</p>
+                            <p>以 C 和弦为例：C → G → E → G（循环）。</p>
+                            <p>伴奏像流水一样连绵，适合<strong>古典、古典流行、抒情慢歌</strong>。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;font-family:'JetBrains Mono',monospace;font-size:0.75rem;">
+                                <div style="background:var(--bg-secondary);padding:16px;border-radius:4px;">
+                                    <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:10px;">左手 阿尔贝蒂 · C 和弦 · 一小节 2 组</div>
+                                    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;text-align:center;">
+                                        <div style="padding:7px 2px;background:#d4eccf;border-radius:3px;font-weight:600;">C<br><span style="font-size:0.6rem;color:var(--text-dim);">低</span></div>
+                                        <div style="padding:7px 2px;background:#ffe8cc;border-radius:3px;font-weight:600;">G<br><span style="font-size:0.6rem;color:var(--text-dim);">高</span></div>
+                                        <div style="padding:7px 2px;background:#fff1e0;border-radius:3px;font-weight:600;">E<br><span style="font-size:0.6rem;color:var(--text-dim);">中</span></div>
+                                        <div style="padding:7px 2px;background:#ffe8cc;border-radius:3px;font-weight:600;">G<br><span style="font-size:0.6rem;color:var(--text-dim);">高</span></div>
+                                        <div style="padding:7px 2px;background:#d4eccf;border-radius:3px;font-weight:600;">C<br><span style="font-size:0.6rem;color:var(--text-dim);">低</span></div>
+                                        <div style="padding:7px 2px;background:#ffe8cc;border-radius:3px;font-weight:600;">G<br><span style="font-size:0.6rem;color:var(--text-dim);">高</span></div>
+                                        <div style="padding:7px 2px;background:#fff1e0;border-radius:3px;font-weight:600;">E<br><span style="font-size:0.6rem;color:var(--text-dim);">中</span></div>
+                                        <div style="padding:7px 2px;background:#ffe8cc;border-radius:3px;font-weight:600;">G<br><span style="font-size:0.6rem;color:var(--text-dim);">高</span></div>
+                                    </div>
+                                    <div class="tip-box" style="margin-top:14px;">
+                                        <div class="tip-title">口诀</div>
+                                        <p>低 → 高 → 中 → 高，每和弦循环这个模式即可。转位之后："低音=左、高音=右、中音=中"。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">Lv.4</span>双手交替分解（流行爵士常用）</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>手"对答"式</h4>
+                            <p>左手弹 1-5，右手弹 3-5-3-1，两只手错开<strong>交替发声</strong>。</p>
+                            <p>节奏密度加倍，而且两只手<strong>不会同时按下太多音</strong>，声音更干净。</p>
+                            <p>适合<strong>爵士 Ballad、Neo-Soul、抒情流行</strong>。</p>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;font-family:'JetBrains Mono',monospace;font-size:0.75rem;">
+                                <div style="background:var(--bg-secondary);padding:16px;border-radius:4px;">
+                                    <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:10px;">双手交替 · C 和弦 · 4/4 拍</div>
+                                    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;text-align:center;">
+                                        <div style="padding:6px 2px;background:#cfe0ff;border-radius:3px;"><div style="font-size:0.55rem;color:var(--text-dim);">左</div><div style="font-weight:600;">C</div></div>
+                                        <div style="padding:6px 2px;background:#fff1e0;border-radius:3px;"><div style="font-size:0.55rem;color:var(--text-dim);">右</div><div style="font-weight:600;">E</div></div>
+                                        <div style="padding:6px 2px;background:#cfe0ff;border-radius:3px;"><div style="font-size:0.55rem;color:var(--text-dim);">左</div><div style="font-weight:600;">G</div></div>
+                                        <div style="padding:6px 2px;background:#fff1e0;border-radius:3px;"><div style="font-size:0.55rem;color:var(--text-dim);">右</div><div style="font-weight:600;">G</div></div>
+                                        <div style="padding:6px 2px;background:#cfe0ff;border-radius:3px;"><div style="font-size:0.55rem;color:var(--text-dim);">左</div><div style="font-weight:600;">C</div></div>
+                                        <div style="padding:6px 2px;background:#fff1e0;border-radius:3px;"><div style="font-size:0.55rem;color:var(--text-dim);">右</div><div style="font-weight:600;">E</div></div>
+                                        <div style="padding:6px 2px;background:#cfe0ff;border-radius:3px;"><div style="font-size:0.55rem;color:var(--text-dim);">左</div><div style="font-weight:600;">G</div></div>
+                                        <div style="padding:6px 2px;background:#fff1e0;border-radius:3px;"><div style="font-size:0.55rem;color:var(--text-dim);">右</div><div style="font-weight:600;">C5</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">Lv.5</span>加花 + 过渡音（进阶）</h3>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>在分解里塞"经过音"和留音</h4>
+                            <p>从和弦音弹到<strong>相邻非和弦音</strong>再回到和弦音，就是"加花"。</p>
+                            <p>例如 C-E-G 的分解中间穿插 D、F 作为过渡。</p>
+                            <p>原则：重拍落在<strong>和弦音</strong>，非重拍可以放<strong>经过音</strong>。</p>
+                            <div class="tip-box">
+                                <div class="tip-title">练习建议</div>
+                                <p>先把 Lv.1～3 在 C、G、Am、F 四个常用调上练熟，再尝试 Lv.4 的双手交替，最后自然而然就会加花。</p>
+                            </div>
+                        </div>
+                        <div class="k-col-visual">
+                            <div style="width:100%;font-family:'JetBrains Mono',monospace;font-size:0.75rem;">
+                                <div style="background:var(--bg-secondary);padding:16px;border-radius:4px;">
+                                    <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:10px;">C 和弦 · 分解加经过音</div>
+                                    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;text-align:center;">
+                                        <div style="padding:7px 2px;background:#d4eccf;border-radius:3px;font-weight:600;">C<br><span style="font-size:0.55rem;color:#2e8a4a;">和弦音</span></div>
+                                        <div style="padding:7px 2px;background:#ffe0d9;border-radius:3px;font-weight:600;">D<br><span style="font-size:0.55rem;color:#d4380d;">经过音</span></div>
+                                        <div style="padding:7px 2px;background:#ffe8cc;border-radius:3px;font-weight:600;">E<br><span style="font-size:0.55rem;color:#a05a00;">和弦音</span></div>
+                                        <div style="padding:7px 2px;background:#ffe0d9;border-radius:3px;font-weight:600;">F<br><span style="font-size:0.55rem;color:#d4380d;">经过音</span></div>
+                                        <div style="padding:7px 2px;background:#ffe8cc;border-radius:3px;font-weight:600;">G<br><span style="font-size:0.55rem;color:#a05a00;">和弦音</span></div>
+                                        <div style="padding:7px 2px;background:#ffe0d9;border-radius:3px;font-weight:600;">A<br><span style="font-size:0.55rem;color:#d4380d;">经过音</span></div>
+                                        <div style="padding:7px 2px;background:#d4eccf;border-radius:3px;font-weight:600;">C5<br><span style="font-size:0.55rem;color:#2e8a4a;">和弦音</span></div>
+                                        <div style="padding:7px 2px;background:#ffe8cc;border-radius:3px;font-weight:600;">G<br><span style="font-size:0.55rem;color:#a05a00;">和弦音</span></div>
+                                    </div>
+                                    <div style="margin-top:14px;padding:10px 12px;background:#fff;border:1px dashed var(--border-subtle);border-radius:3px;font-size:0.72rem;color:var(--text-secondary);line-height:1.7;">
+                                        重拍（第1、3、5、7格）→ <span style="color:var(--text-primary);font-weight:600;">落在和弦音</span><br>
+                                        轻拍（第2、4、6格）→ <span style="color:#d4380d;font-weight:600;">可以放经过音</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">速查</span>5级弹法一图流</h3>
+                    <table class="interval-table" style="margin-top:16px;">
+                        <thead>
+                            <tr>
+                                <th>难度</th>
+                                <th>名称</th>
+                                <th>核心节奏 (以C为例)</th>
+                                <th>适用场景</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="num-col">Lv.1</td><td>单音爬音</td><td>1 → 3 → 5 → 1' → 5 → 3 → 1</td><td>初学者、超慢速抒情</td></tr>
+                            <tr><td class="num-col">Lv.2</td><td>八度+和弦</td><td>左：C - G - C - G &nbsp;&nbsp;右：(CEG) × 4</td><td>流行副歌、摇滚抒情</td></tr>
+                            <tr><td class="num-col">Lv.3</td><td>阿尔贝蒂低音</td><td>低 → 高 → 中 → 高 循环</td><td>古典、K-pop Ballad</td></tr>
+                            <tr><td class="num-col">Lv.4</td><td>双手交替</td><td>左1 右3 左5 右5 … 交错</td><td>爵士、Neo-Soul、抒情</td></tr>
+                            <tr><td class="num-col">Lv.5</td><td>加花分解</td><td>和弦音 + 经过音穿插</td><td>即兴、专业编曲</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- TAB 7: 音程表 -->
+            <div class="chords-tab-panel" id="chordTab-interval">
+                <div class="knowledge-hero">
+                    <h2>Interval Reference</h2>
+                    <p>音程是两个音之间的距离，是构建和弦的"材料"。熟记下面这张音程表，就能自己推算出任何和弦的组成音。</p>
+                </div>
+                <section class="k-section">
+                    <h3><span class="sec-num">01</span>完全音程与大/小音程</h3>
+                    <table class="interval-table" style="margin-top:16px;">
+                        <thead>
+                            <tr>
+                                <th class="num-col">半音数</th>
+                                <th>音程名称</th>
+                                <th>简谱 (C根)</th>
+                                <th>音名示例 (C→)</th>
+                                <th class="num-col">听感特征</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="num-col">0</td><td>纯一度</td><td>1 → 1</td><td>C → C</td><td class="num-col" style="color:var(--text-dim);">完全一致</td></tr>
+                            <tr><td class="num-col">1</td><td>小二度</td><td>1 → b2</td><td>C → Db</td><td class="num-col" style="color:#d4380d;">极不协和</td></tr>
+                            <tr><td class="num-col">2</td><td>大二度</td><td>1 → 2</td><td>C → D</td><td class="num-col" style="color:#d46b08;">轻度紧张</td></tr>
+                            <tr><td class="num-col">3</td><td>小三度</td><td>1 → b3</td><td>C → Eb</td><td class="num-col" style="color:#2e8a4a;">柔和·小和弦</td></tr>
+                            <tr><td class="num-col">4</td><td>大三度</td><td>1 → 3</td><td>C → E</td><td class="num-col" style="color:#ff922b;">明亮·大和弦</td></tr>
+                            <tr><td class="num-col">5</td><td>纯四度</td><td>1 → 4</td><td>C → F</td><td class="num-col" style="color:#2e8a4a;">稳定·空泛</td></tr>
+                            <tr><td class="num-col">6</td><td>增四度 / 减五度 (三全音)</td><td>1 → #4 / b5</td><td>C → F#</td><td class="num-col" style="color:#d4380d;">极度不安</td></tr>
+                            <tr><td class="num-col">7</td><td>纯五度</td><td>1 → 5</td><td>C → G</td><td class="num-col" style="color:#135200;">最稳定</td></tr>
+                            <tr><td class="num-col">8</td><td>小六度</td><td>1 → b6</td><td>C → Ab</td><td class="num-col" style="color:#2e8a4a;">柔和温暖</td></tr>
+                            <tr><td class="num-col">9</td><td>大六度</td><td>1 → 6</td><td>C → A</td><td class="num-col" style="color:#ff922b;">明亮开阔</td></tr>
+                            <tr><td class="num-col">10</td><td>小七度</td><td>1 → b7</td><td>C → Bb</td><td class="num-col" style="color:#d46b08;">属七·爵士</td></tr>
+                            <tr><td class="num-col">11</td><td>大七度</td><td>1 → 7</td><td>C → B</td><td class="num-col" style="color:#722ed1;">梦幻·紧张</td></tr>
+                            <tr><td class="num-col">12</td><td>纯八度</td><td>1 → 高音1</td><td>C → C'</td><td class="num-col" style="color:#135200;">融合一致</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section class="k-section">
+                    <h3><span class="sec-num">02</span>和弦速查公式</h3>
+                    <p>用半音数作为"配方"，可以从任意根音推算和弦。公式中的数字代表相对于根音的半音增量。</p>
+                    <table class="interval-table" style="margin-top:16px;">
+                        <thead>
+                            <tr>
+                                <th>和弦类型</th>
+                                <th>符号后缀</th>
+                                <th>半音公式 (以根音=0)</th>
+                                <th>C调示例</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>大三和弦</td><td>(无)</td><td>0 — 4 — 7</td><td>C E G</td></tr>
+                            <tr><td>小三和弦</td><td>m / min</td><td>0 — 3 — 7</td><td>C Eb G</td></tr>
+                            <tr><td>属七和弦</td><td>7</td><td>0 — 4 — 7 — 10</td><td>C E G Bb</td></tr>
+                            <tr><td>大七和弦</td><td>maj7 / M7</td><td>0 — 4 — 7 — 11</td><td>C E G B</td></tr>
+                            <tr><td>小七和弦</td><td>m7 / min7</td><td>0 — 3 — 7 — 10</td><td>C Eb G Bb</td></tr>
+                            <tr><td>减三和弦</td><td>dim / °</td><td>0 — 3 — 6</td><td>C Eb Gb</td></tr>
+                            <tr><td>减七和弦</td><td>dim7 / °7</td><td>0 — 3 — 6 — 9</td><td>C Eb Gb A</td></tr>
+                            <tr><td>增三和弦</td><td>aug / +</td><td>0 — 4 — 8</td><td>C E G#</td></tr>
+                            <tr><td>挂二和弦</td><td>sus2</td><td>0 — 2 — 7</td><td>C D G</td></tr>
+                            <tr><td>挂四和弦</td><td>sus4</td><td>0 — 5 — 7</td><td>C F G</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="tip-box" style="margin-top:20px;">
+                        <div class="tip-title">使用方法</div>
+                        <p>想知道 F#m7 的组成音？① 根音 F# = 0；② 小七公式 0-3-7-10：F#+3=A, F#+7=C#, F#+10=E；③ 结果：F# A C# E。</p>
+                    </div>
+                </section>
+            </div>
         </div>
     </div>
 
@@ -4184,6 +5226,12 @@
                 exitChartView();
                 switchPage('my');
             });
+            document.getElementById('navChords').addEventListener('click', () => {
+                exitChartView();
+                switchPage('chords');
+            });
+            // 和弦知识库子Tab切换 & 和弦库初始化
+            initChordLibrary();
 
             // Back button (chart detail view)
             document.getElementById('backFromChartBtn').addEventListener('click', () => {
@@ -6827,6 +7875,7 @@
             currentPage = page;
             document.getElementById('pageHome').style.display = page === 'home' ? 'block' : 'none';
             document.getElementById('pageMy').style.display = page === 'my' ? 'block' : 'none';
+            document.getElementById('pageChords').style.display = page === 'chords' ? 'block' : 'none';
             document.getElementById('pageEditor').style.display = page === 'editor' ? 'block' : 'none';
             // 更新 Nav active 状态（预览页时不切换 nav active，保持原页面高亮）
             if (page !== 'editor') {
@@ -6834,6 +7883,7 @@
             }
             if (page === 'home') loadPublicCharts();
             if (page === 'my') loadMyCharts();
+            if (page === 'chords') onEnterChordsPage();
         }
 
         function setNavActive(page) {
@@ -7226,6 +8276,326 @@
                 console.warn('Sync to server failed:', e.message);
                 showToast('保存失败: ' + e.message, 3000);
             }
+        }
+
+        // ============================================================
+        // 和弦知识库模块（整合进主程序，独立作用域逻辑放 initChordLibrary 内）
+        // ============================================================
+        let chordLibInited = false;
+        let chordAllChords = [];
+        let chordFilter = 'all';
+        let chordSearch = '';
+        let chordAudioCtx = null;
+
+        function chordEnsureAudio() {
+            if (!chordAudioCtx) chordAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return chordAudioCtx;
+        }
+        function chordPlaySemitone(absSemi, dur = 0.8, vol = 0.2) {
+            const ctx = chordEnsureAudio();
+            const baseFreq = 261.63;
+            const freq = baseFreq * Math.pow(2, absSemi / 12);
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(vol, now + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(now); osc.stop(now + dur);
+        }
+        function chordPlayAll(semitonesAbs, dur = 1.3, vol = 0.15) {
+            semitonesAbs.forEach(s => chordPlaySemitone(s, dur, vol));
+        }
+        // 暴露给 HTML onclick (迷你钢琴 & 卡片键盘)
+        window.playSingleAbs = chordPlaySemitone;
+
+        function chordBuildData() {
+            const noteToSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+            const semitoneToNumber = {
+                0: '1', 1: '1#', 2: '2', 3: '2#', 4: '3', 5: '4', 6: '4#',
+                7: '5', 8: '#5', 9: '6', 10: 'b7', 11: '7'
+            };
+            const semitoneToNoteSharp = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+            const chordIntervals = {
+                'major': [0, 4, 7],   'minor': [0, 3, 7],
+                '7':     [0, 4, 7, 10], 'maj7':  [0, 4, 7, 11],
+                'm7':    [0, 3, 7, 10], 'dim':   [0, 3, 6],
+                'dim7':  [0, 3, 6, 9],   'aug':   [0, 4, 8],
+                'sus2':  [0, 2, 7],      'sus4':  [0, 5, 7]
+            };
+            const chordMeta = {
+                'major': { label: '大三和弦', suffix: '',     cat: 'major', intervals: '根音 + 大三度 + 纯五度' },
+                'minor': { label: '小三和弦', suffix: 'm',    cat: 'minor', intervals: '根音 + 小三度 + 纯五度' },
+                '7':     { label: '属七和弦', suffix: '7',    cat: '7',     intervals: '根音 + 大三度 + 纯五度 + 小七度' },
+                'maj7':  { label: '大七和弦', suffix: 'maj7', cat: '7',     intervals: '根音 + 大三度 + 纯五度 + 大七度' },
+                'm7':    { label: '小七和弦', suffix: 'm7',   cat: '7',     intervals: '根音 + 小三度 + 纯五度 + 小七度' },
+                'dim':   { label: '减三和弦', suffix: 'dim',  cat: 'dim',   intervals: '根音 + 小三度 + 减五度' },
+                'dim7':  { label: '减七和弦', suffix: 'dim7', cat: 'dim',   intervals: '根音 + 小三度 + 减五度 + 减七度' },
+                'aug':   { label: '增三和弦', suffix: 'aug',  cat: 'dim',   intervals: '根音 + 大三度 + 增五度' },
+                'sus2':  { label: '挂二和弦', suffix: 'sus2', cat: 'sus',   intervals: '根音 + 大二度 + 纯五度' },
+                'sus4':  { label: '挂四和弦', suffix: 'sus4', cat: 'sus',   intervals: '根音 + 纯四度 + 纯五度' },
+            };
+            const allRoots = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+            const list = [];
+            for (const root of allRoots) {
+                for (const [quality, intervals] of Object.entries(chordIntervals)) {
+                    const meta = chordMeta[quality];
+                    const rootSemi = noteToSemitone[root];
+                    const noteNames = intervals.map(iv => semitoneToNoteSharp[(rootSemi + iv) % 12]);
+                    const numbers   = intervals.map(iv => semitoneToNumber[(rootSemi + iv) % 12]);
+                    list.push({
+                        root, quality, intervals, meta,
+                        name: root + meta.suffix,
+                        noteNames, numbers,
+                        rootSemitone: rootSemi,
+                        semitones: intervals.map(iv => (rootSemi + iv) % 12),
+                        noteCount: intervals.length
+                    });
+                }
+            }
+            return list;
+        }
+
+        function chordCalcInversion(chord, inv) {
+            let nums = [...chord.numbers];
+            if (inv > 0 && inv < nums.length) nums = nums.slice(inv).concat(nums.slice(0, inv));
+            return { left: chord.numbers[0], right: nums.join(' ') };
+        }
+
+        function chordPianoKeysHTML(keys, bassKey = null) {
+            const octaves = 2;
+            const whitePerOct = 7;
+            const whiteTotal = octaves * whitePerOct;
+            const whitePct = 100 / whiteTotal;
+            const blackWidth = whitePct * 0.65;
+            const whiteBase = [
+                {semi:0,note:'C'},{semi:2,note:'D'},{semi:4,note:'E'},
+                {semi:5,note:'F'},{semi:7,note:'G'},{semi:9,note:'A'},{semi:11,note:'B'}
+            ];
+            const blackBase = [
+                {semi:1,after:0},{semi:3,after:1},{semi:6,after:3},
+                {semi:8,after:4},{semi:10,after:5}
+            ];
+            let html = '<div class="piano-keys-inner">';
+            for (let oct = 0; oct < octaves; oct++) {
+                for (let w = 0; w < whitePerOct; w++) {
+                    const base = whiteBase[w];
+                    const whiteIdx = oct * whitePerOct + w;
+                    const absSemi = oct * 12 + base.semi;
+                    const octLabel = oct === 0 ? '4' : '5';
+                    const noteLabel = w === 0 ? `${base.note}${octLabel}` : base.note;
+                    const left = whiteIdx * whitePct;
+                    const cls = [];
+                    if (keys.includes(absSemi)) cls.push('active');
+                    if (absSemi === bassKey) cls.push('bass-note');
+                    html += `<div class="pwk ${cls.join(' ')}" style="left:${left}%;width:${whitePct}%;" data-abs="${absSemi}" onclick="playSingleAbs(${absSemi})">${noteLabel}</div>`;
+                }
+            }
+            for (let oct = 0; oct < octaves; oct++) {
+                for (const b of blackBase) {
+                    const whiteIdx = oct * whitePerOct + b.after;
+                    const absSemi = oct * 12 + b.semi;
+                    const left = (whiteIdx + 1) * whitePct - blackWidth / 2;
+                    const cls = [];
+                    if (keys.includes(absSemi)) cls.push('active');
+                    if (absSemi === bassKey) cls.push('bass-note');
+                    html += `<div class="pbk ${cls.join(' ')}" style="left:${left}%;width:${blackWidth}%;" data-abs="${absSemi}" onclick="playSingleAbs(${absSemi})"></div>`;
+                }
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function chordRenderCard(chord) {
+            const maxInv = chord.noteCount;
+            const inv0 = chordCalcInversion(chord, 0);
+            let invBtns = '';
+            for (let i = 0; i < maxInv; i++) {
+                invBtns += `<button class="inv-btn ${i === 0 ? 'active' : ''}" data-inv="${i}">${i === 0 ? '原位' : i + '转'}</button>`;
+            }
+            // 播放按钮：传半音数组转JSON
+            const semitoneListStr = JSON.stringify(chord.semitones);
+            return `
+            <div class="chord-card" data-root="${chord.root}" data-quality="${chord.quality}" data-name="${chord.name.toLowerCase()}">
+                <div class="chord-card-header">
+                    <div><div class="chord-name">${chord.name}</div></div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <span class="chord-type-label">${chord.meta.label}</span>
+                        <button class="play-btn-sm" data-playcard="${chord.root}-${chord.quality}" aria-label="试听">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="chord-notes"><span class="chord-notes-label">音名</span>${chord.noteNames.join(' - ')}</div>
+                <div class="chord-numbers"><span class="chord-notes-label">数字</span>${chord.numbers.join(' - ')}</div>
+                <div class="chord-intervals-text">${chord.meta.intervals}</div>
+                <div class="piano-keys">${chordPianoKeysHTML(chord.semitones, chord.semitones[0])}</div>
+                <div class="chord-tab-display">
+                    <div class="tab-hand"><span class="tab-hand-label">左手</span><span class="tab-hand-val" id="clh-${chord.root}-${chord.quality}">${inv0.left}</span></div>
+                    <div class="tab-hand"><span class="tab-hand-label">右手</span><span class="tab-hand-val" id="crh-${chord.root}-${chord.quality}">${inv0.right}</span></div>
+                </div>
+                <div class="chord-inversions">${invBtns}</div>
+            </div>`;
+        }
+
+        function chordRenderGrid() {
+            const grid = document.getElementById('chordsGrid');
+            if (!grid) return;
+            let list = chordAllChords;
+            if (chordFilter !== 'all') list = list.filter(c => c.meta.cat === chordFilter);
+            if (chordSearch) {
+                const q = chordSearch.toLowerCase();
+                list = list.filter(c =>
+                    c.name.toLowerCase().includes(q) ||
+                    c.root.toLowerCase().includes(q) ||
+                    c.meta.label.includes(chordSearch)
+                );
+            }
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎵</div>没有找到匹配的和弦</div>';
+                return;
+            }
+            grid.innerHTML = list.map(chordRenderCard).join('');
+
+            // 事件委托：转位按钮 + 试听按钮
+            grid.querySelectorAll('.chord-card').forEach(card => {
+                const root = card.dataset.root;
+                const quality = card.dataset.quality;
+                const chord = chordAllChords.find(c => c.root === root && c.quality === quality);
+                if (!chord) return;
+
+                card.querySelectorAll('.inv-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        card.querySelectorAll('.inv-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        const inv = parseInt(btn.dataset.inv);
+                        const res = chordCalcInversion(chord, inv);
+                        const lel = document.getElementById(`clh-${root}-${quality}`);
+                        const rel = document.getElementById(`crh-${root}-${quality}`);
+                        if (lel) lel.textContent = res.left;
+                        if (rel) rel.textContent = res.right;
+                        // 更新键盘高亮（inv音抬八度）
+                        const invSemiAbs = [];
+                        const n = chord.semitones.length;
+                        for (let i = inv; i < n; i++) invSemiAbs.push(chord.semitones[i]);
+                        for (let i = 0; i < inv; i++) invSemiAbs.push(chord.semitones[i] + 12);
+                        const piano = card.querySelector('.piano-keys-inner');
+                        if (piano) {
+                            piano.querySelectorAll('.pwk, .pbk').forEach(k => k.classList.remove('active', 'bass-note'));
+                            invSemiAbs.forEach((s, idx) => {
+                                const key = piano.querySelector(`[data-abs="${s}"]`);
+                                if (!key) return;
+                                key.classList.add('active');
+                                if (idx === 0) key.classList.add('bass-note');
+                            });
+                        }
+                    });
+                });
+
+                const playBtn = card.querySelector('[data-playcard]');
+                if (playBtn) {
+                    playBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        chordPlayAll(chord.semitones);
+                    });
+                }
+            });
+        }
+
+        function chordRenderMini(containerId, keys, bassKey = null) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            const octaves = 2;
+            const whitePerOct = 7;
+            const whiteTotal = octaves * whitePerOct;
+            const whitePct = 100 / whiteTotal;
+            const blackWidth = whitePct * 0.65;
+            const whiteBase = [
+                {semi:0,note:'C'},{semi:2,note:'D'},{semi:4,note:'E'},
+                {semi:5,note:'F'},{semi:7,note:'G'},{semi:9,note:'A'},{semi:11,note:'B'}
+            ];
+            const blackBase = [
+                {semi:1,after:0},{semi:3,after:1},{semi:6,after:3},
+                {semi:8,after:4},{semi:10,after:5}
+            ];
+            let html = '<div class="kp-inner">';
+            for (let oct = 0; oct < octaves; oct++) {
+                for (let w = 0; w < whitePerOct; w++) {
+                    const base = whiteBase[w];
+                    const whiteIdx = oct * whitePerOct + w;
+                    const absSemi = oct * 12 + base.semi;
+                    const left = whiteIdx * whitePct;
+                    let cls = 'kp-wk';
+                    if (keys.includes(absSemi)) cls += ' hl';
+                    if (absSemi === bassKey) cls = 'kp-wk root';
+                    const label = w === 0 ? `${base.note}${oct===0?'4':'5'}` : '';
+                    html += `<div class="${cls}" style="left:${left}%;width:${whitePct}%;" onclick="playSingleAbs(${absSemi})">${label}</div>`;
+                }
+            }
+            for (let oct = 0; oct < octaves; oct++) {
+                for (const b of blackBase) {
+                    const whiteIdx = oct * whitePerOct + b.after;
+                    const absSemi = oct * 12 + b.semi;
+                    const left = (whiteIdx + 1) * whitePct - blackWidth / 2;
+                    let cls = 'kp-bk';
+                    if (keys.includes(absSemi)) cls += ' hl';
+                    html += `<div class="${cls}" style="left:${left}%;width:${blackWidth}%;" onclick="playSingleAbs(${absSemi})"></div>`;
+                }
+            }
+            html += '</div>';
+            el.innerHTML = html;
+        }
+
+        function onEnterChordsPage() {
+            // 首次进入时初始化和弦数据 + 子Tab绑定 + 搜索/筛选绑定
+            if (!chordLibInited) initChordLibrary(true);
+        }
+
+        function initChordLibrary(isInsideInit = false) {
+            if (chordLibInited) return;
+            chordAllChords = chordBuildData();
+
+            // 搜索 + 筛选
+            const sInput = document.getElementById('chordSearchInput');
+            if (sInput) {
+                sInput.addEventListener('input', (e) => {
+                    chordSearch = e.target.value.trim();
+                    chordRenderGrid();
+                });
+            }
+            document.querySelectorAll('#chordFilterBar .filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#chordFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    chordFilter = btn.dataset.cat;
+                    chordRenderGrid();
+                });
+            });
+
+            // 子Tab切换 (chords-submenu 下的 submenu-btn，面板前缀 chordTab-)
+            document.querySelectorAll('#chordsSubmenu .submenu-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#chordsSubmenu .submenu-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const tab = btn.dataset.tab;
+                    document.querySelectorAll('.chords-tab-panel').forEach(p => p.classList.remove('active'));
+                    const panel = document.getElementById('chordTab-' + tab);
+                    if (panel) panel.classList.add('active');
+                    // 迷你钢琴懒渲染
+                    if (tab === 'basic') chordRenderMini('kpBasic', [0,2,4,5,7,9,11], 0);
+                    if (tab === 'inversion') {
+                        chordRenderMini('kpInv0', [0, 4, 7], 0);
+                        chordRenderMini('kpInv1', [4, 7, 12], 4);
+                        chordRenderMini('kpInv2', [7, 12, 16], 7);
+                    }
+                });
+            });
+
+            // 默认先渲染和弦图（120卡）
+            chordRenderGrid();
+            chordLibInited = true;
         }
 
         // Start
