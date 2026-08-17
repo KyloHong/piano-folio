@@ -3402,6 +3402,55 @@
         }
         .kp-bk.hl { background: linear-gradient(180deg, #ffdca8, #f48c1c); }
 
+        /* ===========================================
+           Progression 4536251 专用样式
+           =========================================== */
+        .kb-block-head {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+        }
+        .prog-play-btn {
+            appearance: none; border: 0; cursor: pointer;
+            background: linear-gradient(135deg, var(--kb-accent, #ff6b6b), #ff8e53);
+            color: #fff; font-weight: 600; font-size: 0.88rem;
+            padding: 9px 18px; border-radius: 999px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        .prog-play-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+        .prog-play-btn.active, .prog-chord-card.active {
+            outline: 3px solid #ffd43b;
+            outline-offset: 2px;
+        }
+        .prog-chord-row {
+            display: grid; gap: 14px;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        .prog-chord-card {
+            background: #fff; border: 1px solid var(--border-subtle); border-radius: 14px;
+            padding: 14px 10px 10px; text-align: center; cursor: pointer;
+            transition: transform .15s ease, box-shadow .15s ease, border-color .15s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .prog-chord-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); border-color: #ffe8cc; }
+        .prog-chord-card.active { border-color: var(--kb-accent, #ff6b6b); background: #fff5f5; }
+        .pcc-step { font-size: 0.7rem; color: #888; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .pcc-name { font-size: 1.55rem; font-weight: 800; color: var(--text-primary); line-height: 1.15; }
+        .pcc-name.pcc-root { color: var(--kb-accent, #e03131); }
+        .pcc-notes { font-size: 0.74rem; color: #868e96; margin: 4px 0 8px; letter-spacing: 0.02em; }
+        .prog-chord-card .kp-wrap {
+            position: relative; height: 70px; border-radius: 8px;
+            background: #1a1a1a; padding: 6px 6px 5px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        @media (max-width: 980px) {
+            .prog-chord-row { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .prog-chord-row { grid-template-columns: repeat(2, 1fr); }
+        }
+
         @media (max-width: 640px) {
             .k-two-col { grid-template-columns: 1fr; }
             .knowledge-hero { padding: 28px 22px; }
@@ -3475,6 +3524,7 @@
 
             <nav class="chords-submenu" id="chordsSubmenu">
                 <button class="submenu-btn active" data-tab="chart">和弦图</button>
+                <button class="submenu-btn" data-tab="prog4536">4536251 走向</button>
                 <button class="submenu-btn" data-tab="basic">乐理基础</button>
                 <button class="submenu-btn" data-tab="structure">和弦构成</button>
                 <button class="submenu-btn" data-tab="inversion">转位原理</button>
@@ -3482,6 +3532,184 @@
                 <button class="submenu-btn" data-tab="strum">分解弹法</button>
                 <button class="submenu-btn" data-tab="interval">音程表</button>
             </nav>
+
+            <!-- TAB 2: 4536251 流行经典走向 -->
+            <div class="chords-tab-panel" id="chordTab-prog4536">
+                <div class="chords-kb-hero">
+                    <h2 class="knowledge-heading">流行黄金走向 —— 4536251</h2>
+                    <p class="knowledge-sub">华语流行最常见的七和弦循环，无数热门歌曲使用此走向。下方列出 C / G / D 三个最常用调的版本，点击「▶ 整段试听」听走向效果，点击单个和弦单独播放。</p>
+                </div>
+
+                <!-- 什么是 4536251 -->
+                <section class="knowledge-block">
+                    <h3 class="knowledge-block-title">📐 什么是 4536251？</h3>
+                    <p class="knowledge-p">
+                        用<strong>数字级数</strong>（首调）写的和声序列：<strong>IV → V → iii → vi → ii → V → I</strong>。
+                        括号中的「5」在最后一段代替 vi 和 I 之间通常用的终止 IV，以形成更强的 V→I 解决。
+                        直觉上的听感："期待 → 推 → 推 → 沉 → 悬 → 强期待 → 落回主和弦"。
+                    </p>
+                    <div class="knowledge-table-wrap">
+                        <table class="knowledge-table">
+                            <thead><tr><th>位置</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
+                            <tbody>
+                                <tr><td>级数</td><td>IV</td><td>V</td><td>iii</td><td>vi</td><td>ii</td><td>V</td><td>I</td></tr>
+                                <tr><td>功能</td><td>下属(SD)</td><td>属(D)</td><td>小和弦过渡</td><td>副主</td><td>下属预备</td><td>强属功能</td><td>主和弦(T)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- C 大调 -->
+                <section class="knowledge-block" style="--kb-accent:#ff6b6b;">
+                    <div class="kb-block-head">
+                        <h3 class="knowledge-block-title">🎹 C 大调版本（最常用入门调）</h3>
+                        <button class="prog-play-btn" data-prog="C4536">▶ 整段试听</button>
+                    </div>
+                    <div class="prog-chord-row">
+                        <div class="prog-chord-card" data-chord="F" data-prog-name="C4536" data-idx="0">
+                            <div class="pcc-step">1 · IV</div>
+                            <div class="pcc-name">F</div>
+                            <div class="pcc-notes">F - A - C</div>
+                            <div class="kp-wrap" id="kp4536_C4536_0"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="G" data-prog-name="C4536" data-idx="1">
+                            <div class="pcc-step">2 · V</div>
+                            <div class="pcc-name">G</div>
+                            <div class="pcc-notes">G - B - D</div>
+                            <div class="kp-wrap" id="kp4536_C4536_1"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="Em" data-prog-name="C4536" data-idx="2">
+                            <div class="pcc-step">3 · iii</div>
+                            <div class="pcc-name">Em</div>
+                            <div class="pcc-notes">E - G - B</div>
+                            <div class="kp-wrap" id="kp4536_C4536_2"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="Am" data-prog-name="C4536" data-idx="3">
+                            <div class="pcc-step">4 · vi</div>
+                            <div class="pcc-name">Am</div>
+                            <div class="pcc-notes">A - C - E</div>
+                            <div class="kp-wrap" id="kp4536_C4536_3"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="Dm" data-prog-name="C4536" data-idx="4">
+                            <div class="pcc-step">5 · ii</div>
+                            <div class="pcc-name">Dm</div>
+                            <div class="pcc-notes">D - F - A</div>
+                            <div class="kp-wrap" id="kp4536_C4536_4"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="G" data-prog-name="C4536" data-idx="5">
+                            <div class="pcc-step">6 · V</div>
+                            <div class="pcc-name">G</div>
+                            <div class="pcc-notes">G - B - D</div>
+                            <div class="kp-wrap" id="kp4536_C4536_5"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="C" data-prog-name="C4536" data-idx="6">
+                            <div class="pcc-step">7 · I</div>
+                            <div class="pcc-name pcc-root">C</div>
+                            <div class="pcc-notes">C - E - G</div>
+                            <div class="kp-wrap" id="kp4536_C4536_6"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- G 大调 -->
+                <section class="knowledge-block" style="--kb-accent:#339af0;">
+                    <div class="kb-block-head">
+                        <h3 class="knowledge-block-title">🎸 G 大调版本（男声常见音域，吉他开放调）</h3>
+                        <button class="prog-play-btn" data-prog="G4536">▶ 整段试听</button>
+                    </div>
+                    <div class="prog-chord-row">
+                        <div class="prog-chord-card" data-chord="C" data-prog-name="G4536" data-idx="0">
+                            <div class="pcc-step">1 · IV</div><div class="pcc-name">C</div><div class="pcc-notes">C - E - G</div>
+                            <div class="kp-wrap" id="kp4536_G4536_0"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="D" data-prog-name="G4536" data-idx="1">
+                            <div class="pcc-step">2 · V</div><div class="pcc-name">D</div><div class="pcc-notes">D - F# - A</div>
+                            <div class="kp-wrap" id="kp4536_G4536_1"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="Bm" data-prog-name="G4536" data-idx="2">
+                            <div class="pcc-step">3 · iii</div><div class="pcc-name">Bm</div><div class="pcc-notes">B - D - F#</div>
+                            <div class="kp-wrap" id="kp4536_G4536_2"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="Em" data-prog-name="G4536" data-idx="3">
+                            <div class="pcc-step">4 · vi</div><div class="pcc-name">Em</div><div class="pcc-notes">E - G - B</div>
+                            <div class="kp-wrap" id="kp4536_G4536_3"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="Am" data-prog-name="G4536" data-idx="4">
+                            <div class="pcc-step">5 · ii</div><div class="pcc-name">Am</div><div class="pcc-notes">A - C - E</div>
+                            <div class="kp-wrap" id="kp4536_G4536_4"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="D" data-prog-name="G4536" data-idx="5">
+                            <div class="pcc-step">6 · V</div><div class="pcc-name">D</div><div class="pcc-notes">D - F# - A</div>
+                            <div class="kp-wrap" id="kp4536_G4536_5"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="G" data-prog-name="G4536" data-idx="6">
+                            <div class="pcc-step">7 · I</div><div class="pcc-name pcc-root">G</div><div class="pcc-notes">G - B - D</div>
+                            <div class="kp-wrap" id="kp4536_G4536_6"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- D 大调 -->
+                <section class="knowledge-block" style="--kb-accent:#20c997;">
+                    <div class="kb-block-head">
+                        <h3 class="knowledge-block-title">🎷 D 大调版本（明朗开阔，女声常选）</h3>
+                        <button class="prog-play-btn" data-prog="D4536">▶ 整段试听</button>
+                    </div>
+                    <div class="prog-chord-row">
+                        <div class="prog-chord-card" data-chord="G" data-prog-name="D4536" data-idx="0">
+                            <div class="pcc-step">1 · IV</div><div class="pcc-name">G</div><div class="pcc-notes">G - B - D</div>
+                            <div class="kp-wrap" id="kp4536_D4536_0"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="A" data-prog-name="D4536" data-idx="1">
+                            <div class="pcc-step">2 · V</div><div class="pcc-name">A</div><div class="pcc-notes">A - C# - E</div>
+                            <div class="kp-wrap" id="kp4536_D4536_1"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="F#m" data-prog-name="D4536" data-idx="2">
+                            <div class="pcc-step">3 · iii</div><div class="pcc-name">F#m</div><div class="pcc-notes">F# - A - C#</div>
+                            <div class="kp-wrap" id="kp4536_D4536_2"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="Bm" data-prog-name="D4536" data-idx="3">
+                            <div class="pcc-step">4 · vi</div><div class="pcc-name">Bm</div><div class="pcc-notes">B - D - F#</div>
+                            <div class="kp-wrap" id="kp4536_D4536_3"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="Em" data-prog-name="D4536" data-idx="4">
+                            <div class="pcc-step">5 · ii</div><div class="pcc-name">Em</div><div class="pcc-notes">E - G - B</div>
+                            <div class="kp-wrap" id="kp4536_D4536_4"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="A" data-prog-name="D4536" data-idx="5">
+                            <div class="pcc-step">6 · V</div><div class="pcc-name">A</div><div class="pcc-notes">A - C# - E</div>
+                            <div class="kp-wrap" id="kp4536_D4536_5"></div>
+                        </div>
+                        <div class="prog-chord-card" data-chord="D" data-prog-name="D4536" data-idx="6">
+                            <div class="pcc-step">7 · I</div><div class="pcc-name pcc-root">D</div><div class="pcc-notes">D - F# - A</div>
+                            <div class="kp-wrap" id="kp4536_D4536_6"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 常见歌曲示例 -->
+                <section class="knowledge-block">
+                    <h3 class="knowledge-block-title">🎧 用到 4536251 的经典歌曲（节选）</h3>
+                    <div class="knowledge-grid-2">
+                        <div class="knowledge-note">
+                            <strong>C 大调：</strong>
+                            周杰伦《青花瓷》副歌 · 林俊杰《小酒窝》 · 梁静茹《可惜不是你》 · 五月天《突然好想你》副歌 · 陈绮贞《旅行的意义》
+                        </div>
+                        <div class="knowledge-note">
+                            <strong>G / D 变体：</strong>
+                            Coldplay《The Scientist》 · Passenger《Let Her Go》(G调 6415 → 4536251混用) · Ed Sheeran《Perfect》(G调变体)
+                        </div>
+                        <div class="knowledge-note">
+                            <strong>演奏变奏思路：</strong>
+                            ① 第 6 个和弦 V 用属七（G7 / D7 / A7）增强张力 ② 第 4 个 vi 加 9 音 ③ 最后 I 用 I→vi→IV→V 作 outro 循环
+                        </div>
+                        <div class="knowledge-note">
+                            <strong>练习建议：</strong>
+                            从 C 调开始，右手弹原位三和弦，左手每拍弹低音根音；稳定后右手改为「分解弹法」里的 Lv.2/3，会立刻有流行歌的味道。
+                        </div>
+                    </div>
+                </section>
+            </div>
 
             <!-- TAB 1: 和弦图 -->
             <div class="chords-tab-panel active" id="chordTab-chart">
@@ -8624,12 +8852,157 @@
                         chordRenderMini('kpInv1', [4, 7, 12], 4);
                         chordRenderMini('kpInv2', [7, 12, 16], 7);
                     }
+                    if (tab === 'prog4536') chordInit4536Tab();
                 });
             });
+
+            // 绑定「整段试听」按钮 & 单卡片点击（使用委托，防止多tab切换后重复绑定）
+            const progPanel = document.getElementById('chordTab-prog4536');
+            if (progPanel) {
+                progPanel.addEventListener('click', (e) => {
+                    const playBtn = e.target.closest('[data-prog].prog-play-btn');
+                    const card = e.target.closest('.prog-chord-card');
+                    if (playBtn) chordPlayProgression(playBtn.dataset.prog, playBtn);
+                    else if (card) {
+                        const chordName = card.dataset.chord;
+                        const semis = chordResolveChordNameToSemitones(chordName);
+                        if (semis) chordPlayAll(semis, 1.4, 0.16);
+                        const progName = card.dataset.progName;
+                        chordHighlightCard(progName, parseInt(card.dataset.idx || '0'));
+                    }
+                });
+            }
 
             // 默认先渲染和弦图（120卡）
             chordRenderGrid();
             chordLibInited = true;
+        }
+
+        // ---------- 4536251 Tab 专用 ----------
+        // 三个调的走向：各7个和弦(名称→半音数组)
+        const PROG_4536_DATA = {
+            C4536: ['F','G','Em','Am','Dm','G','C'],
+            G4536: ['C','D','Bm','Em','Am','D','G'],
+            D4536: ['G','A','F#m','Bm','Em','A','D']
+        };
+        // 迷你钢琴 (2 oct, 同 chordRenderMini)
+        function chordMiniPianoHTML(keys, bassKey = null) {
+            const octaves = 2;
+            const whitePerOct = 7;
+            const whiteTotal = octaves * whitePerOct;
+            const whitePct = 100 / whiteTotal;
+            const blackWidth = whitePct * 0.65;
+            const whiteBase = [
+                {semi:0,note:'C'},{semi:2,note:'D'},{semi:4,note:'E'},
+                {semi:5,note:'F'},{semi:7,note:'G'},{semi:9,note:'A'},{semi:11,note:'B'}
+            ];
+            const blackBase = [
+                {semi:1,after:0},{semi:3,after:1},{semi:6,after:3},
+                {semi:8,after:4},{semi:10,after:5}
+            ];
+            let html = '<div class="kp-inner">';
+            for (let oct = 0; oct < octaves; oct++) {
+                for (let w = 0; w < whitePerOct; w++) {
+                    const base = whiteBase[w];
+                    const whiteIdx = oct * whitePerOct + w;
+                    const absSemi = oct * 12 + base.semi;
+                    const left = whiteIdx * whitePct;
+                    let cls = 'kp-wk';
+                    if (keys.includes(absSemi)) cls += ' hl';
+                    if (absSemi === bassKey) cls = 'kp-wk root';
+                    const label = w === 0 ? `${base.note}${oct===0?'4':'5'}` : '';
+                    html += `<div class="${cls}" style="left:${left}%;width:${whitePct}%;" onclick="playSingleAbs(${absSemi},event)">${label}</div>`;
+                }
+            }
+            for (let oct = 0; oct < octaves; oct++) {
+                for (const b of blackBase) {
+                    const whiteIdx = oct * whitePerOct + b.after;
+                    const absSemi = oct * 12 + b.semi;
+                    const left = (whiteIdx + 1) * whitePct - blackWidth / 2;
+                    let cls = 'kp-bk';
+                    if (keys.includes(absSemi)) cls += ' hl';
+                    html += `<div class="${cls}" style="left:${left}%;width:${blackWidth}%;" onclick="playSingleAbs(${absSemi},event)"></div>`;
+                }
+            }
+            html += '</div>';
+            return html;
+        }
+        function chordResolveChordNameToSemitones(name) {
+            // 将 "F" / "Em" / "F#m" / "Am" / "Dm" / "Bm" 等常见三和弦名解析为半音数组
+            if (!name) return null;
+            // 匹配 [根音][#/b]? [后缀]
+            const m = name.match(/^([A-G])(#|b)?(maj7|m7|maj|m|dim|aug|sus2|sus4|7)?$/);
+            if (!m) return null;
+            const letter = m[1]; const acc = m[2] || ''; const qual = m[3] || 'maj';
+            const mapAcc = { 'C':0,'D':2,'E':4,'F':5,'G':7,'A':9,'B':11 };
+            let root = mapAcc[letter];
+            if (acc === '#') root = (root + 1) % 12;
+            if (acc === 'b') root = (root + 11) % 12;
+            const intervals = {
+                'maj':[0,4,7], 'm':[0,3,7], 'dim':[0,3,6], 'aug':[0,4,8],
+                'sus2':[0,2,7], 'sus4':[0,5,7], '7':[0,4,7,10],
+                'm7':[0,3,7,10], 'maj7':[0,4,7,11]
+            };
+            const ivs = intervals[qual] || intervals['maj'];
+            return ivs.map(iv => (root + iv) % 12);
+        }
+        let prog4536Inited = false;
+        function chordInit4536Tab() {
+            if (prog4536Inited) return;
+            prog4536Inited = true;
+            for (const progName of Object.keys(PROG_4536_DATA)) {
+                const chords = PROG_4536_DATA[progName];
+                chords.forEach((cname, idx) => {
+                    const el = document.getElementById(`kp4536_${progName}_${idx}`);
+                    if (!el) return;
+                    const semis = chordResolveChordNameToSemitones(cname);
+                    if (semis) el.innerHTML = chordMiniPianoHTML(semis, semis[0]);
+                });
+            }
+            // 让 playSingleAbs 支持 event 参数（避免冒泡激活卡片高亮）
+            window.playSingleAbs = function(absSemi, ev) {
+                if (ev && ev.stopPropagation) ev.stopPropagation();
+                chordPlaySemitone(absSemi);
+            };
+        }
+        function chordHighlightCard(progName, idx) {
+            const panel = document.getElementById('chordTab-prog4536');
+            if (!panel) return;
+            panel.querySelectorAll(`.prog-chord-card[data-prog-name="${progName}"]`).forEach(c => c.classList.remove('active'));
+            const target = panel.querySelector(`.prog-chord-card[data-prog-name="${progName}"][data-idx="${idx}"]`);
+            if (target) {
+                target.classList.add('active');
+                target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+            panel.querySelectorAll(`.prog-play-btn[data-prog="${progName}"]`).forEach(b => b.classList.add('active'));
+        }
+        function chordPlayProgression(progName, playBtn) {
+            const chords = PROG_4536_DATA[progName];
+            if (!chords) return;
+            const ctx = chordEnsureAudio();
+            if (ctx.state === 'suspended') ctx.resume();
+            // 每个和弦一拍 ~0.9s，共 7 拍
+            const step = 0.9;
+            playBtn.classList.add('active');
+            let stopClear = () => { playBtn.classList.remove('active');
+                const panel = document.getElementById('chordTab-prog4536');
+                if (panel) panel.querySelectorAll(`.prog-chord-card[data-prog-name="${progName}"]`).forEach(c => c.classList.remove('active'));
+            };
+            let cancelled = false;
+            // 用 setTimeout 依次触发并高亮
+            chords.forEach((name, i) => {
+                setTimeout(() => {
+                    if (cancelled) return;
+                    const semis = chordResolveChordNameToSemitones(name);
+                    if (semis) chordPlayAll(semis, step * 1.4, 0.15);
+                    chordHighlightCard(progName, i);
+                }, Math.round(i * step * 1000));
+            });
+            setTimeout(stopClear, Math.round(chords.length * step * 1000 + 300));
+            // 再次点击时取消高亮（下次点击时会重玩）
+            const onceStop = () => { cancelled = true; stopClear(); playBtn.removeEventListener('click', onceStop, true); };
+            playBtn.addEventListener('click', onceStop, true);
+            setTimeout(() => playBtn.removeEventListener('click', onceStop, true), Math.round(chords.length * step * 1000 + 400));
         }
 
         // Start
