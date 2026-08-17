@@ -8291,19 +8291,48 @@
             if (!chordAudioCtx) chordAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
             return chordAudioCtx;
         }
-        function chordPlaySemitone(absSemi, dur = 0.8, vol = 0.2) {
+        function chordPlaySemitone(absSemi, dur = 1.8, vol = 0.22) {
+            // 模拟真钢音色：多谐波叠加（基波1 + 2/3/4/5/6次谐波，强度按真钢频谱递减）
+            // + 快速起音 + 指数衰减包络 + 轻微低通软化高频
             const ctx = chordEnsureAudio();
             const baseFreq = 261.63;
-            const freq = baseFreq * Math.pow(2, absSemi / 12);
+            const f0 = baseFreq * Math.pow(2, absSemi / 12);
             const now = ctx.currentTime;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine'; osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0, now);
-            gain.gain.linearRampToValueAtTime(vol, now + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.start(now); osc.stop(now + dur);
+
+            const harmonics = [
+                { mul: 1, gain: 1.00, type: 'triangle' }, // 基频 主能量
+                { mul: 2, gain: 0.48, type: 'sine' },     // 二次谐波（八度）
+                { mul: 3, gain: 0.28, type: 'sine' },     // 三次
+                { mul: 4, gain: 0.16, type: 'sine' },     // 四次
+                { mul: 5, gain: 0.10, type: 'sine' },     // 五次
+                { mul: 6, gain: 0.06, type: 'sine' }      // 六次
+            ];
+            const bus = ctx.createGain();
+            // 低通：软化毛刺，模拟钢琴音板滤波特性
+            const lp = ctx.createBiquadFilter();
+            lp.type = 'lowpass'; lp.frequency.value = 6500; lp.Q.value = 0.6;
+            bus.connect(lp); lp.connect(ctx.destination);
+
+            // ADSR 包络：attack 5ms ~ peak，decay 至 ~15%，然后持续释放
+            const attackT = 0.005;
+            const peakT  = now + attackT;
+            const sustainLv = 0.18;
+            const endT = now + dur;
+            bus.gain.setValueAtTime(0, now);
+            bus.gain.linearRampToValueAtTime(vol, peakT);
+            bus.gain.exponentialRampToValueAtTime(Math.max(sustainLv * vol, 0.0008), now + Math.min(dur * 0.35, 0.6));
+            bus.gain.exponentialRampToValueAtTime(0.0005, endT);
+
+            harmonics.forEach(h => {
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = h.type; osc.frequency.value = f0 * h.mul;
+                // 随次数增加略做轻微失谐，模拟真实钢弦非理想弹性
+                if (h.mul > 2) osc.frequency.value = f0 * h.mul * (1 + (h.mul - 2) * 0.0008);
+                g.gain.setValueAtTime(h.gain, now);
+                osc.connect(g); g.connect(bus);
+                osc.start(now); osc.stop(endT + 0.05);
+            });
         }
         function chordPlayAll(semitonesAbs, dur = 1.3, vol = 0.15) {
             semitonesAbs.forEach(s => chordPlaySemitone(s, dur, vol));
@@ -8312,7 +8341,12 @@
         window.playSingleAbs = chordPlaySemitone;
 
         function chordBuildData() {
-            const noteToSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+            // 修复：12 个音级全部建立映射，否则 C#/D#/F#/G#/A# 的 rootSemi = undefined → 导致 semitones/notes 全为 NaN
+            const noteToSemitone = {
+                'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4,
+                'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9,
+                'A#': 10, 'Bb': 10, 'B': 11, 'Cb': 11
+            };
             const semitoneToNumber = {
                 0: '1', 1: '1#', 2: '2', 3: '2#', 4: '3', 5: '4', 6: '4#',
                 7: '5', 8: '#5', 9: '6', 10: 'b7', 11: '7'
