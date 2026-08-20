@@ -414,15 +414,43 @@ app.get('/api/music/search', async (req, res) => {
             throw new Error('搜索结果格式错误');
         }
 
-        // 网易云返回格式: { result: { songs: [{ id, name, artists, album }] } }
-        // album.picUrl 为专辑封面图片
+        // 网易云搜索 API 返回的 album 对象不含 picUrl，需要用歌曲详情 API 补获封面
         const songs = data.result.songs.map(item => ({
             id: item.id,
             name: item.name || '未知歌曲',
             artist: item.artists && item.artists.length > 0 ? item.artists.map(a => a.name).join('/') : '未知歌手',
             album: item.album ? item.album.name : '未知专辑',
-            cover: item.album && item.album.picUrl ? item.album.picUrl.replace(/^http:/, 'https:') : null
+            cover: null
         }));
+
+        // 批量获取歌曲详情（含专辑封面 picUrl）
+        try {
+            const songIds = JSON.stringify(songs.map(s => s.id));
+            const detailUrl = `https://music.163.com/api/song/detail/?ids=${encodeURIComponent(songIds)}`;
+            const detailResp = await fetch(detailUrl, {
+                headers: {
+                    'Referer': 'https://music.163.com',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+            if (detailResp.ok) {
+                const detailData = await detailResp.json();
+                if (detailData.code === 200 && detailData.songs) {
+                    const coverMap = {};
+                    detailData.songs.forEach(s => {
+                        if (s.album && s.album.picUrl) {
+                            coverMap[s.id] = s.album.picUrl.replace(/^http:/, 'https:');
+                        }
+                    });
+                    songs.forEach(s => {
+                        if (coverMap[s.id]) s.cover = coverMap[s.id];
+                    });
+                }
+            }
+        } catch (e) {
+            // 封面获取失败不影响主流程
+            console.error('封面获取失败:', e.message);
+        }
 
         res.json({ songs });
     } catch (error) {
