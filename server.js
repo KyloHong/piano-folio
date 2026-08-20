@@ -415,11 +415,13 @@ app.get('/api/music/search', async (req, res) => {
         }
 
         // 网易云返回格式: { result: { songs: [{ id, name, artists, album }] } }
+        // album.picUrl 为专辑封面图片
         const songs = data.result.songs.map(item => ({
             id: item.id,
             name: item.name || '未知歌曲',
             artist: item.artists && item.artists.length > 0 ? item.artists.map(a => a.name).join('/') : '未知歌手',
-            album: item.album ? item.album.name : '未知专辑'
+            album: item.album ? item.album.name : '未知专辑',
+            cover: item.album && item.album.picUrl ? item.album.picUrl.replace(/^http:/, 'https:') : null
         }));
 
         res.json({ songs });
