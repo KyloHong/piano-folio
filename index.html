@@ -598,6 +598,34 @@
             border-bottom-color: transparent;
         }
 
+        .song-version-input {
+            font-size: 1rem;
+            color: var(--accent-color);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            text-align: center;
+            padding: 4px 12px;
+            font-style: italic;
+            font-weight: 500;
+            transition: border-color 0.2s;
+        }
+
+        .song-version-input::placeholder {
+            color: var(--text-dim);
+            font-weight: 400;
+        }
+
+        .song-version-input:focus {
+            outline: none;
+            border-bottom-color: var(--accent-color);
+        }
+
+        .song-version-input[readonly] {
+            cursor: default;
+            border-bottom-color: transparent;
+        }
+
         .song-author {
             font-size: 0.9rem;
             color: var(--text-dim);
@@ -1993,6 +2021,32 @@
             border-color: var(--text-primary);
         }
 
+        .save-version-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+            color: var(--accent-color);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-style: italic;
+            font-weight: 500;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .save-version-input::placeholder {
+            color: var(--text-dim);
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        .save-version-input:focus {
+            border-color: var(--accent-color);
+        }
+
         .save-dialog-actions {
             display: flex;
             gap: 8px;
@@ -2692,9 +2746,11 @@
 
         /* ===== My Library 新样式 ===== */
         .gallery-main.gallery-my {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 48px 32px 80px;
+            max-width: none;
+            width: 100%;
+            margin: 0;
+            padding: 32px 11px 64px;
+            box-sizing: border-box;
         }
 
         .library-header {
@@ -2779,13 +2835,18 @@
 
         .chart-grid-2 {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 56px 40px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 36px 24px;
         }
 
-        @media (max-width: 720px) {
+        @media (min-width: 720px)  { .chart-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 28px; } }
+        @media (min-width: 1100px) { .chart-grid-2 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px 32px; } }
+        @media (min-width: 1500px) { .chart-grid-2 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+        @media (max-width: 560px) {
             .chart-grid-2 {
                 grid-template-columns: 1fr;
+                gap: 28px 0;
             }
             .library-title {
                 font-size: 1.75rem;
@@ -2952,7 +3013,16 @@
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
+        }
+
+        .library-card-version {
+            font-size: 0.78rem;
+            color: var(--accent-color);
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            margin-bottom: 10px;
+            font-style: italic;
         }
 
         .library-card-meta {
@@ -3065,9 +3135,12 @@
 
         .chart-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 48px 32px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 40px 28px;
         }
+        @media (min-width: 780px)  { .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px 30px; } }
+        @media (min-width: 1180px) { .chart-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px 32px; } }
+        @media (min-width: 1580px) { .chart-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
         .grid-card {
             cursor: pointer;
             transition: opacity 0.2s ease;
@@ -3124,6 +3197,15 @@
             font-size: 0.78rem;
             color: var(--text-secondary);
             letter-spacing: 0.3px;
+            margin-bottom: 4px;
+        }
+
+        .grid-card-version {
+            font-size: 0.78rem;
+            color: var(--accent-color);
+            font-weight: 500;
+            font-style: italic;
+            letter-spacing: 0.2px;
             margin-bottom: 6px;
         }
         .grid-card-meta {
@@ -5063,7 +5145,9 @@
                 </div>
                 <div class="song-meta">
                     <input type="text" class="song-artist-input" id="songArtistInput" placeholder="请输入歌手名称" aria-label="歌手名称">
-                    <span class="song-author" id="songAuthorDisplay" style="display: none;"></span>
+                </div>
+                <div class="song-meta" style="margin-top:2px;">
+                    <input type="text" class="song-version-input" id="songVersionInput" placeholder="版本描述（如：@劳老师、C调简化版）" aria-label="版本描述">
                 </div>
                 <div class="song-divider"></div>
             </section>
@@ -5371,6 +5455,7 @@
         <div class="save-dialog-title" id="saveDialogTitle">保存图谱</div>
         <div class="save-dialog-hint" id="saveDialogHint">保存后可在「我的图谱」中查看</div>
         <input type="text" class="save-name-input" id="saveNameInput" placeholder="图谱名称（如：七里香-练习版）">
+        <input type="text" class="save-version-input" id="saveVersionInput" placeholder="版本描述（如：@劳老师、C调简化版、原调完整版）">
         <div class="save-dialog-actions">
             <button class="btn btn-secondary" id="saveCancel">取消</button>
             <button class="btn btn-secondary" id="saveAsConfirm" style="display:none;">另存为新图谱</button>
@@ -5393,7 +5478,7 @@
     <script>
         // Application State
         const state = {
-            song: { title: '', artist: '', lyrics: [], sections: {} },
+            song: { title: '', artist: '', version: '', cover: '', lyrics: [], sections: {} },
             displayMode: 'name', // 'name' or 'tab'
             lyricsLayout: 'sequential', // 'sequential' or 'parallel'
             selectedChar: null,
@@ -5973,6 +6058,10 @@
             });
             document.getElementById('songArtistInput')?.addEventListener('input', function() {
                 state.song.artist = this.value;
+                markDirty();
+            });
+            document.getElementById('songVersionInput')?.addEventListener('input', function() {
+                state.song.version = this.value;
                 markDirty();
             });
 
@@ -6858,6 +6947,7 @@
             songInfo.style.display = 'block';
             const titleInput = document.getElementById('songTitleInput');
             const artistInput = document.getElementById('songArtistInput');
+            const versionInput = document.getElementById('songVersionInput');
             const authorDisplay = document.getElementById('songAuthorDisplay');
             const coverWrap = document.getElementById('songCoverWrap');
             const coverImg = document.getElementById('songCoverImg');
@@ -6880,6 +6970,10 @@
             if (artistInput) {
                 artistInput.value = state.song.artist || '';
                 artistInput.readOnly = state.isReadOnly;
+            }
+            if (versionInput) {
+                versionInput.value = state.song.version || '';
+                versionInput.readOnly = state.isReadOnly;
             }
             // 只读模式下单独显示作者信息在歌手名下方
             if (authorDisplay) {
@@ -8120,7 +8214,7 @@
         // New chart
         function newChart() {
             if (state.isDirty && !confirm('当前图谱有未保存的修改，确定要新建吗？')) return;
-            state.song = { title: '', artist: '', lyrics: [], sections: {} };
+            state.song = { title: '', artist: '', version: '', cover: '', lyrics: [], sections: {} };
             state.chordData = {};
             state.currentChartId = null;
             state.currentChartName = null;
@@ -8257,6 +8351,7 @@
             const dialog = document.getElementById('saveDialog');
             const overlay = document.getElementById('saveOverlay');
             const input = document.getElementById('saveNameInput');
+            const versionInput = document.getElementById('saveVersionInput');
             const saveBtn = document.getElementById('saveConfirm');
             const saveAsBtn = document.getElementById('saveAsConfirm');
             const hint = document.getElementById('saveDialogHint');
@@ -8276,6 +8371,9 @@
 
             // 预填名称
             input.value = mode === 'saveas' ? (_saveDialogOriginalName ? `${_saveDialogOriginalName} 副本` : '') : _saveDialogOriginalName;
+
+            // 预填版本描述：优先使用当前编辑区的值
+            versionInput.value = state.song.version || '';
 
             // 另存为模式下：另存为为主按钮，保存为副按钮
             if (mode === 'saveas') {
@@ -8308,6 +8406,7 @@
             document.getElementById('saveDialog').classList.remove('visible');
             document.getElementById('saveOverlay').classList.remove('visible');
             document.getElementById('saveNameInput').value = '';
+            document.getElementById('saveVersionInput').value = '';
         }
 
         // Show toast notification
@@ -8324,6 +8423,7 @@
             // 强校验：歌曲标题和歌手必须填写
             const title = document.getElementById('songTitleInput')?.value.trim();
             const artist = document.getElementById('songArtistInput')?.value.trim();
+            const version = (document.getElementById('saveVersionInput')?.value || '').trim();
             
             if (!title) {
                 alert('请输入歌曲名称');
@@ -8337,9 +8437,10 @@
                 return;
             }
             
-            // 更新状态中的歌曲信息
+            // 更新状态中的歌曲信息（版本：优先用保存对话框中的值，否则用编辑区的值）
             state.song.title = title;
             state.song.artist = artist;
+            state.song.version = version || (document.getElementById('songVersionInput')?.value || '').trim();
             
             // 图谱名称：如果用户没有输入，使用歌曲名称作为默认值
             let name = document.getElementById('saveNameInput').value.trim();
@@ -8363,6 +8464,7 @@
             // 强校验：歌曲标题和歌手必须填写
             const title = document.getElementById('songTitleInput')?.value.trim();
             const artist = document.getElementById('songArtistInput')?.value.trim();
+            const version = (document.getElementById('saveVersionInput')?.value || '').trim();
             
             if (!title) {
                 alert('请输入歌曲名称');
@@ -8379,6 +8481,7 @@
             // 更新状态中的歌曲信息
             state.song.title = title;
             state.song.artist = artist;
+            state.song.version = version || (document.getElementById('songVersionInput')?.value || '').trim();
             
             // 图谱名称：如果用户没有输入，使用歌曲名称作为默认值
             let name = document.getElementById('saveNameInput').value.trim();
@@ -8843,7 +8946,7 @@
                 list.innerHTML = charts.map(c => {
                     return `
                     <div class="grid-card library-card" onclick="loadChart('${c.id}', 'my')">
-                        <div class="library-cover">
+                        <div class="library-cover" data-chart-id="${c.id}">
                             ${renderChartCover(c, c.id)}
                             <span class="library-level ${c.is_public ? 'public' : 'private'}">${c.is_public ? 'PUBLIC' : 'PRIVATE'}</span>
                         </div>
@@ -8862,7 +8965,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="library-card-meta">${escapeHtml(c.song_artist || '—')}</div>
+                            <div class="library-card-artist">${escapeHtml(c.song_artist || '—')}</div>
+                            ${c.song_version ? `<div class="library-card-version">${escapeHtml(c.song_version)}</div>` : ''}
                             <div class="library-card-author">@ ${escapeHtml(currentUser || '我')}</div>
                             <div class="library-tags">
                                 <span class="tag-pill">${formatDate(c.updated_at)}</span>
@@ -8871,8 +8975,65 @@
                     </div>
                     `;
                 }).join('');
+
+                // 后台补封面：对没有专辑封面但有歌曲名的图谱，逐个搜索网易云并补封面
+                const needCover = charts.filter(c => !c.cover && c.song_title && c.song_title.trim());
+                if (needCover.length > 0) {
+                    needCover.forEach((chart, idx) => {
+                        setTimeout(() => fetchAndApplyChartCover(chart.id, chart.song_title, chart.song_artist), idx * 450);
+                    });
+                }
             } catch (e) {
                 list.innerHTML = '<div class="empty-list"><div class="empty-list-icon">🌐</div>暂无图谱</div>';
+            }
+        }
+
+        // 为指定图谱搜索网易云封面，并在命中时更新服务端与封面 DOM
+        async function fetchAndApplyChartCover(chartId, songTitle, songArtist) {
+            try {
+                if (!authToken || !songTitle) return;
+                const q = songArtist ? `${songTitle} ${songArtist}` : songTitle;
+                const resp = await fetch(`/api/music/search?q=${encodeURIComponent(q)}`);
+                if (!resp.ok) return;
+                const data = await resp.json();
+                if (!data || !Array.isArray(data.songs) || data.songs.length === 0) return;
+                // 优先按标题+歌手匹配，其次按标题匹配
+                const artistNorm = (songArtist || '').trim();
+                const titleNorm = songTitle.trim();
+                let best = data.songs.find(s =>
+                    s.name === titleNorm && artistNorm && s.artist &&
+                    (s.artist === artistNorm || s.artist.includes(artistNorm) || artistNorm.includes(s.artist))
+                );
+                if (!best) best = data.songs.find(s => s.name === titleNorm && s.cover);
+                if (!best) best = data.songs.find(s => s.cover);
+                if (!best || !best.cover) return;
+                const coverUrl = best.cover;
+                // 更新服务端
+                try {
+                    await apiRequest('/api/charts/my/' + chartId, {
+                        method: 'PUT',
+                        body: JSON.stringify({ song: { cover: coverUrl } })
+                    });
+                } catch (_) { /* 忽略更新失败，下次重试 */ }
+                // 更新 DOM 中的封面图节点
+                const coverWrap = document.querySelector(`.library-cover[data-chart-id="${chartId}"]`);
+                if (coverWrap) {
+                    const oldImg = coverWrap.querySelector('img.chart-cover-img');
+                    if (oldImg) { oldImg.src = coverUrl; oldImg.style.display = ''; }
+                    else {
+                        const existSvg = coverWrap.querySelector('svg');
+                        const img = document.createElement('img');
+                        img.className = 'chart-cover-img';
+                        img.src = coverUrl;
+                        img.alt = (titleNorm || 'cover') + ' cover';
+                        img.loading = 'lazy';
+                        img.onerror = () => { img.style.display = 'none'; };
+                        coverWrap.appendChild(img);
+                        if (existSvg) { /* 保留 SVG 作为底层，img 覆盖在上面（CSS absolute） */ }
+                    }
+                }
+            } catch (e) {
+                // 静默失败，下次进入页面再尝试
             }
         }
 
@@ -8970,6 +9131,7 @@
             state.song = {
                 title: chart.song_title || '',
                 artist: chart.song_artist || '',
+                version: chart.song_version || '',
                 cover: chart.cover || '',
                 lyrics: JSON.parse(chart.song_lyrics || '[]'),
                 sections: JSON.parse(chart.song_sections || '{}')
@@ -9045,7 +9207,7 @@
                 const confirmed = await showConfirmDialog('确认新建', '当前图谱有未保存的修改，确定要重新开始吗？');
                 if (!confirmed) return;
             }
-            state.song = { title: '', artist: '', lyrics: [''], sections: {} }; // 默认1行空歌词
+            state.song = { title: '', artist: '', version: '', cover: '', lyrics: [''], sections: {} }; // 默认1行空歌词
             state.chordData = {};
             state.currentChartId = null;  // 重置当前图谱ID
             state.currentChartName = null; // 重置当前图谱名称
@@ -9087,6 +9249,7 @@
                         <div>
                             <div class="grid-card-title">${escapeHtml(c.name)}</div>
                             <div class="grid-card-meta">${escapeHtml(c.song_artist || 'Various')}</div>
+                            ${c.song_version ? `<div class="grid-card-version">${escapeHtml(c.song_version)}</div>` : ''}
                             <div class="grid-card-artist">@ ${escapeHtml(c.author)}</div>
                             <span class="grid-card-time">${formatDate(c.updated_at)}</span>
                             <div class="grid-card-actions">
@@ -9152,6 +9315,7 @@
             bodyEl.innerHTML = `
                 ${chart.cover ? `<div class="chart-viewer-cover"><img src="${escapeHtml(chart.cover)}" alt="${escapeHtml(chart.song_title || chart.name || 'cover')}" onerror="this.parentElement.style.display='none'"></div>` : ''}
                 <div class="chart-viewer-song">${escapeHtml(chart.song_title)}${chart.song_artist ? ' · ' + escapeHtml(chart.song_artist) : ''}</div>
+                ${chart.song_version ? `<div class="chart-viewer-version" style="font-size:0.78rem;color:var(--accent-color);font-weight:500;font-style:italic;margin-top:3px;">${escapeHtml(chart.song_version)}</div>` : ''}
                 ${isPublic && chart.author ? '<div class="chart-viewer-author">作者：@' + escapeHtml(chart.author) + '</div>' : ''}
                 <div style="margin-top:12px;display:flex;gap:6px;align-items:center">
                     <span style="font-size:0.75rem;color:var(--text-secondary)">显示模式：</span>

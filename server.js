@@ -109,11 +109,13 @@ async function initSchema() {
                 name TEXT NOT NULL,
                 song_title TEXT DEFAULT '',
                 song_artist TEXT DEFAULT '',
+                song_version TEXT DEFAULT '',
                 song_lyrics TEXT DEFAULT '[]',
                 song_sections TEXT DEFAULT '{}',
                 chord_data TEXT DEFAULT '{}',
                 display_mode TEXT DEFAULT 'name',
                 is_public INTEGER DEFAULT 0,
+                cover TEXT DEFAULT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
@@ -127,6 +129,7 @@ async function initSchema() {
         await addCol('charts', 'song_sections', `TEXT DEFAULT '{}'`);
         await addCol('charts', 'display_mode', `TEXT DEFAULT 'name'`);
         await addCol('charts', 'cover', 'TEXT DEFAULT NULL');
+        await addCol('charts', 'song_version', `TEXT DEFAULT ''`);
         schemaInited = true;
     } catch (e) {
         console.error('Schema init error:', e.message);
@@ -239,7 +242,7 @@ app.get('/api/charts/my', authenticate, async (req, res) => {
     try {
         await initSchema();
         const charts = (await dbAll(`
-            SELECT id, name, song_title, song_artist, cover, display_mode, is_public, created_at, updated_at
+            SELECT id, name, song_title, song_artist, song_version, cover, display_mode, is_public, created_at, updated_at
             FROM charts WHERE user_id = ? ORDER BY updated_at DESC
         `, [req.userId])).map(convertChartTimestamps);
         res.json(charts);
@@ -271,11 +274,11 @@ app.post('/api/charts/my', authenticate, async (req, res) => {
         const lyrics = Array.isArray(songData.lyrics) ? songData.lyrics : [];
         const sections = songData.sections || {};
         await dbRun(`
-            INSERT INTO charts (id, user_id, name, song_title, song_artist, song_lyrics, song_sections, chord_data, display_mode, cover)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO charts (id, user_id, name, song_title, song_artist, song_version, song_lyrics, song_sections, chord_data, display_mode, cover)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
             id, req.userId, name.trim(),
-            songData.title || '', songData.artist || '',
+            songData.title || '', songData.artist || '', songData.version || '',
             JSON.stringify(lyrics), JSON.stringify(sections),
             JSON.stringify(chord_data || {}),
             display_mode || 'name',
@@ -299,7 +302,7 @@ app.put('/api/charts/my/:id', authenticate, async (req, res) => {
         const sections = songData.sections || {};
         await dbRun(`
             UPDATE charts SET
-                name = ?, song_title = ?, song_artist = ?,
+                name = ?, song_title = ?, song_artist = ?, song_version = ?,
                 song_lyrics = ?, song_sections = ?, chord_data = ?, display_mode = ?,
                 cover = COALESCE(?, cover),
                 is_public = CASE WHEN ? IS NOT NULL THEN ? ELSE is_public END,
@@ -309,6 +312,7 @@ app.put('/api/charts/my/:id', authenticate, async (req, res) => {
             name ? name.trim() : chart.name,
             songData.title || chart.song_title,
             songData.artist || chart.song_artist,
+            songData.version !== undefined ? (songData.version || '') : chart.song_version,
             JSON.stringify(lyrics),
             JSON.stringify(sections),
             JSON.stringify(chord_data || (chart.chord_data ? JSON.parse(chart.chord_data) : {})),
@@ -359,7 +363,7 @@ app.get('/api/charts/public', async (req, res) => {
     try {
         await initSchema();
         const charts = (await dbAll(`
-            SELECT c.id, c.name, c.song_title, c.song_artist, c.cover, c.display_mode,
+            SELECT c.id, c.name, c.song_title, c.song_artist, c.song_version, c.cover, c.display_mode,
                    c.created_at, c.updated_at, u.username as author
             FROM charts c
             JOIN users u ON c.user_id = u.id
