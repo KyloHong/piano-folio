@@ -3301,11 +3301,12 @@
             width: 100%;
             box-sizing: border-box;
             margin: 0;
-            padding: 24px 24px 120px 0;
+            padding: 24px 32px 120px 32px;
         }
         #pageChords .chords-header {
             margin-left: 0;
-            padding-left: 10px;
+            padding-left: 0;
+            text-align: center;
         }
 
         .chords-header { margin-bottom: 24px; }
@@ -3811,6 +3812,30 @@
             border-bottom-color: var(--text-primary);
             color: #c0392b;
         }
+
+        /* 视频教学卡片网格（与 chords-grid 保持同尺寸/同列数自适应逻辑） */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            margin-top: 12px;
+        }
+        .videos-grid .video-card-link { margin-top: 0; }
+        .videos-grid .video-card {
+            padding: 14px 14px 16px;
+            border-radius: 10px;
+        }
+        .videos-grid .video-card-meta { gap: 10px; padding: 2px 4px 0; }
+        .videos-grid .video-card-title { font-size: 1rem; line-height: 1.4; }
+        .videos-grid .video-card-desc { font-size: 0.82rem; line-height: 1.65; }
+        .videos-grid .video-card-play { width: 52px; height: 52px; font-size: 18px; }
+        /* 与 chords-grid 同逻辑：强兜底列数，杜绝只出1列 */
+        @media (min-width: 860px)  { .videos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1260px) { .videos-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (min-width: 1640px) { .videos-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
         .chord-build-diagram { width: 100%; display: flex; flex-direction: column; gap: 6px; }
         .cbd-row {
@@ -4935,15 +4960,15 @@
                 </section>
             </div>
 
-            <!-- TAB 8: 视频教学（外链卡片） -->
+            <!-- TAB 8: 视频教学（外链卡片网格） -->
             <div class="chords-tab-panel" id="chordTab-video">
                 <div class="knowledge-hero">
                     <h2>Video Lessons · 视频教学精选</h2>
                     <p>精选优质教学视频，按主题分类整理：柱式和弦 · 和弦转位 · 分解和弦。点击封面卡片跳转至小红书原文页面继续学习。</p>
                 </div>
 
-                <section class="k-section">
-                    <h3><span class="sec-num">01</span>柱式和弦 · 即兴伴奏必练</h3>
+                <div class="videos-grid">
+                    <!-- 01 柱式和弦 -->
                     <a class="video-card-link" href="https://xhslink.cn/o/AkFY0YTCL3P" target="_blank" rel="noopener noreferrer" aria-label="跳转到小红书学习：柱式和弦原位转位练习">
                         <div class="video-card">
                             <div class="video-card-cover">
@@ -4954,21 +4979,18 @@
                             </div>
                             <div class="video-card-meta">
                                 <h4 class="video-card-title">柱式和弦原位转位练习 · 即兴伴奏必练</h4>
-                                <p class="video-card-desc">柱式和弦 <strong>原位 + 转位</strong> 的整套基础练习，是即兴伴奏的入门根基。涵盖常见调式的左右手配合逻辑，跟着视频反复练熟，转位感会真正进入你的手指——这是很多同学弹了很久仍然转位卡手的关键解决方案。</p>
+                                <p class="video-card-desc">柱式和弦 <strong>原位 + 转位</strong> 的整套基础练习，是即兴伴奏的入门根基。涵盖常见调式的左右手配合逻辑，转位感真正进入手指。</p>
                                 <div class="video-card-foot">
                                     <span class="video-chip">柱式和弦</span>
                                     <span class="video-chip">转位训练</span>
-                                    <span class="video-chip">即兴伴奏</span>
                                     <span class="video-chip">入门级</span>
-                                    <span class="video-card-go">打开小红书学习 →</span>
+                                    <span class="video-card-go">小红书学习 →</span>
                                 </div>
                             </div>
                         </div>
                     </a>
-                </section>
 
-                <section class="k-section">
-                    <h3><span class="sec-num">02</span>和弦转位 · 强化练习</h3>
+                    <!-- 02 和弦转位强化 -->
                     <a class="video-card-link" href="https://xhslink.cn/o/AukBwy3OVPi" target="_blank" rel="noopener noreferrer" aria-label="跳转到小红书学习：和弦转位强化练习">
                         <div class="video-card">
                             <div class="video-card-cover">
@@ -4979,21 +5001,18 @@
                             </div>
                             <div class="video-card-meta">
                                 <h4 class="video-card-title">和弦转位强化练习 · 即兴伴奏必练</h4>
-                                <p class="video-card-desc">转位不只是"知道"，更要"手指条件反射"。从三和弦到七和弦、从慢速到 <strong>节拍器提速</strong> 的一整套强化训练，帮你把转位切换速度练稳——弹流行即兴时不再为找音而停顿。</p>
+                                <p class="video-card-desc">从三和弦到七和弦、从慢速到 <strong>节拍器提速</strong> 的一整套强化训练，把转位切换速度练稳——弹流行即兴时不再为找音而停顿。</p>
                                 <div class="video-card-foot">
                                     <span class="video-chip">和弦转位</span>
                                     <span class="video-chip">强化训练</span>
-                                    <span class="video-chip">即兴伴奏</span>
                                     <span class="video-chip">进阶级</span>
-                                    <span class="video-card-go">打开小红书学习 →</span>
+                                    <span class="video-card-go">小红书学习 →</span>
                                 </div>
                             </div>
                         </div>
                     </a>
-                </section>
 
-                <section class="k-section">
-                    <h3><span class="sec-num">03</span>分解和弦 · 超简单的加花</h3>
+                    <!-- 03 分解和弦加花 -->
                     <a class="video-card-link" href="https://xhslink.cn/o/9KgNNYnGuLr" target="_blank" rel="noopener noreferrer" aria-label="跳转到小红书学习：超简单的加花 让柱式和弦瞬间好听">
                         <div class="video-card">
                             <div class="video-card-cover">
@@ -5004,18 +5023,17 @@
                             </div>
                             <div class="video-card-meta">
                                 <h4 class="video-card-title">超简单的加花 · 让柱式和弦瞬间好听</h4>
-                                <p class="video-card-desc">柱式和弦弹久了太平？学会这几种 <strong>超简单的分解和弦加花</strong>，伴奏立刻从"能听"变"好听"。从最基础的八分音符分解，到左右手配合的小装饰音，不复杂但立竿见影。</p>
+                                <p class="video-card-desc">学会这几种 <strong>超简单的分解和弦加花</strong>，伴奏立刻从"能听"变"好听"。从最基础的八分音符分解，到左右手配合的小装饰音。</p>
                                 <div class="video-card-foot">
                                     <span class="video-chip">分解和弦</span>
                                     <span class="video-chip">加花技巧</span>
-                                    <span class="video-chip">伴奏美化</span>
                                     <span class="video-chip">入门级</span>
-                                    <span class="video-card-go">打开小红书学习 →</span>
+                                    <span class="video-card-go">小红书学习 →</span>
                                 </div>
                             </div>
                         </div>
                     </a>
-                </section>
+                </div>
             </div>
 
                 </div><!-- /chords-main-content -->
