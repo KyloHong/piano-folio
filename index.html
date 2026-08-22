@@ -3296,12 +3296,13 @@
         }
         .chords-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
 
-        /* 和弦知识主布局：左侧菜单栏（贴最左，轻盈风格） + 右侧内容区 */
+        /* 和弦知识主布局：左侧菜单栏（贴最左，极窄留白） + 右侧内容区 */
         .chords-main-layout {
             display: grid;
-            grid-template-columns: 160px 1fr;
-            gap: 20px;
+            grid-template-columns: 100px 1fr;
+            gap: 8px;
             align-items: flex-start;
+            margin-left: -12px;
         }
         .chords-sidebar { padding: 0; }
 
@@ -3321,18 +3322,20 @@
             background: transparent;
             border: none;
             border-radius: 0;
-            padding: 9px 2px;
+            padding: 7px 1px;
             font-family: inherit;
-            font-size: 0.82rem;
+            font-size: 0.76rem;
             color: var(--text-secondary);
             cursor: pointer;
             transition: color 0.15s ease;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
             text-align: left;
             margin: 0;
             border-bottom: 1px solid var(--border-subtle);
             border-left: 2px solid transparent;
             width: 100%;
+            white-space: nowrap;
+            line-height: 1.3;
         }
         .chords-submenu .submenu-btn:hover {
             color: var(--text-primary);
@@ -3343,7 +3346,7 @@
             font-weight: 600;
             background: transparent;
             border-left-color: var(--text-primary);
-            padding-left: 8px;
+            padding-left: 5px;
         }
 
         .chords-tab-panel {
@@ -3858,7 +3861,7 @@
         }
 
         @media (max-width: 860px) {
-            .chords-main-layout { grid-template-columns: 1fr; gap: 20px; }
+            .chords-main-layout { grid-template-columns: 1fr; gap: 20px; margin-left: 0; }
             .chords-submenu {
                 position: static;
                 flex-direction: row;
