@@ -322,6 +322,22 @@
             padding: 32px 24px 40px;
             margin-bottom: 32px;
         }
+        .song-cover-wrap {
+            width: 180px;
+            max-width: 80vw;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            background: #f0f0f0;
+        }
+        .song-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
 
         .song-title {
             font-family: 'Playfair Display', serif;
@@ -2883,6 +2899,15 @@
             height: 100%;
             display: block;
         }
+        .grid-card-cover .chart-cover-img,
+        .library-cover .chart-cover-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
         .grid-card-level {
             position: absolute;
             top: 14px;
@@ -2990,6 +3015,21 @@
         .chart-viewer-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
         .chart-viewer-author { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
         .chart-viewer-song { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
+        .chart-viewer-cover {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 240px;
+            margin: 0 auto 12px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+        .chart-viewer-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
         .chart-viewer-back {
             padding: 4px 10px;
             border: 1px solid var(--border-subtle);
@@ -3740,6 +3780,7 @@
                     <button class="filter-btn active" data-cat="all">全部</button>
                     <button class="filter-btn" data-cat="major">大三和弦</button>
                     <button class="filter-btn" data-cat="minor">小三和弦</button>
+                    <button class="filter-btn" data-cat="6">六和弦</button>
                     <button class="filter-btn" data-cat="7">七和弦</button>
                     <button class="filter-btn" data-cat="sus">挂留和弦</button>
                     <button class="filter-btn" data-cat="dim">减增和弦</button>
@@ -3815,7 +3856,78 @@
                     </div>
                 </section>
                 <section class="k-section">
-                    <h3><span class="sec-num">03</span>大调与小调</h3>
+                    <h3><span class="sec-num">03</span>音名 · 唱名 · 简谱 · 和弦名 对照</h3>
+                    <p style="margin:0 0 18px 0;color:var(--text-secondary);line-height:1.75;">同一个音有多种叫法。建立四者之间的对应关系，是从「看谱弹」进阶到「想弹就弹」的基础。尤其要注意<strong>升号（#）写法的区分：音名是 C#（升号在后），简谱是 #1（升号在前）</strong>。</p>
+                    <div class="k-two-col">
+                        <div class="k-col-text">
+                            <h4>12 音完整对照表（C大调 / a小调）</h4>
+                            <div style="overflow-x:auto;">
+                                <table class="interval-table" style="font-size:0.76rem;">
+                                    <thead>
+                                        <tr style="background:var(--bg-secondary);">
+                                            <th style="padding:8px 10px;font-weight:600;color:var(--text-dim);font-size:0.7rem;text-align:center;">#</th>
+                                            <th style="padding:8px 10px;font-weight:600;color:var(--text-dim);font-size:0.7rem;text-align:center;">音名<br><span style="font-weight:400;">(Note)</span></th>
+                                            <th style="padding:8px 10px;font-weight:600;color:var(--text-dim);font-size:0.7rem;text-align:center;">唱名<br><span style="font-weight:400;">(Solfege)</span></th>
+                                            <th style="padding:8px 10px;font-weight:600;color:var(--text-dim);font-size:0.7rem;text-align:center;">简谱<br><span style="font-weight:400;">(Number)</span></th>
+                                            <th style="padding:8px 10px;font-weight:600;color:var(--text-dim);font-size:0.7rem;text-align:center;">半音<br><span style="font-weight:400;">(Semitone)</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td style="text-align:center;color:var(--text-dim);">1</td><td style="text-align:center;font-weight:600;color:#135200;">C</td><td style="text-align:center;">Do</td><td style="text-align:center;font-weight:600;">1</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">0</td></tr>
+                                        <tr style="background:#fffaf0;"><td style="text-align:center;color:var(--text-dim);">2</td><td style="text-align:center;font-weight:600;color:#d4380d;">C#</td><td style="text-align:center;">升 Do / Di</td><td style="text-align:center;font-weight:600;color:#d4380d;">#1</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">1</td></tr>
+                                        <tr><td style="text-align:center;color:var(--text-dim);">3</td><td style="text-align:center;font-weight:600;">D</td><td style="text-align:center;">Re</td><td style="text-align:center;font-weight:600;">2</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">2</td></tr>
+                                        <tr style="background:#fffaf0;"><td style="text-align:center;color:var(--text-dim);">4</td><td style="text-align:center;font-weight:600;color:#d4380d;">D#</td><td style="text-align:center;">升 Re / Ri</td><td style="text-align:center;font-weight:600;color:#d4380d;">#2</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">3</td></tr>
+                                        <tr><td style="text-align:center;color:var(--text-dim);">5</td><td style="text-align:center;font-weight:600;">E</td><td style="text-align:center;">Mi</td><td style="text-align:center;font-weight:600;">3</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">4</td></tr>
+                                        <tr><td style="text-align:center;color:var(--text-dim);">6</td><td style="text-align:center;font-weight:600;">F</td><td style="text-align:center;">Fa</td><td style="text-align:center;font-weight:600;">4</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">5</td></tr>
+                                        <tr style="background:#fffaf0;"><td style="text-align:center;color:var(--text-dim);">7</td><td style="text-align:center;font-weight:600;color:#d4380d;">F#</td><td style="text-align:center;">升 Fa / Fi</td><td style="text-align:center;font-weight:600;color:#d4380d;">#4</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">6</td></tr>
+                                        <tr><td style="text-align:center;color:var(--text-dim);">8</td><td style="text-align:center;font-weight:600;">G</td><td style="text-align:center;">Sol</td><td style="text-align:center;font-weight:600;">5</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">7</td></tr>
+                                        <tr style="background:#fffaf0;"><td style="text-align:center;color:var(--text-dim);">9</td><td style="text-align:center;font-weight:600;color:#d4380d;">G#</td><td style="text-align:center;">升 Sol / Si</td><td style="text-align:center;font-weight:600;color:#d4380d;">#5</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">8</td></tr>
+                                        <tr><td style="text-align:center;color:var(--text-dim);">10</td><td style="text-align:center;font-weight:600;">A</td><td style="text-align:center;">La</td><td style="text-align:center;font-weight:600;">6</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">9</td></tr>
+                                        <tr style="background:#fffaf0;"><td style="text-align:center;color:var(--text-dim);">11</td><td style="text-align:center;font-weight:600;color:#d4380d;">A#</td><td style="text-align:center;">升 La / Li</td><td style="text-align:center;font-weight:600;color:#d4380d;">#6</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">10</td></tr>
+                                        <tr><td style="text-align:center;color:var(--text-dim);">12</td><td style="text-align:center;font-weight:600;">B</td><td style="text-align:center;">Si</td><td style="text-align:center;font-weight:600;">7</td><td style="text-align:center;font-family:'JetBrains Mono',monospace;">11</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="k-col-visual">
+                            <h4 style="margin-top:0;">🎯 写法规范：音名 C# vs 简谱 #1</h4>
+                            <div style="background:#fff1f0;padding:14px;border-left:3px solid #cf1322;border-radius:3px;margin-bottom:16px;">
+                                <div style="font-weight:600;color:#a8071a;margin-bottom:8px;">本站统一：<span style="font-size:1.05rem;">音名升号在后，简谱升号在前</span></div>
+                                <div style="font-size:0.78rem;line-height:1.9;color:var(--text-primary);">
+                                    <div style="margin-bottom:4px;">✅ 正确：<span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#2e8a4a;">C#</span> · <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#2e8a4a;">F#m</span> · <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#2e8a4a;">#1</span> · <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#2e8a4a;">A/C#</span></div>
+                                    <div style="margin-bottom:4px;">❌ 不推荐：<span style="font-family:'JetBrains Mono',monospace;color:#a8071a;text-decoration:line-through;">#C</span> · <span style="font-family:'JetBrains Mono',monospace;color:#a8071a;text-decoration:line-through;">#Fm</span> · <span style="font-family:'JetBrains Mono',monospace;color:#a8071a;text-decoration:line-through;">1#</span> · <span style="font-family:'JetBrains Mono',monospace;color:#a8071a;text-decoration:line-through;">A/#C</span></div>
+                                </div>
+                            </div>
+                            <div style="font-size:0.78rem;line-height:1.8;color:var(--text-secondary);">
+                                <p style="margin:0 0 10px 0;"><strong style="color:var(--text-primary);">为什么不一样？</strong> 这是两套独立系统的<strong>书写习惯</strong>不同：</p>
+                                <ul style="margin:0 0 8px 0;padding-left:18px;">
+                                    <li><strong>音名（国际通用）</strong>：字母为主、升号为辅 —— <code>C#</code> 读作「C sharp」，<strong>升号写在音名后面</strong>，和乐谱记谱一致。</li>
+                                    <li><strong>简谱（中国体系）</strong>：数字为主、升号为辅 —— <code>#1</code> 读作「升 Do」，<strong>升号写在数字前面</strong>，这是简谱专用写法。</li>
+                                </ul>
+                                <p style="margin:0 0 10px 0;">一句话：<strong>字母带# → 放后面（C#）；数字带# → 放前面（#1）</strong>，不要搞反。</p>
+                                <div class="tip-box" style="margin-top:12px;">
+                                    <div class="tip-title">对应记忆口诀</div>
+                                    <p style="margin:0;">C# 对 #1，D# 对 #2，F# 对 #4，G# 对 #5，A# 对 #6。<br>字母在后数字在前，黑键简谱<strong>一一对应</strong>。</p>
+                                </div>
+                            </div>
+                            <div style="margin-top:16px;">
+                                <h4 style="margin-top:0;">🎼 和弦名是怎么拼出来的？</h4>
+                                <div style="background:var(--bg-secondary);padding:12px 14px;border-radius:4px;font-size:0.76rem;line-height:1.9;">
+                                    <div style="margin-bottom:6px;"><span style="color:#2e8a4a;font-weight:600;">和弦名 = 根音（音名格式） + 性质（后缀）</span></div>
+                                    <div style="font-family:'JetBrains Mono',monospace;">
+                                        <div>C# + m &nbsp;= <strong style="color:#ff922b;">C#m</strong> &nbsp;<span style="color:var(--text-dim);">（C#小三和弦）</span></div>
+                                        <div>F# + m7 = <strong style="color:#ff922b;">F#m7</strong> <span style="color:var(--text-dim);">（F#小七和弦）</span></div>
+                                        <div>C# + maj7 = <strong style="color:#ff922b;">C#maj7</strong> <span style="color:var(--text-dim);">（C#大七和弦）</span></div>
+                                        <div>A &nbsp;/ C# = <strong style="color:#ff922b;">A/C#</strong> &nbsp;<span style="color:var(--text-dim);">（A和弦 / C#低音）</span></div>
+                                    </div>
+                                    <p style="margin:10px 0 0 0;font-size:0.74rem;color:var(--text-dim);line-height:1.6;">斜杠和弦（Slash Chord）：左边是和弦本体，右边是实际要弹的<strong>最低音</strong>（低音）。低音也按「升号在后」的音名规则写。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="k-section">
+                    <h3><span class="sec-num">04</span>大调与小调</h3>
                     <div class="k-two-col">
                         <div class="k-col-text">
                             <h4>两种基础调性色彩</h4>
@@ -4392,6 +4504,9 @@
 
             <!-- Song Info Hero (Editable) -->
             <section class="song-info" id="songInfo">
+                <div class="song-cover-wrap" id="songCoverWrap" style="display:none;">
+                    <img class="song-cover-img" id="songCoverImg" alt="专辑封面">
+                </div>
                 <div class="song-title-container">
                     <input type="text" class="song-title-input" id="songTitleInput" placeholder="请输入歌曲名称" aria-label="歌曲名称">
                 </div>
@@ -4802,22 +4917,50 @@
         // Which tab fields have been manually edited by user
         const tabEdited = { left: false, right: false };
 
-        // 音名到半音位置映射
-        const noteToSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
-        
-        // 半音到数字标记映射（含升降号）
+        // 音名到半音位置映射（支持 C# 和 #C 两种写法）
+        const noteToSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11,
+                                 '#C': 1, '#D': 3, '#F': 6, '#G': 8, '#A': 10,
+                                 'C#': 1, 'D#': 3, 'F#': 6, 'G#': 8, 'A#': 10,
+                                 'Db': 1, 'Eb': 3, 'Gb': 6, 'Ab': 8, 'Bb': 10, 'Cb': 11 };
+
+        // 半音到简谱数字标记（#号在前，符合简谱写法）
         const semitoneToNumber = {
-            0: '1', 1: '1#', 2: '2', 3: '2#', 4: '3', 5: '4', 6: '4#',
-            7: '5', 8: '#5', 9: '6', 10: 'b7', 11: '7'
+            0: '1', 1: '#1', 2: '2', 3: '#2', 4: '3', 5: '4', 6: '#4',
+            7: '5', 8: '#5', 9: '6', 10: '#6', 11: '7'
         };
 
-        // 半音到音名映射（升号优先）
+        // 半音到音名映射（音名升号在后，如 C#、D#；简谱数字才用 #1、#2 形式）
         const semitoneToNoteSharp = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         const semitoneToNoteFlat = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
-        // 解析音名（含升降号）为半音数
+        // 和弦名显示格式：统一输出 C#、F#m（升号在后）
+        // - 正确写法：音名 C# D# F# G# A#（升号在后），和弦名 C#m F#m7 A/C#
+        // - 对应简谱：#1 #2 #4 #5 #6（升号在前，数字在后）
+        // 此函数把输入的两种写法（#C 或 C#）都统一规范为升号在后的显示形式
+        function formatChordNameForDisplay(name) {
+            if (!name) return name;
+            const parts = name.split('/');
+            const formatted = parts.map(p => {
+                // 1) #号在前写法：#Cm / #Cmaj7 / #F → 转为 C#m / C#maj7 / F#
+                const sharpFront = p.match(/^#([A-G])(.*)$/);
+                if (sharpFront) {
+                    return sharpFront[1] + '#' + sharpFront[2];
+                }
+                // 2) #号在后写法：C#m / F#7 → 直接保持不变
+                return p;
+            });
+            return formatted.join('/');
+        }
+
+        // 解析音名（含升降号）为半音数：兼容 C# 与 #C 两种写法
         function parseNoteToSemitone(noteStr) {
             if (!noteStr) return null;
+            // #号在前写法：#C, #D, #F, #G, #A
+            const sharpFront = noteStr.match(/^#([A-G])/);
+            if (sharpFront) {
+                const mp = { C: 1, D: 3, F: 6, G: 8, A: 10 };
+                if (mp[sharpFront[1]] !== undefined) return mp[sharpFront[1]];
+            }
             const match = noteStr.match(/^([A-G])([#b]?)/);
             if (!match) return null;
             const base = match[1];
@@ -4841,7 +4984,8 @@
         function transposeChordName(chordName, offset) {
             if (!chordName || offset === 0) return chordName;
 
-            const slashMatch = chordName.match(/^(.+)\/([A-G][#b]?)$/);
+            // 兼容斜杠和弦两种写法：A/C#（升号在后）和 A/#C（升号在前）
+            const slashMatch = chordName.match(/^(.+)\/(#?[A-G][#b]?)$/);
             let mainPart = chordName;
             let bassNote = null;
 
@@ -4850,7 +4994,8 @@
                 bassNote = slashMatch[2];
             }
 
-            const rootMatch = mainPart.match(/^([A-G][#b]?)(.*)$/);
+            // 兼容两种根音写法：#C（升号在前）和 C#（升号在后）
+            const rootMatch = mainPart.match(/^(#?[A-G][#b]?)(.*)$/);
             if (!rootMatch) return chordName;
 
             const rootNote = rootMatch[1];
@@ -4876,14 +5021,24 @@
             let i = 0;
             while (i < numStr.length) {
                 const ch = numStr[i];
-                if (numMap[ch] != null) {
-                    let semitone = numMap[ch];
-                    let accidental = '';
-                    if (i + 1 < numStr.length && (numStr[i + 1] === '#' || numStr[i + 1] === 'b')) {
+                // 兼容 #1（升号在前）和 1#（升号在后）两种写法
+                let accidentalPrefix = '';
+                if (ch === '#' || ch === 'b') {
+                    accidentalPrefix = ch;
+                    i++;
+                    if (i >= numStr.length) { result += accidentalPrefix; break; }
+                }
+                const digit = accidentalPrefix ? numStr[i] : ch;
+                if (numMap[digit] != null) {
+                    let semitone = numMap[digit];
+                    let accidental = accidentalPrefix;
+                    // 如果没有前置升降号，检查是否有后置升降号（1#、1b写法）
+                    if (!accidental && i + 1 < numStr.length && (numStr[i + 1] === '#' || numStr[i + 1] === 'b')) {
                         accidental = numStr[i + 1];
-                        semitone += accidental === '#' ? 1 : -1;
                         i++;
                     }
+                    if (accidental === '#') semitone += 1;
+                    if (accidental === 'b') semitone -= 1;
                     const newSemitone = (semitone + offset + 12) % 12;
                     const baseNote = reverseMap[newSemitone];
                     if (baseNote != null) {
@@ -4892,11 +5047,12 @@
                         const lower = newSemitone - 1;
                         const higher = (newSemitone + 1) % 12;
                         if (reverseMap[lower] != null) {
-                            result += reverseMap[lower] + '#';
+                            // #号在前：#1 而非 1#
+                            result += '#' + reverseMap[lower];
                         } else if (reverseMap[higher] != null) {
-                            result += reverseMap[higher] + 'b';
+                            result += 'b' + reverseMap[higher];
                         } else {
-                            result += ch + accidental;
+                            result += (accidental ? accidental : '') + digit;
                         }
                     }
                 } else if (ch === '(' || ch === ')' || ch === '，' || ch === '、' || /\d/.test(ch)) {
@@ -4913,6 +5069,8 @@
         const chordIntervals = {
             'major': [0, 4, 7],
             'minor': [0, 3, 7],
+            '6': [0, 4, 7, 9],
+            'm6': [0, 3, 7, 9],
             '7': [0, 4, 7, 10],
             'maj7': [0, 4, 7, 11],
             'm7': [0, 3, 7, 10],
@@ -4931,7 +5089,7 @@
 
         // 获取和弦的最大转位数（3音和弦3个，4音和弦4个）
         function getMaxInversions(quality, extensions) {
-            const fourNoteChords = ['7', 'maj7', 'm7', 'dim7'];
+            const fourNoteChords = ['6', 'm6', '7', 'maj7', 'm7', 'dim7'];
             if (fourNoteChords.includes(quality)) return 4;
             return 3;
         }
@@ -5574,11 +5732,13 @@
                 const songs = [];
                 const seenTitles = new Set();
 
-                // 先添加有和弦的歌曲
+                // 先添加有和弦的歌曲（从音乐搜索结果中匹配专辑封面）
                 chordsData.songs.forEach(song => {
                     if (!seenTitles.has(song.title)) {
                         seenTitles.add(song.title);
-                        songs.push({ ...song, hasChords: true });
+                        // 从音乐搜索结果中查找同名歌曲，获取专辑封面
+                        const musicMatch = musicData.songs.find(m => m.name === song.title);
+                        songs.push({ ...song, cover: musicMatch ? musicMatch.cover : '', hasChords: true });
                     }
                 });
 
@@ -5628,10 +5788,11 @@
                                 ${extraInfo ? `<span style="margin-left: 8px;" class="search-result-album">${extraInfo}</span>` : ''}
                             </div>
                         </div>
-                        <button class="btn btn-primary search-result-btn" 
-                                data-song-id="${escapeHtml(song.id || '')}" 
-                                data-song-name="${escapeHtml(song.title)}" 
+                        <button class="btn btn-primary search-result-btn"
+                                data-song-id="${escapeHtml(song.id || '')}"
+                                data-song-name="${escapeHtml(song.title)}"
                                 data-song-artist="${escapeHtml(song.artist)}"
+                                data-song-cover="${escapeHtml(song.cover || '')}"
                                 data-has-chords="${song.hasChords ? 'true' : 'false'}">选择</button>
                     </div>
                 `;
@@ -5643,8 +5804,9 @@
                     const songId = btn.dataset.songId;
                     const songName = btn.dataset.songName;
                     const songArtist = btn.dataset.songArtist;
+                    const songCover = btn.dataset.songCover || '';
                     const hasChords = btn.dataset.hasChords === 'true';
-                    await selectSong(songId, songName, songArtist, hasChords);
+                    await selectSong(songId, songName, songArtist, hasChords, songCover);
                 });
             });
 
@@ -5653,13 +5815,14 @@
                 currentSelectedSong = {
                     title: songs[0].title,
                     artist: songs[0].artist,
+                    cover: songs[0].cover || '',
                     lyrics: []
                 };
             }
         }
 
         // 选择歌曲并获取歌词/和弦
-        async function selectSong(songId, songName, songArtist, hasChords) {
+        async function selectSong(songId, songName, songArtist, hasChords, songCover) {
             const searchResultsContent = document.getElementById('searchResultsContent');
             searchResultsContent.innerHTML = '<div class="search-result-loading">正在获取歌曲信息...</div>';
 
@@ -5674,10 +5837,11 @@
                         state.song = {
                             title: chordsData.title,
                             artist: chordsData.artist,
+                            cover: songCover || '',
                             lyrics: chordsData.lyrics || [],
                             sections: chordsData.sections || {}
                         };
-                        
+
                         // 将和弦数据填充到 state.chordData
                         state.chordData = {};
                         let lineIndex = 0;
@@ -5697,7 +5861,7 @@
                             });
                             lineIndex++;
                         });
-                        
+
                         // 关闭弹窗并更新 UI
                         document.getElementById('searchResultsModal').classList.remove('visible');
                         updateSongInfo();
@@ -5730,6 +5894,7 @@
                 state.song = {
                     title: songName,
                     artist: songArtist,
+                    cover: songCover || '',
                     lyrics: lyrics,
                     sections: {}
                 };
@@ -5986,7 +6151,7 @@
         }
 
         // 选择歌曲并获取歌词/和弦
-        async function selectSong(songId, songName, songArtist, hasChords) {
+        async function selectSong(songId, songName, songArtist, hasChords, songCover) {
             const searchResultsContent = document.getElementById('searchResultsContent');
             searchResultsContent.innerHTML = '<div class="search-result-loading">正在获取歌曲信息...</div>';
 
@@ -5996,11 +6161,12 @@
                     const chordsResponse = await fetch(`/api/chords/detail?title=${encodeURIComponent(songName)}`);
                     if (chordsResponse.ok) {
                         const chordsData = await chordsResponse.json();
-                        
+
                         // 填充到 state.song（使用数据库中的歌词和和弦）
                         state.song = {
                             title: chordsData.title,
                             artist: chordsData.artist,
+                            cover: songCover || '',
                             lyrics: chordsData.lyrics || [],
                             sections: chordsData.sections || {}
                         };
@@ -6051,6 +6217,7 @@
                 currentSelectedSong = {
                     title: songName,
                     artist: songArtist,
+                    cover: songCover || '',
                     lyrics: data.lyric ? parseLrcLyric(data.lyric) : []
                 };
 
@@ -6066,6 +6233,7 @@
                 state.song = {
                     title: songName,
                     artist: songArtist,
+                    cover: songCover || '',
                     lyrics: lyrics,
                     sections: {}
                 };
@@ -6097,6 +6265,19 @@
             const titleInput = document.getElementById('songTitleInput');
             const artistInput = document.getElementById('songArtistInput');
             const authorDisplay = document.getElementById('songAuthorDisplay');
+            const coverWrap = document.getElementById('songCoverWrap');
+            const coverImg = document.getElementById('songCoverImg');
+
+            // 显示专辑封面（有则显示，无则隐藏）
+            if (coverWrap && coverImg) {
+                if (state.song.cover) {
+                    coverImg.src = state.song.cover;
+                    coverImg.onerror = () => { coverWrap.style.display = 'none'; };
+                    coverWrap.style.display = 'block';
+                } else {
+                    coverWrap.style.display = 'none';
+                }
+            }
 
             if (titleInput) {
                 titleInput.value = state.song.title || '';
@@ -6518,7 +6699,9 @@
             if (!chord || !chord.chord) return '';
 
             const offset = state.keyOffset || 0;
-            const displayChord = transposeChordName(chord.chord, offset);
+            const rawChord = transposeChordName(chord.chord, offset);
+            // 显示时将 C# 形式格式化为 #C 形式
+            const displayChord = formatChordNameForDisplay(rawChord);
 
             if (state.displayMode === 'tab' && chord.left && chord.right) {
                 const displayLeft = transposeTabNumber(chord.left, offset);
@@ -7001,18 +7184,38 @@
             if (!chordName) return null;
             const name = chordName.trim();
 
-            // 1. Extract root note (supports C, C#, Cb, Db, etc.)
-            const rootMatch = name.match(/^([A-G])([#b]?)/);
-            if (!rootMatch) return null;
-
-            const rootLetter = rootMatch[1];
-            const rootAccidental = rootMatch[2];
+            // 1. Extract root note (supports C# D# F# [标准写法] 和 #C #D #F [兼容旧写法])
+            let rootLetter;
+            let rootAccidental = '';
+            let rootMatchedLength = 0;
+            // 优先匹配标准写法：C# / D# / F# / G# / A# （升号在后）
+            const sharpBackMatch = name.match(/^([A-G])([#b])/);
+            if (sharpBackMatch) {
+                rootLetter = sharpBackMatch[1];
+                rootAccidental = sharpBackMatch[2];
+                rootMatchedLength = 2;
+            } else {
+                // 兼容旧写法：#C / #D / #F / #G / #A （升号在前）
+                const sharpFrontMatch = name.match(/^#([A-G])/);
+                if (sharpFrontMatch) {
+                    rootLetter = sharpFrontMatch[1];
+                    rootAccidental = '#';
+                    rootMatchedLength = 2;
+                } else {
+                    // 纯音名：C D E F G A B
+                    const rootMatch = name.match(/^([A-G])/);
+                    if (!rootMatch) return null;
+                    rootLetter = rootMatch[1];
+                    rootAccidental = '';
+                    rootMatchedLength = 1;
+                }
+            }
             let rootSemitone = noteToSemitone[rootLetter];
             if (rootAccidental === '#') rootSemitone = (rootSemitone + 1) % 12;
             if (rootAccidental === 'b') rootSemitone = (rootSemitone + 11) % 12;
 
             // 2. Determine chord quality / type from the remainder
-            const remainder = name.substring(rootMatch[0].length);
+            const remainder = name.substring(rootMatchedLength);
 
             // Ordered mapping of string-pattern -> quality key (longest-match first)
             const qualityPatterns = [
@@ -7020,12 +7223,15 @@
                 ['Maj7', 'maj7'],
                 ['m7b5', 'dim'],     // half-diminished treated as dim for pitch display
                 ['m7', 'm7'],
+                ['m6', 'm6'],        // 小六和弦，优先于m匹配
                 ['dim7', 'dim7'],
                 ['dim', 'dim'],
                 ['aug', 'aug'],
                 ['sus4', 'sus4'],
                 ['sus2', 'sus2'],
+                ['add6', '6'],       // add6 等同大六和弦
                 ['7', '7'],
+                ['6', '6'],          // 大六和弦，优先于maj匹配
                 ['maj', 'major'],
                 ['M', 'major'],
                 ['m', 'minor']
@@ -7187,7 +7393,8 @@
         function renderProgressionRow(chordSequence) {
             const offset = state.keyOffset || 0;
             return chordSequence.map((chord, i) => {
-                const displayChord = transposeChordName(chord, offset);
+                const rawChord = transposeChordName(chord, offset);
+                const displayChord = formatChordNameForDisplay(rawChord);
                 const arrow = (i < chordSequence.length - 1)
                     ? `<span class="progression-arrow">→</span>`
                     : '';
@@ -7689,6 +7896,15 @@
             </svg>`;
         }
 
+        // 渲染图谱封面：有专辑封面则覆盖在钢琴键 SVG 之上，加载失败时回退显示 SVG
+        function renderChartCover(chart, seed) {
+            const coverUrl = chart && chart.cover;
+            const svg = renderPianoCover(seed);
+            if (!coverUrl) return svg;
+            const alt = escapeHtml((chart.song_title || chart.name || '') + ' cover');
+            return `${svg}<img class="chart-cover-img" src="${escapeHtml(coverUrl)}" alt="${alt}" loading="lazy" onerror="this.style.display='none'">`;
+        }
+
         // Open favorites dialog
         function openFavoritesDialog() {
             const dialog = document.getElementById('favoritesDialog');
@@ -7976,7 +8192,7 @@
                     return `
                     <div class="grid-card library-card" onclick="loadChart('${c.id}', 'my')">
                         <div class="library-cover">
-                            ${renderPianoCover(c.id)}
+                            ${renderChartCover(c, c.id)}
                             <span class="library-level ${c.is_public ? 'public' : 'private'}">${c.is_public ? 'PUBLIC' : 'PRIVATE'}</span>
                         </div>
                         <div class="library-info">
@@ -8102,6 +8318,7 @@
             state.song = {
                 title: chart.song_title || '',
                 artist: chart.song_artist || '',
+                cover: chart.cover || '',
                 lyrics: JSON.parse(chart.song_lyrics || '[]'),
                 sections: JSON.parse(chart.song_sections || '{}')
             };
@@ -8213,7 +8430,7 @@
                 list.innerHTML = charts.map(c => `
                     <div class="grid-card" onclick="loadChart('${c.id}', 'public')">
                         <div class="grid-card-cover">
-                            ${renderPianoCover(c.id)}
+                            ${renderChartCover(c, c.id)}
                         </div>
                         <div>
                             <div class="grid-card-title">${escapeHtml(c.name)}</div>
@@ -8243,7 +8460,7 @@
                     method: 'POST',
                     body: JSON.stringify({
                         name: name,
-                        song: { title: chart.song_title, artist: chart.song_artist, lyrics: JSON.parse(chart.song_lyrics || '[]'), sections: JSON.parse(chart.song_sections || '{}') },
+                        song: { title: chart.song_title, artist: chart.song_artist, cover: chart.cover || '', lyrics: JSON.parse(chart.song_lyrics || '[]'), sections: JSON.parse(chart.song_sections || '{}') },
                         chord_data: JSON.parse(chart.chord_data || '{}'),
                         display_mode: chart.display_mode || 'name'
                     })
@@ -8281,6 +8498,7 @@
             }).join('');
             
             bodyEl.innerHTML = `
+                ${chart.cover ? `<div class="chart-viewer-cover"><img src="${escapeHtml(chart.cover)}" alt="${escapeHtml(chart.song_title || chart.name || 'cover')}" onerror="this.parentElement.style.display='none'"></div>` : ''}
                 <div class="chart-viewer-song">${escapeHtml(chart.song_title)}${chart.song_artist ? ' · ' + escapeHtml(chart.song_artist) : ''}</div>
                 ${isPublic && chart.author ? '<div class="chart-viewer-author">作者：@' + escapeHtml(chart.author) + '</div>' : ''}
                 <div style="margin-top:12px;display:flex;gap:6px;align-items:center">
@@ -8411,19 +8629,26 @@
         window.playSingleAbs = chordPlaySemitone;
 
         function chordBuildData() {
-            // 修复：12 个音级全部建立映射，否则 C#/D#/F#/G#/A# 的 rootSemi = undefined → 导致 semitones/notes 全为 NaN
+            // 12 个音级全部建立映射，支持 C# 和 #C 两种写法
             const noteToSemitone = {
-                'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4,
-                'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9,
-                'A#': 10, 'Bb': 10, 'B': 11, 'Cb': 11
+                'C': 0, 'C#': 1, 'Db': 1, '#C': 1,
+                'D': 2, 'D#': 3, 'Eb': 3, '#D': 3,
+                'E': 4,
+                'F': 5, 'F#': 6, 'Gb': 6, '#F': 6,
+                'G': 7, 'G#': 8, 'Ab': 8, '#G': 8,
+                'A': 9, 'A#': 10, 'Bb': 10, '#A': 10,
+                'B': 11, 'Cb': 11
             };
+            // 简谱数字：#号在前，如 #1, #2（保持正确简谱写法）
             const semitoneToNumber = {
-                0: '1', 1: '1#', 2: '2', 3: '2#', 4: '3', 5: '4', 6: '4#',
-                7: '5', 8: '#5', 9: '6', 10: 'b7', 11: '7'
+                0: '1', 1: '#1', 2: '2', 3: '#2', 4: '3', 5: '4', 6: '#4',
+                7: '5', 8: '#5', 9: '6', 10: '#6', 11: '7'
             };
+            // 音名显示：升号在后，如 C#、D#（标准音名写法）
             const semitoneToNoteSharp = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
             const chordIntervals = {
                 'major': [0, 4, 7],   'minor': [0, 3, 7],
+                '6':     [0, 4, 7, 9],   'm6':    [0, 3, 7, 9],
                 '7':     [0, 4, 7, 10], 'maj7':  [0, 4, 7, 11],
                 'm7':    [0, 3, 7, 10], 'dim':   [0, 3, 6],
                 'dim7':  [0, 3, 6, 9],   'aug':   [0, 4, 8],
@@ -8432,6 +8657,8 @@
             const chordMeta = {
                 'major': { label: '大三和弦', suffix: '',     cat: 'major', intervals: '根音 + 大三度 + 纯五度' },
                 'minor': { label: '小三和弦', suffix: 'm',    cat: 'minor', intervals: '根音 + 小三度 + 纯五度' },
+                '6':     { label: '大六和弦', suffix: '6',    cat: '6',     intervals: '根音 + 大三度 + 纯五度 + 大六度' },
+                'm6':    { label: '小六和弦', suffix: 'm6',   cat: '6',     intervals: '根音 + 小三度 + 纯五度 + 大六度' },
                 '7':     { label: '属七和弦', suffix: '7',    cat: '7',     intervals: '根音 + 大三度 + 纯五度 + 小七度' },
                 'maj7':  { label: '大七和弦', suffix: 'maj7', cat: '7',     intervals: '根音 + 大三度 + 纯五度 + 大七度' },
                 'm7':    { label: '小七和弦', suffix: 'm7',   cat: '7',     intervals: '根音 + 小三度 + 纯五度 + 小七度' },
@@ -8441,6 +8668,7 @@
                 'sus2':  { label: '挂二和弦', suffix: 'sus2', cat: 'sus',   intervals: '根音 + 大二度 + 纯五度' },
                 'sus4':  { label: '挂四和弦', suffix: 'sus4', cat: 'sus',   intervals: '根音 + 纯四度 + 纯五度' },
             };
+            // 根音顺序，升号写在后：C#, D#（标准音名写法）
             const allRoots = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
             const list = [];
             for (const root of allRoots) {
@@ -8451,7 +8679,7 @@
                     const numbers   = intervals.map(iv => semitoneToNumber[(rootSemi + iv) % 12]);
                     list.push({
                         root, quality, intervals, meta,
-                        name: root + meta.suffix,
+                        name: root + meta.suffix,   // C#、C#m、F#7 等（升号在后标准写法）
                         noteNames, numbers,
                         rootSemitone: rootSemi,
                         semitones: intervals.map(iv => (rootSemi + iv) % 12),

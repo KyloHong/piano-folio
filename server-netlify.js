@@ -158,7 +158,7 @@ app.get('/api/charts/my', authenticate, async (req, res) => {
     try {
         const { data: charts } = await getDb()
             .from('charts')
-            .select('id, name, song_title, song_artist, display_mode, is_public, created_at, updated_at')
+            .select('id, name, song_title, song_artist, cover, display_mode, is_public, created_at, updated_at')
             .eq('user_id', req.userId)
             .order('updated_at', { ascending: false });
 
@@ -202,6 +202,7 @@ app.post('/api/charts/my', authenticate, async (req, res) => {
                 name: name.trim(),
                 song_title: songData.title || '',
                 song_artist: songData.artist || '',
+                cover: songData.cover || null,
                 song_lyrics: lyrics,
                 song_sections: sections,
                 chord_data: chord_data || {},
@@ -237,6 +238,7 @@ app.put('/api/charts/my/:id', authenticate, async (req, res) => {
             name: name ? name.trim() : chart.name,
             song_title: songData.title !== undefined ? songData.title : chart.song_title,
             song_artist: songData.artist !== undefined ? songData.artist : chart.song_artist,
+            cover: songData.cover !== undefined ? (songData.cover || null) : chart.cover,
             song_lyrics: lyrics,
             song_sections: sections,
             chord_data: chord_data !== undefined ? chord_data : chart.chord_data,
@@ -311,7 +313,7 @@ app.get('/api/charts/public', async (req, res) => {
         // 先取所有公共图谱
         const { data: rawCharts } = await getDb()
             .from('charts')
-            .select('id, name, song_title, song_artist, display_mode, is_public, user_id, created_at, updated_at')
+            .select('id, name, song_title, song_artist, cover, display_mode, is_public, user_id, created_at, updated_at')
             .eq('is_public', 1)
             .order('updated_at', { ascending: false });
 
@@ -330,6 +332,7 @@ app.get('/api/charts/public', async (req, res) => {
             name: c.name,
             song_title: c.song_title,
             song_artist: c.song_artist,
+            cover: c.cover,
             display_mode: c.display_mode,
             is_public: c.is_public,
             author: userMap.get(c.user_id) || 'unknown',
