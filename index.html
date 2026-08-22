@@ -4737,10 +4737,13 @@
                 <div class="chord-btn-group" id="qualityGroup">
                     <button class="chord-btn selected" data-quality="major">大三</button>
                     <button class="chord-btn" data-quality="minor">小三</button>
+                    <button class="chord-btn" data-quality="6">大六</button>
+                    <button class="chord-btn" data-quality="m6">小六</button>
                     <button class="chord-btn" data-quality="7">七</button>
                     <button class="chord-btn" data-quality="maj7">大七</button>
                     <button class="chord-btn" data-quality="m7">小七</button>
                     <button class="chord-btn" data-quality="dim">减</button>
+                    <button class="chord-btn" data-quality="dim7">减七</button>
                     <button class="chord-btn" data-quality="aug">增</button>
                     <button class="chord-btn" data-quality="sus2">sus2</button>
                     <button class="chord-btn" data-quality="sus4">sus4</button>
@@ -5152,6 +5155,8 @@
             if (accidental === 'flat') chordName += 'b';
 
             if (quality === 'minor') chordName += 'm';
+            else if (quality === '6') chordName += '6';
+            else if (quality === 'm6') chordName += 'm6';
             else if (quality === '7') chordName += '7';
             else if (quality === 'maj7') chordName += 'maj7';
             else if (quality === 'm7') chordName += 'm7';
