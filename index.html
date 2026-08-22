@@ -3296,49 +3296,54 @@
         }
         .chords-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
 
-        /* 和弦知识主布局：左侧菜单栏 + 右侧内容区 */
+        /* 和弦知识主布局：左侧菜单栏（贴最左，轻盈风格） + 右侧内容区 */
         .chords-main-layout {
             display: grid;
-            grid-template-columns: 210px 1fr;
-            gap: 32px;
+            grid-template-columns: 160px 1fr;
+            gap: 20px;
             align-items: flex-start;
         }
+        .chords-sidebar { padding: 0; }
 
         .chords-submenu {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 0;
             position: sticky;
             top: 20px;
-            padding: 8px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            border-top: 1px solid var(--border-subtle);
         }
         .chords-submenu .submenu-btn {
             background: transparent;
-            border: 1px solid transparent;
-            border-radius: 4px;
-            padding: 11px 14px;
+            border: none;
+            border-radius: 0;
+            padding: 9px 2px;
             font-family: inherit;
-            font-size: 0.86rem;
+            font-size: 0.82rem;
             color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.15s;
+            transition: color 0.15s ease;
             letter-spacing: 0.3px;
             text-align: left;
-            margin-bottom: 0;
-            border-bottom: none;
+            margin: 0;
+            border-bottom: 1px solid var(--border-subtle);
+            border-left: 2px solid transparent;
+            width: 100%;
         }
         .chords-submenu .submenu-btn:hover {
             color: var(--text-primary);
-            background: var(--bg-hover);
+            background: transparent;
         }
         .chords-submenu .submenu-btn.active {
-            color: #fff;
+            color: var(--text-primary);
             font-weight: 600;
-            background: var(--text-primary);
-            border-color: var(--text-primary);
+            background: transparent;
+            border-left-color: var(--text-primary);
+            padding-left: 8px;
         }
 
         .chords-tab-panel {
