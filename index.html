@@ -401,43 +401,81 @@
             display: none !important;
         }
 
-        /* 并行模式下：单个句子 = 一张小卡片，分隔感来自边框和底纹 */
+        /* 并行模式下：单个句子 —— 去掉外框/底纹，只做合理内边距承载和弦+文字 */
         #lyricsContainer.parallel-layout .lyric-line {
-            flex: 0 1 auto;             /* 句子按内容宽度排列，可换行 */
+            flex: 0 1 auto;
             display: inline-flex;
             align-items: flex-end;
             justify-content: center;
-            padding: 8px 12px 6px;
+            padding: 0 12px;
             margin: 0;
-            min-height: 40px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 4px;
+            min-height: 0;
+            background: transparent;
+            border: none;
+            border-radius: 0;
             position: relative;
+        }
+
+        /* 句子之间的分隔竖线（唯一的句子分隔视觉） */
+        #lyricsContainer.parallel-layout .lyric-line + .lyric-line::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12%;
+            bottom: 12%;
+            width: 1px;
+            background: var(--border-subtle);
+            opacity: 0.75;
+            pointer-events: none;
         }
 
         #lyricsContainer.parallel-layout .lyric-line:hover {
             background: var(--bg-hover);
-            border-color: #d8c9a8;
-        }
-
-        /* 句子之间的分隔竖线：除了第一句之外，左边加一条淡竖线作为视觉分隔（只在hover之外辅助区分） */
-        #lyricsContainer.parallel-layout .lyric-line + .lyric-line::before {
-            content: '';
-            position: absolute;
-            left: -8px;
-            top: 20%;
-            bottom: 20%;
-            width: 1px;
-            background: var(--border-subtle);
-            opacity: 0.6;
+            border-radius: 2px;
         }
 
         #lyricsContainer.parallel-layout .lyric-line .line-content {
-            justify-content: center;
+            justify-content: flex-start;
+            padding: 24px 0 2px;
         }
 
-        /* 并行模式下段落卡片之间有明显间距（主歌A / 副歌之间的间隔） */
+        /* ──────────────────────────────────────
+           弹唱标记(tab)模式下：句子之间的横向间距加大，
+           保证分隔竖线远离左右手简谱/和弦信息，避免重叠
+           ────────────────────────────────────── */
+        #lyricsContainer.parallel-layout.display-mode-tab .parallel-lines-row {
+            gap: 2px 32px;
+        }
+
+        #lyricsContainer.parallel-layout.display-mode-tab .lyric-line {
+            padding-left: 18px;
+            padding-right: 8px;
+        }
+
+        /* tab 模式下：分隔竖线要和句子内容保持距离，避免文字/和弦贴线 */
+        #lyricsContainer.parallel-layout.display-mode-tab .lyric-line + .lyric-line::before {
+            left: -16px;
+            top: 8%;
+            bottom: 8%;
+        }
+
+        /* 和弦名(name)模式下：句子间距默认即可，但分隔线也要有安全距离 */
+        #lyricsContainer.parallel-layout.display-mode-name .parallel-lines-row {
+            gap: 2px 18px;
+        }
+
+        #lyricsContainer.parallel-layout.display-mode-name .lyric-line {
+            padding-left: 12px;
+            padding-right: 2px;
+        }
+
+        #lyricsContainer.parallel-layout.display-mode-name .lyric-line + .lyric-line::before {
+            left: -9px;
+            top: 12%;
+            bottom: 12%;
+        }
+
+        /* 并行模式下段落卡片之间的间隔（主歌A到副歌的纵向距离） */
         #lyricsContainer.parallel-layout .parallel-section-card + .parallel-section-card {
             margin-top: 0;
         }
@@ -5571,6 +5609,11 @@
                     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     state.displayMode = btn.dataset.mode;
+                    const container = document.getElementById('lyricsContainer');
+                    if (container) {
+                        container.classList.toggle('display-mode-tab', state.displayMode === 'tab');
+                        container.classList.toggle('display-mode-name', state.displayMode !== 'tab');
+                    }
                     renderLyrics();
                     updateSummary();
                 });
@@ -5629,6 +5672,9 @@
                 } else {
                     container.classList.remove('parallel-layout');
                 }
+                // 同时同步 display-mode-* class（保证初始化/切布局后仍正确）
+                container.classList.toggle('display-mode-tab', state.displayMode === 'tab');
+                container.classList.toggle('display-mode-name', state.displayMode !== 'tab');
             }
             applyLyricsLayoutClass();
 
