@@ -444,19 +444,19 @@
            保证分隔竖线远离左右手简谱/和弦信息，避免重叠
            ────────────────────────────────────── */
         #lyricsContainer.parallel-layout.display-mode-tab .parallel-lines-row {
-            gap: 2px 32px;
+            gap: 2px 52px;
         }
 
         #lyricsContainer.parallel-layout.display-mode-tab .lyric-line {
-            padding-left: 18px;
-            padding-right: 8px;
+            padding-left: 28px;
+            padding-right: 10px;
         }
 
         /* tab 模式下：分隔竖线要和句子内容保持距离，避免文字/和弦贴线 */
         #lyricsContainer.parallel-layout.display-mode-tab .lyric-line + .lyric-line::before {
-            left: -16px;
-            top: 8%;
-            bottom: 8%;
+            left: -26px;
+            top: 6%;
+            bottom: 6%;
         }
 
         /* 和弦名(name)模式下：句子间距默认即可，但分隔线也要有安全距离 */
@@ -1079,7 +1079,17 @@
             font-weight: 500;
         }
 
-        .chord-btn.sharp, .chord-btn.flat { background: var(--bg-primary); }
+        .chord-btn.sharp, .chord-btn.flat {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .chord-btn.sharp.selected,
+        .chord-btn.flat.selected {
+            background: var(--text-primary);
+            color: #fff;
+            border-color: var(--text-primary);
+        }
 
         /* Slash chord group */
         .slash-chord-group {
@@ -3765,8 +3775,7 @@
                 <button class="submenu-btn" data-tab="prog4536">4536251 走向</button>
                 <button class="submenu-btn" data-tab="basic">乐理基础</button>
                 <button class="submenu-btn" data-tab="structure">和弦构成</button>
-                <button class="submenu-btn" data-tab="inversion">转位原理</button>
-                <button class="submenu-btn" data-tab="slash">斜杠和弦</button>
+                <button class="submenu-btn" data-tab="inversion">和弦转位</button>
                 <button class="submenu-btn" data-tab="strum">分解弹法</button>
                 <button class="submenu-btn" data-tab="interval">音程表</button>
             </nav>
@@ -4223,11 +4232,11 @@
                 </section>
             </div>
 
-            <!-- TAB 4: 转位原理 -->
+            <!-- TAB 4: 和弦转位（原 转位原理 + 斜杠和弦 合并） -->
             <div class="chords-tab-panel" id="chordTab-inversion">
                 <div class="knowledge-hero">
-                    <h2>Chord Inversions</h2>
-                    <p>转位是和弦演奏的核心技巧。通过改变低音的位置，让和声连接更流畅，左右手分配更合理。理解转位，才能真正弹好钢琴伴奏。</p>
+                    <h2>Chord Inversions · 和弦转位</h2>
+                    <p>转位是和弦演奏的核心技巧。通过改变低音的位置，让和声连接更流畅。<strong style="color:#7d6a3d;">斜杠和弦（Slash Chord）</strong>是转位的通用记谱写法，同时还能表达非和弦外低音的"经过低音"。</p>
                 </div>
                 <section class="k-section">
                     <h3><span class="sec-num">01</span>什么是转位？</h3>
@@ -4273,23 +4282,16 @@
                         </div>
                     </div>
                 </section>
-            </div>
 
-            <!-- TAB 5: 斜杠和弦 C/B G/B -->
-            <div class="chords-tab-panel" id="chordTab-slash">
-                <div class="knowledge-hero">
-                    <h2>Slash Chords · 斜杠和弦</h2>
-                    <p>C/B、G/B 这种写法叫"斜杠和弦"（Slash Chord），格式是 <strong>和弦 / 低音</strong>。左边是弹什么和弦，右边指定<strong>左手最低音</strong>是什么。常用于低音旋律化、转位标记和连接过渡。</p>
-                </div>
-
+                <!-- ===== 合并内容：斜杠和弦 = 记谱形式 ===== -->
                 <section class="k-section">
-                    <h3><span class="sec-num">01</span>斜杠和弦怎么读？</h3>
+                    <h3><span class="sec-num">03</span>记谱形式：斜杠和弦（Slash Chord）</h3>
                     <div class="k-two-col">
                         <div class="k-col-text">
                             <h4>格式：<code style="background:#fff1e0;padding:2px 6px;border-radius:3px;">和弦 / 低音</code></h4>
-                            <p><strong>C / B</strong> 读作 "C over B" 或 "C on B"，意思是：<span style="color:var(--text-primary);font-weight:600;">右手弹 C 和弦（C E G）</span>，<span style="color:#2e8a4a;font-weight:600;">左手低音弹 B</span>。</p>
-                            <p><strong>G / B</strong> 读作 "G over B"：右手弹 G 和弦（G B D），左手低音弹 B。</p>
-                            <p>斜线<strong>左边</strong>永远是和弦本体，<strong>右边</strong>是左手单独指定的低音。</p>
+                            <p>C/B、G/B 这种写法叫"斜杠和弦"。<strong>左边</strong>是弹什么和弦本体，<strong>右边</strong>指定<strong>左手最低音</strong>是什么。读作 "X over Y"。</p>
+                            <p><strong>C / B</strong>：右手弹 C 和弦（C E G），左手低音弹 B。</p>
+                            <p><strong>G / B</strong>：右手弹 G 和弦（G B D），左手低音弹 B。</p>
                         </div>
                         <div class="k-col-visual">
                             <div style="width:100%;font-family:'JetBrains Mono',monospace;">
@@ -4325,11 +4327,15 @@
                 </section>
 
                 <section class="k-section">
-                    <h3><span class="sec-num">02</span>两种常见用法</h3>
-                    <div class="k-two-col">
-                        <div class="k-col-text">
-                            <h4>用法 A：记写"转位和弦"</h4>
-                            <p>当低音=某个和弦音时，斜杠和弦等价于"转位"：</p>
+                    <h3><span class="sec-num">04</span>关键区分：斜杠 ≠ 一定是转位</h3>
+                    <div class="tip-box" style="background:linear-gradient(135deg,#fffaf0 0%,#fff5e6 100%);border-left:4px solid #c08a2b;">
+                        <div class="tip-title" style="color:#8a5a12;">一句话记住</div>
+                        <p><strong>C/G：是斜杠和弦，同时也是转位和弦。斜杠只是一套记谱符号，转位是它的和声本质。</strong></p>
+                        <p>通俗说：<strong>所有转位和弦都可以写成斜杠格式</strong>（例如 C 第一转位 → C/E，C 第二转位 → C/G，G 第一转位 → G/B…）；但<strong>不是所有斜杠和弦都是转位</strong>——当斜杠右边的低音<strong>不在左边和弦音里</strong>时，它就是一条独立的低音旋律线（例如 C/B、Am/G）。</p>
+                    </div>
+                    <div class="k-two-col" style="margin-top:20px;">
+                        <div class="k-col-text" style="padding:16px;background:#f3fbf2;border:1px solid #cfe6cb;border-radius:4px;">
+                            <h4 style="color:#2e8a4a;margin-top:0;">✅ 低音 ∈ 和弦音 → 就是转位</h4>
                             <div class="inv-diagram" style="margin-top:10px;">
                                 <div class="inv-step"><span class="inv-step-label" style="width:88px;">C / E</span><div class="inv-step-notes"><span class="inv-note bass">E (低音)</span><span class="inv-note">G</span><span class="inv-note">C5</span></div></div>
                                 <div class="inv-step"><span class="inv-step-label" style="width:88px;">= C 第一转位</span><div class="inv-step-notes"><span class="inv-note">3 5 1</span></div></div>
@@ -4337,65 +4343,55 @@
                                 <div class="inv-step"><span class="inv-step-label" style="width:88px;">C / G</span><div class="inv-step-notes"><span class="inv-note bass">G (低音)</span><span class="inv-note">C5</span><span class="inv-note">E5</span></div></div>
                                 <div class="inv-step"><span class="inv-step-label" style="width:88px;">= C 第二转位</span><div class="inv-step-notes"><span class="inv-note">5 1 3</span></div></div>
                             </div>
-                            <div class="tip-box" style="margin-top:16px;">
-                                <div class="tip-title">结论</div>
-                                <p>如果<strong>斜杠右边的低音是左边和弦的组成音</strong>，那这个斜杠和弦就是一次标准转位。</p>
-                            </div>
+                            <p style="margin-top:14px;">规律：斜杠右边的音如果能在右手和弦音里找到，那就是一次"把这个音沉到最低"的排列重组——即转位。</p>
                         </div>
-                        <div class="k-col-text">
-                            <h4>用法 B：低音<strong>不在</strong>和弦里（最常见！）</h4>
-                            <p>这就是 C/B 这种写法的意义——低音 B 并<strong>不是</strong> C 和弦的音（C E G）。它的作用是：<strong>让低音线变成一条独立的旋律</strong>。</p>
-                            <p>经典案例（卡农/流行）：</p>
-                            <div style="margin-top:12px;padding:14px;background:var(--bg-secondary);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;">
+                        <div class="k-col-text" style="padding:16px;background:#fff5f0;border:1px solid #f5c1a7;border-radius:4px;">
+                            <h4 style="color:#d4380d;margin-top:0;">❌ 低音 ∉ 和弦音 → 非转位（经过低音）</h4>
+                            <p>这是 C/B 这种写法的真相——低音 B 并不是 C 和弦（C E G）的音，它的作用是让低音线变成一条独立的旋律。</p>
+                            <div style="margin-top:12px;padding:14px;background:#fff;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;">
                                 <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
-                                    <span style="font-weight:600;">C</span><span style="color:var(--text-dim);">低音 C（原位）</span>
+                                    <span style="font-weight:600;">C</span><span style="color:var(--text-dim);">原位低音 C</span>
                                 </div>
                                 <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
-                                    <span style="font-weight:600;color:#d4380d;">C / B</span><span style="color:#d4380d;">低音 B ↓（旋律下降过渡）</span>
+                                    <span style="font-weight:600;color:#d4380d;">C / B</span><span style="color:#d4380d;">低音 B ↓ 过渡</span>
                                 </div>
                                 <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
-                                    <span style="font-weight:600;">Am</span><span style="color:var(--text-dim);">低音 A（原位）</span>
+                                    <span style="font-weight:600;">Am</span><span style="color:var(--text-dim);">原位低音 A</span>
                                 </div>
                                 <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
-                                    <span style="font-weight:600;">Am / G</span><span style="color:#d4380d;">低音 G ↓（继续下降）</span>
-                                </div>
-                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,0.1);">
-                                    <span style="font-weight:600;">F</span><span style="color:var(--text-dim);">低音 F（原位）</span>
+                                    <span style="font-weight:600;color:#d4380d;">Am / G</span><span style="color:#d4380d;">低音 G ↓ 继续下降</span>
                                 </div>
                                 <div style="display:flex;justify-content:space-between;padding:4px 0;">
-                                    <span style="font-weight:600;color:#d4380d;">G / B</span><span style="color:#d4380d;">低音 B ↑（回到G和弦前的经过低音）</span>
+                                    <span style="font-weight:600;">F</span><span style="color:var(--text-dim);">原位低音 F</span>
                                 </div>
                             </div>
-                            <div class="tip-box" style="margin-top:14px;">
-                                <div class="tip-title">C / B 的真相</div>
-                                <p>在 C → C/B → Am 这条经典下行中，右手其实都按 C 和弦或 Am（差不多的音），<strong>只有左手低音走了 C → B → A 这条旋律线</strong>，听感立刻变得高级。这就是斜杠和弦最实用的场景。</p>
-                            </div>
+                            <p style="margin-top:12px;">卡农、流行歌里最常见的这条 <strong>C → C/B → Am → Am/G → F</strong>，听感高级完全来自左手那条下行低音。</p>
                         </div>
                     </div>
                 </section>
 
                 <section class="k-section">
-                    <h3><span class="sec-num">03</span>常见斜杠和弦速查</h3>
+                    <h3><span class="sec-num">05</span>常见写法速查（一眼判断：转位 or 经过低音）</h3>
                     <table class="interval-table" style="margin-top:16px;">
                         <thead>
                             <tr>
-                                <th>和弦</th>
+                                <th>和弦写法</th>
                                 <th>右手和弦音</th>
                                 <th>左手低音</th>
-                                <th>等价 / 用法</th>
+                                <th>本质</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>C / E</td><td>C E G</td><td style="color:#2e8a4a;font-weight:600;">E</td><td>C 大三 第一转位</td></tr>
-                            <tr><td>C / G</td><td>C E G</td><td style="color:#2e8a4a;font-weight:600;">G</td><td>C 大三 第二转位</td></tr>
-                            <tr style="background:#fffaf0;"><td style="font-weight:600;">C / B</td><td>C E G</td><td style="color:#d4380d;font-weight:600;">B</td><td>★ 经典经过低音（卡农下行）</td></tr>
-                            <tr style="background:#fffaf0;"><td style="font-weight:600;">G / B</td><td>G B D</td><td style="color:#2e8a4a;font-weight:600;">B</td><td>★ 上行至G的过渡低音 / G第一转位</td></tr>
-                            <tr><td>D / F#</td><td>D F# A</td><td style="color:#2e8a4a;font-weight:600;">F#</td><td>D 大三 第一转位</td></tr>
-                            <tr><td>D / A</td><td>D F# A</td><td style="color:#2e8a4a;font-weight:600;">A</td><td>D 大三 第二转位</td></tr>
-                            <tr><td>Am / C</td><td>A C E</td><td style="color:#2e8a4a;font-weight:600;">C</td><td>Am 小三 第一转位</td></tr>
-                            <tr style="background:#fffaf0;"><td style="font-weight:600;">Am / G</td><td>A C E</td><td style="color:#d4380d;font-weight:600;">G</td><td>★ 卡农下行 C→C/B→Am/G</td></tr>
-                            <tr><td>F / A</td><td>F A C</td><td style="color:#2e8a4a;font-weight:600;">A</td><td>F 大三 第一转位</td></tr>
-                            <tr><td>F / C</td><td>F A C</td><td style="color:#2e8a4a;font-weight:600;">C</td><td>F 大三 第二转位</td></tr>
+                            <tr><td>C / E</td><td>C E G</td><td style="color:#2e8a4a;font-weight:600;">E（在和弦里）</td><td>C 大三 第一转位</td></tr>
+                            <tr><td style="font-weight:600;background:#f3fbf2;">C / G</td><td>C E G</td><td style="color:#2e8a4a;font-weight:600;">G（在和弦里）</td><td><strong>斜杠 = 转位（C 第二转位）</strong></td></tr>
+                            <tr style="background:#fffaf0;"><td style="font-weight:600;">C / B</td><td>C E G</td><td style="color:#d4380d;font-weight:600;">B（不在和弦里）</td><td>★ 非转位·卡农下行经过低音</td></tr>
+                            <tr style="background:#fffaf0;"><td style="font-weight:600;">G / B</td><td>G B D</td><td style="color:#2e8a4a;font-weight:600;">B（在和弦里）</td><td>★ 既是 G 第一转位，也常用作经过低音</td></tr>
+                            <tr><td>D / F#</td><td>D F# A</td><td style="color:#2e8a4a;font-weight:600;">F#（在和弦里）</td><td>D 大三 第一转位</td></tr>
+                            <tr><td>D / A</td><td>D F# A</td><td style="color:#2e8a4a;font-weight:600;">A（在和弦里）</td><td>D 大三 第二转位</td></tr>
+                            <tr><td>Am / C</td><td>A C E</td><td style="color:#2e8a4a;font-weight:600;">C（在和弦里）</td><td>Am 小三 第一转位</td></tr>
+                            <tr style="background:#fffaf0;"><td style="font-weight:600;">Am / G</td><td>A C E</td><td style="color:#d4380d;font-weight:600;">G（不在和弦里）</td><td>★ 非转位·卡农下行</td></tr>
+                            <tr><td>F / A</td><td>F A C</td><td style="color:#2e8a4a;font-weight:600;">A（在和弦里）</td><td>F 大三 第一转位</td></tr>
+                            <tr><td>F / C</td><td>F A C</td><td style="color:#2e8a4a;font-weight:600;">C（在和弦里）</td><td>F 大三 第二转位</td></tr>
                         </tbody>
                     </table>
                 </section>
