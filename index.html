@@ -3286,17 +3286,26 @@
         /* ===========================================
            Chord Knowledge Base (子菜单 + 图文)
            =========================================== */
-        #pageChords { display: none; }
+        /* 关键修复：破除全局 .page-section 的 max-width:720px + margin:auto 居中限制
+           否则即使后代 .container 设为 100%，也永远无法超过 720px，导致左侧红框大片空白 */
+        #pageChords.page-section {
+            display: none;
+            max-width: none;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         #pageChords .container {
             max-width: none;
             width: 100%;
             box-sizing: border-box;
             margin: 0;
-            padding: 24px 20px 120px 0;
+            padding: 24px 24px 120px 0;
         }
         #pageChords .chords-header {
             margin-left: 0;
-            padding-left: 12px;
+            padding-left: 10px;
         }
 
         .chords-header { margin-bottom: 24px; }
