@@ -302,6 +302,105 @@
             z-index: 1;
         }
 
+        /* Lyrics Layout Toggle */
+        .lyrics-layout-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            border: 1px solid var(--border-subtle);
+            border-radius: 2px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .layout-label {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            padding: 6px 10px 6px 14px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .layout-btn {
+            padding: 6px 16px;
+            background: transparent;
+            border: none;
+            border-left: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .layout-btn.active {
+            background: var(--text-primary);
+            color: #fff;
+            border-color: var(--text-primary);
+        }
+
+        .layout-btn:hover:not(.active) {
+            color: var(--text-primary);
+            background: rgba(0,0,0,0.04);
+        }
+
+        /* =====================
+           Parallel Layout Styles
+           ===================== */
+        #lyricsContainer.parallel-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* 并行布局中的"段落卡片" */
+        .parallel-section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 16px 16px 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .parallel-section-card .section-card-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #7d6a3d;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .parallel-section-card.untitled-section .section-card-title {
+            display: none;
+        }
+
+        /* 并行模式：隐藏"段首的独立line-section-label"（标题已在卡片顶部） */
+        #lyricsContainer.parallel-layout > .line-section-label {
+            display: none;
+        }
+
+        /* 并行模式：隐藏每行歌词前的数字序号 */
+        #lyricsContainer.parallel-layout .line-number {
+            display: none !important;
+        }
+
+        /* 并行模式下：段落内每首歌行收缩边距 */
+        #lyricsContainer.parallel-layout .lyric-line {
+            padding: 6px 2px;
+            margin: 2px 0;
+            min-height: 36px;
+        }
+
+        #lyricsContainer.parallel-layout .parallel-section-card + .parallel-section-card {
+            margin-top: 0;
+        }
+
         /* 详情只读视图隐藏搜索栏 */
         #homeSearchSection.readonly-hidden {
             display: none;
@@ -4563,6 +4662,12 @@
                                 <option value="25">快</option>
                             </select>
                         </div>
+                        <!-- 歌词布局切换（顺序 / 并行） -->
+                        <div class="lyrics-layout-toggle">
+                            <span class="layout-label">布局：</span>
+                            <button class="layout-btn active" data-layout="sequential">顺序</button>
+                            <button class="layout-btn" data-layout="parallel">并行</button>
+                        </div>
                         <!-- AI 智能和弦分析按钮 -->
                         <div id="aiChordAnalyzer" class="ai-chord-analyzer" style="display:none;">
                             <button class="ai-chord-btn" id="aiAnalyzeBtn">
@@ -4838,6 +4943,7 @@
         const state = {
             song: { title: '', artist: '', lyrics: [], sections: {} },
             displayMode: 'name', // 'name' or 'tab'
+            lyricsLayout: 'sequential', // 'sequential' or 'parallel'
             selectedChar: null,
             chordData: {}, // { lineIndex: { charIndex: { chord: 'C', left: '1', right: '135' } } }
             keyOffset: 0, // 转调半音数，0 = C调
@@ -5461,6 +5567,29 @@
                     }
                 });
             }
+
+            // Lyrics layout toggle (顺序 / 并行)
+            document.querySelectorAll('.layout-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.lyricsLayout = btn.dataset.layout || 'sequential';
+                    applyLyricsLayoutClass();
+                    renderLyrics();
+                });
+            });
+
+            // 初始化布局按钮高亮 & container class（bindEvents 里调用一次）
+            function applyLyricsLayoutClass() {
+                const container = document.getElementById('lyricsContainer');
+                if (!container) return;
+                if (state.lyricsLayout === 'parallel') {
+                    container.classList.add('parallel-layout');
+                } else {
+                    container.classList.remove('parallel-layout');
+                }
+            }
+            applyLyricsLayoutClass();
 
             // 用户手动滚动时暂停自动翻谱
             let autoScrollLastY = window.scrollY;
@@ -6404,8 +6533,10 @@
             }
             
             const isReadOnly = state.isReadOnly;
+            const layout = state.lyricsLayout || 'sequential';
 
-            lyricsContainer.innerHTML = state.song.lyrics.map((line, lineIndex) => {
+            // 1) 先逐行生成 "sectionLabel + lyricLine" 的原始 HTML 片段，保留行索引信息
+            const rawRows = state.song.lyrics.map((line, lineIndex) => {
                 const chars = line.split('').map((char, charIndex) => {
                     const preChord = getChord(lineIndex, charIndex, 'pre');
                     const curChord = getChord(lineIndex, charIndex, 'current');
@@ -6452,12 +6583,12 @@
                     `;
                 }).join('');
 
-                const sectionLabel = state.song.sections && state.song.sections[lineIndex]
-                    ? `<div class="line-section-label">${escapeHtml(state.song.sections[lineIndex])}</div>`
+                const sectionName = state.song.sections && state.song.sections[lineIndex];
+                const sectionLabel = sectionName
+                    ? `<div class="line-section-label">${escapeHtml(sectionName)}</div>`
                     : '';
 
-                return `
-                    ${sectionLabel}
+                const lyricLineHtml = `
                     <div class="lyric-line ${isReadOnly ? 'is-readonly' : ''}" data-line="${lineIndex}">
                         <span class="line-number">${lineIndex + 1}</span>
                         <div class="line-content">${chars}</div>
@@ -6465,13 +6596,69 @@
                         <div class="line-actions">
                             <button class="line-edit-btn" data-line="${lineIndex}" title="编辑歌词">✏️ 编辑</button>
                             <div class="section-selector">
-                                <button class="section-btn" data-line="${lineIndex}">${state.song.sections && state.song.sections[lineIndex] ? escapeHtml(state.song.sections[lineIndex]) : '+ 段落'}</button>
+                                <button class="section-btn" data-line="${lineIndex}">${sectionName ? escapeHtml(sectionName) : '+ 段落'}</button>
                             </div>
                         </div>
                         `}
                     </div>
                 `;
-            }).join('');
+
+                return {
+                    lineIndex,
+                    sectionName: sectionName || null,
+                    sectionLabelHtml: sectionLabel,
+                    lyricLineHtml,
+                };
+            });
+
+            // 2) 根据布局模式组合最终 HTML
+            let html = '';
+            if (layout === 'parallel') {
+                // 按段落分组：新的 sectionName 出现时开启新卡片。
+                // 规则：sectionName 非空的行作为"新段落起始"；开头未命名的行归入一张"未命名段落"卡片
+                const cards = [];
+                let currentCard = null;
+                rawRows.forEach(row => {
+                    // sectionName 非空 => 新开卡片（即使上一张同名也作为新起始标记；实际用户基本不会重复标记）
+                    if (row.sectionName) {
+                        if (currentCard) cards.push(currentCard);
+                        currentCard = {
+                            title: row.sectionName,
+                            rows: [row],
+                            untitled: false,
+                        };
+                    } else {
+                        if (!currentCard) {
+                            currentCard = { title: null, rows: [], untitled: true };
+                        }
+                        currentCard.rows.push(row);
+                    }
+                });
+                if (currentCard) cards.push(currentCard);
+
+                html = cards.map(card => {
+                    const rowsHtml = card.rows.map(r => r.lyricLineHtml).join('');
+                    const titleHtml = card.untitled
+                        ? ''
+                        : `<div class="section-card-title">${escapeHtml(card.title)}</div>`;
+                    return `<div class="parallel-section-card ${card.untitled ? 'untitled-section' : ''}">
+                        ${titleHtml}
+                        ${rowsHtml}
+                    </div>`;
+                }).join('');
+            } else {
+                // 顺序模式：保持原有扁平结构
+                html = rawRows.map(row => `${row.sectionLabelHtml}${row.lyricLineHtml}`).join('');
+            }
+
+            // 同步 container class（保证初始化 / 数据重载后样式仍然正确）
+            if (layout === 'parallel') {
+                lyricsContainer.classList.add('parallel-layout');
+            } else {
+                lyricsContainer.classList.remove('parallel-layout');
+            }
+
+            lyricsContainer.innerHTML = html;
 
             if (!isReadOnly) {
                 // Bind click events for chord marking (character)
