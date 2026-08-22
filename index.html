@@ -3287,30 +3287,58 @@
            Chord Knowledge Base (子菜单 + 图文)
            =========================================== */
         #pageChords { display: none; }
-        #pageChords .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 120px; }
+        #pageChords .container { max-width: 1280px; margin: 0 auto; padding: 24px 20px 120px; }
 
-        .chords-header { margin-bottom: 28px; }
+        .chords-header { margin-bottom: 24px; }
         .chords-title {
             font-family: 'Playfair Display', 'Noto Serif SC', serif;
             font-size: 2rem; font-weight: 700; margin-bottom: 6px;
         }
         .chords-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
 
+        /* 和弦知识主布局：左侧菜单栏 + 右侧内容区 */
+        .chords-main-layout {
+            display: grid;
+            grid-template-columns: 210px 1fr;
+            gap: 32px;
+            align-items: flex-start;
+        }
+
         .chords-submenu {
-            display: flex; gap: 2px; margin-bottom: 28px;
-            border-bottom: 1px solid var(--border-subtle);
-            flex-wrap: wrap;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: sticky;
+            top: 20px;
+            padding: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
         }
         .chords-submenu .submenu-btn {
-            background: none; border: none; padding: 10px 18px;
-            font-family: inherit; font-size: 0.82rem; color: var(--text-secondary);
-            cursor: pointer; border-bottom: 2px solid transparent;
-            margin-bottom: -1px; transition: all 0.15s; letter-spacing: 0.3px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 11px 14px;
+            font-family: inherit;
+            font-size: 0.86rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.3px;
+            text-align: left;
+            margin-bottom: 0;
+            border-bottom: none;
         }
-        .chords-submenu .submenu-btn:hover { color: var(--text-primary); }
+        .chords-submenu .submenu-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
         .chords-submenu .submenu-btn.active {
-            color: var(--text-primary); font-weight: 600;
-            border-bottom-color: var(--text-primary);
+            color: #fff;
+            font-weight: 600;
+            background: var(--text-primary);
+            border-color: var(--text-primary);
         }
 
         .chords-tab-panel {
@@ -3577,6 +3605,131 @@
             text-align: center; color: var(--text-secondary);
         }
 
+        /* ===== 视频教学卡片 ===== */
+        .video-card-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            margin-top: 24px;
+        }
+        .video-card {
+            display: grid;
+            grid-template-columns: minmax(280px, 420px) 1fr;
+            gap: 24px;
+            align-items: start;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+        .video-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+            border-color: #cbb98b;
+        }
+        .video-card-cover {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border-radius: 6px;
+            background: #eee;
+        }
+        .video-card-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .video-card-play {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            padding-left: 5px;
+            backdrop-filter: blur(2px);
+            transition: all 0.18s ease;
+        }
+        .video-card:hover .video-card-play {
+            background: rgba(220, 40, 40, 0.92);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        .video-card-platform {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            background: rgba(255, 255, 255, 0.94);
+            color: #d03058;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+        }
+        .video-card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 4px 4px 4px 0;
+        }
+        .video-card-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.35;
+        }
+        .video-card-desc {
+            margin: 0;
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .video-card-foot {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .video-chip {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            background: #fff4e0;
+            color: #8a5a12;
+            border-radius: 999px;
+            letter-spacing: 0.3px;
+        }
+        .video-card-go {
+            margin-left: auto;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .video-card:hover .video-card-go {
+            border-bottom-color: var(--text-primary);
+        }
+
+        @media (max-width: 760px) {
+            .video-card {
+                grid-template-columns: 1fr;
+                gap: 18px;
+                padding: 14px;
+            }
+        }
+
         .chord-build-diagram { width: 100%; display: flex; flex-direction: column; gap: 6px; }
         .cbd-row {
             display: flex; align-items: center; gap: 10px;
@@ -3699,6 +3852,36 @@
             .prog-chord-row { grid-template-columns: repeat(2, 1fr); }
         }
 
+        @media (max-width: 860px) {
+            .chords-main-layout { grid-template-columns: 1fr; gap: 20px; }
+            .chords-submenu {
+                position: static;
+                flex-direction: row;
+                flex-wrap: wrap;
+                border: none;
+                background: transparent;
+                padding: 0;
+                border-bottom: 1px solid var(--border-subtle);
+                border-radius: 0;
+            }
+            .chords-submenu .submenu-btn {
+                border-radius: 0;
+                padding: 10px 14px;
+                font-size: 0.8rem;
+                margin-bottom: -1px;
+                border: none;
+                border-bottom: 2px solid transparent;
+                background: transparent;
+                color: var(--text-secondary);
+            }
+            .chords-submenu .submenu-btn:hover { background: transparent; color: var(--text-primary); }
+            .chords-submenu .submenu-btn.active {
+                background: transparent;
+                color: var(--text-primary);
+                border-bottom-color: var(--text-primary);
+            }
+        }
+
         @media (max-width: 640px) {
             .k-two-col { grid-template-columns: 1fr; }
             .knowledge-hero { padding: 28px 22px; }
@@ -3767,18 +3950,24 @@
         <div class="container">
             <header class="chords-header">
                 <h1 class="chords-title">Chord Library</h1>
-                <p class="chords-subtitle">120 个和弦 · 点击钢琴键试听音效 · 切换转位查看左右手标记</p>
+                <p class="chords-subtitle">120 个和弦 · 点击钢琴键试听音效 · 切换转位查看左右手标记 · 附带视频教程精选</p>
             </header>
 
-            <nav class="chords-submenu" id="chordsSubmenu">
-                <button class="submenu-btn active" data-tab="chart">和弦图</button>
-                <button class="submenu-btn" data-tab="prog4536">4536251 走向</button>
-                <button class="submenu-btn" data-tab="basic">乐理基础</button>
-                <button class="submenu-btn" data-tab="structure">和弦构成</button>
-                <button class="submenu-btn" data-tab="inversion">和弦转位</button>
-                <button class="submenu-btn" data-tab="strum">分解弹法</button>
-                <button class="submenu-btn" data-tab="interval">音程表</button>
-            </nav>
+            <div class="chords-main-layout">
+                <aside class="chords-sidebar">
+                    <nav class="chords-submenu" id="chordsSubmenu">
+                        <button class="submenu-btn active" data-tab="chart">和弦图</button>
+                        <button class="submenu-btn" data-tab="prog4536">4536251 走向</button>
+                        <button class="submenu-btn" data-tab="basic">乐理基础</button>
+                        <button class="submenu-btn" data-tab="structure">和弦构成</button>
+                        <button class="submenu-btn" data-tab="inversion">和弦转位</button>
+                        <button class="submenu-btn" data-tab="strum">分解弹法</button>
+                        <button class="submenu-btn" data-tab="interval">音程表</button>
+                        <button class="submenu-btn" data-tab="video">视频教学</button>
+                    </nav>
+                </aside>
+
+                <div class="chords-main-content">
 
             <!-- TAB 2: 4536251 流行经典走向 -->
             <div class="chords-tab-panel" id="chordTab-prog4536">
@@ -4661,6 +4850,40 @@
                     </div>
                 </section>
             </div>
+
+            <!-- TAB 8: 视频教学（外链卡片） -->
+            <div class="chords-tab-panel" id="chordTab-video">
+                <div class="knowledge-hero">
+                    <h2>Video Lessons · 视频教学精选</h2>
+                    <p>精选优质教学视频，点击封面卡片跳转至原文页面继续学习。后续你可以随时把新的教程链接发给我加进来。</p>
+                </div>
+
+                <section class="k-section">
+                    <h3><span class="sec-num">01</span>即兴伴奏必练：柱式和弦原位转位练习</h3>
+                    <a class="video-card-link" href="https://xhslink.cn/o/AkFY0YTCL3P" target="_blank" rel="noopener noreferrer">
+                        <div class="video-card">
+                            <div class="video-card-cover">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Piano%20close-up%20on%20keyboard%2C%20warm%20sunny%20studio%2C%20chord%20inversion%20practice%2C%20sheet%20music%20on%20stand%2C%20soft%20golden%20light%2C%20music%20learning%20atmosphere&image_size=landscape_16_9" alt="柱式和弦原位转位练习" loading="lazy">
+                                <span class="video-card-play" aria-hidden="true">▶</span>
+                                <span class="video-card-platform">小红书</span>
+                            </div>
+                            <div class="video-card-meta">
+                                <h4 class="video-card-title">柱式和弦原位转位练习 · 即兴伴奏必练</h4>
+                                <p class="video-card-desc">柱式和弦 原位 + 转位 的整套基础练习，是即兴伴奏的入门根基。跟着视频反复练熟，转位感会真正进入你的手指。</p>
+                                <div class="video-card-foot">
+                                    <span class="video-chip">柱式和弦</span>
+                                    <span class="video-chip">转位</span>
+                                    <span class="video-chip">即兴伴奏</span>
+                                    <span class="video-card-go">打开小红书学习 →</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </section>
+            </div>
+
+                </div><!-- /chords-main-content -->
+            </div><!-- /chords-main-layout -->
         </div>
     </div>
 
