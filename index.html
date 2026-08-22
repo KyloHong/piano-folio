@@ -349,35 +349,46 @@
 
         /* =====================
            Parallel Layout Styles
+           语义：段落纵向堆叠，段落内部的多行歌词横向并排
            ===================== */
         #lyricsContainer.parallel-layout {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 20px;
-            align-items: start;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            align-items: stretch;
         }
 
-        /* 并行布局中的"段落卡片" */
+        /* 并行布局中的"段落卡片"：每个段落一块，纵向依次排列 */
         .parallel-section-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            padding: 16px 16px 4px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
         }
 
         .parallel-section-card .section-card-title {
-            font-size: 0.82rem;
+            font-size: 0.88rem;
             font-weight: 600;
             color: #7d6a3d;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
             padding-bottom: 8px;
-            border-bottom: 1px solid var(--border-subtle);
+            border-bottom: 1px dashed var(--border-subtle);
+            text-align: left;
         }
 
         .parallel-section-card.untitled-section .section-card-title {
             display: none;
+        }
+
+        /* 关键：段落卡片内部的"歌词行容器" → 让所有句子横向并排 + 可换行 */
+        .parallel-section-card .parallel-lines-row {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: stretch;
+            gap: 2px 14px;   /* 纵向小间距，横向句子之间用较大间距形成分隔感 */
         }
 
         /* 并行模式：隐藏"段首的独立line-section-label"（标题已在卡片顶部） */
@@ -390,13 +401,43 @@
             display: none !important;
         }
 
-        /* 并行模式下：段落内每首歌行收缩边距 */
+        /* 并行模式下：单个句子 = 一张小卡片，分隔感来自边框和底纹 */
         #lyricsContainer.parallel-layout .lyric-line {
-            padding: 6px 2px;
-            margin: 2px 0;
-            min-height: 36px;
+            flex: 0 1 auto;             /* 句子按内容宽度排列，可换行 */
+            display: inline-flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 8px 12px 6px;
+            margin: 0;
+            min-height: 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            position: relative;
         }
 
+        #lyricsContainer.parallel-layout .lyric-line:hover {
+            background: var(--bg-hover);
+            border-color: #d8c9a8;
+        }
+
+        /* 句子之间的分隔竖线：除了第一句之外，左边加一条淡竖线作为视觉分隔（只在hover之外辅助区分） */
+        #lyricsContainer.parallel-layout .lyric-line + .lyric-line::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 20%;
+            bottom: 20%;
+            width: 1px;
+            background: var(--border-subtle);
+            opacity: 0.6;
+        }
+
+        #lyricsContainer.parallel-layout .lyric-line .line-content {
+            justify-content: center;
+        }
+
+        /* 并行模式下段落卡片之间有明显间距（主歌A / 副歌之间的间隔） */
         #lyricsContainer.parallel-layout .parallel-section-card + .parallel-section-card {
             margin-top: 0;
         }
@@ -6643,7 +6684,7 @@
                         : `<div class="section-card-title">${escapeHtml(card.title)}</div>`;
                     return `<div class="parallel-section-card ${card.untitled ? 'untitled-section' : ''}">
                         ${titleHtml}
-                        ${rowsHtml}
+                        <div class="parallel-lines-row">${rowsHtml}</div>
                     </div>`;
                 }).join('');
             } else {
