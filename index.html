@@ -3289,12 +3289,14 @@
         #pageChords { display: none; }
         #pageChords .container {
             max-width: none;
+            width: 100%;
+            box-sizing: border-box;
             margin: 0;
-            padding: 24px 32px 120px 0;
+            padding: 24px 20px 120px 0;
         }
         #pageChords .chords-header {
             margin-left: 0;
-            padding-left: 20px;
+            padding-left: 12px;
         }
 
         .chords-header { margin-bottom: 24px; }
@@ -3307,8 +3309,8 @@
         /* 和弦知识主布局：左侧菜单栏（贴网页最左边缘） + 右侧内容区 */
         .chords-main-layout {
             display: grid;
-            grid-template-columns: 120px 1fr;
-            gap: 24px;
+            grid-template-columns: 100px 1fr;
+            gap: 16px;
             align-items: flex-start;
         }
         .chords-sidebar { padding: 0; }
@@ -3319,7 +3321,7 @@
             gap: 0;
             position: sticky;
             top: 20px;
-            padding: 0 14px 0 20px;
+            padding: 0 6px 0 8px;
             background: transparent;
             border: none;
             border-radius: 0;
@@ -3353,7 +3355,7 @@
             font-weight: 600;
             background: transparent;
             border-left-color: var(--text-primary);
-            padding-left: 5px;
+            padding-left: 7px;
         }
 
         .chords-main-content {
@@ -3365,6 +3367,8 @@
         .chords-tab-panel {
             display: none; animation: fadeIn 0.25s ease;
             min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
         .chords-tab-panel.active { display: block; }
         @keyframes fadeIn {
@@ -3374,6 +3378,9 @@
 
         .chords-search-bar {
             display: flex; gap: 12px; margin-bottom: 24px; align-items: center; flex-wrap: wrap;
+            width: 100%;
+            box-sizing: border-box;
+            min-width: 0;
         }
         .chords-search-bar .search-input {
             flex: 1; min-width: 200px; padding: 9px 16px;
@@ -3402,13 +3409,24 @@
 
         .chords-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 18px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
             width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
+        /* 强制兜底：严格按屏幕宽度分级列数，杜绝只出1列 */
+        @media (min-width: 701px)  { .chords-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 981px)  { .chords-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (min-width: 1281px) { .chords-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        @media (min-width: 1600px) { .chords-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
         .chord-card {
             background: var(--bg-card); border: 1px solid var(--border-subtle);
             border-radius: 4px; padding: 20px; transition: box-shadow 0.2s;
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
         .chord-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .chord-card-header {
@@ -3628,7 +3646,7 @@
             text-align: center; color: var(--text-secondary);
         }
 
-        /* ===== 视频教学卡片 ===== */
+        /* ===== 视频教学卡片（封面在上 / 标题正下方 / 单列垂直布局）===== */
         .video-card-link {
             display: block;
             text-decoration: none;
@@ -3639,13 +3657,13 @@
         .video-card-link:focus-visible { outline: 3px solid #5c7cfa; outline-offset: 2px; border-radius: 10px; }
         .video-card {
             display: grid;
-            grid-template-columns: minmax(280px, 420px) 1fr;
-            gap: 24px;
+            grid-template-columns: 1fr;
+            gap: 14px;
             align-items: start;
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: 10px;
+            padding: 16px 16px 18px;
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
         .video-card-link:hover .video-card,
@@ -3659,10 +3677,9 @@
             width: 100%;
             aspect-ratio: 16 / 9;
             overflow: hidden;
-            border-radius: 6px;
+            border-radius: 8px;
             background: #e8e4db;
             isolation: isolate;
-            flex-shrink: 0;
         }
         .video-card-cover::after {
             content: "";
@@ -3684,8 +3701,8 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            width: 68px;
-            height: 68px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.92);
             color: #111;
@@ -3735,16 +3752,16 @@
         .video-card-meta {
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            padding: 4px 4px 4px 0;
+            gap: 12px;
+            padding: 4px 6px 0;
             min-width: 0;
         }
         .video-card-title {
             margin: 0;
-            font-size: 1.15rem;
+            font-size: 1.12rem;
             font-weight: 700;
             color: var(--text-primary);
-            line-height: 1.4;
+            line-height: 1.45;
             transition: color 0.2s ease;
         }
         .video-card-link:hover .video-card-title { color: #c0392b; }
@@ -3784,14 +3801,6 @@
         .video-card-link:focus .video-card-go {
             border-bottom-color: var(--text-primary);
             color: #c0392b;
-        }
-
-        @media (max-width: 760px) {
-            .video-card {
-                grid-template-columns: 1fr;
-                gap: 18px;
-                padding: 14px;
-            }
         }
 
         .chord-build-diagram { width: 100%; display: flex; flex-direction: column; gap: 6px; }
