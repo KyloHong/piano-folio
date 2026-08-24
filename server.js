@@ -157,10 +157,19 @@ function toIsoUtc(ts) {
     return ts;
 }
 
+function _safeParseJSON(val, fallback) {
+    if (val === null || val === undefined) return fallback;
+    if (typeof val !== 'string') return val;
+    try { return JSON.parse(val); } catch (_) { return fallback; }
+}
+
 function convertChartTimestamps(chart) {
     if (!chart) return chart;
     if (chart.created_at) chart.created_at = toIsoUtc(chart.created_at);
     if (chart.updated_at) chart.updated_at = toIsoUtc(chart.updated_at);
+    if ('song_lyrics' in chart) chart.song_lyrics = _safeParseJSON(chart.song_lyrics, []);
+    if ('song_sections' in chart) chart.song_sections = _safeParseJSON(chart.song_sections, {});
+    if ('chord_data' in chart) chart.chord_data = _safeParseJSON(chart.chord_data, {});
     return chart;
 }
 
@@ -294,32 +303,72 @@ app.post('/api/charts/my', authenticate, async (req, res) => {
 app.put('/api/charts/my/:id', authenticate, async (req, res) => {
     try {
         await initSchema();
-        const { name, song, chord_data, display_mode, is_public } = req.body;
+        const rawBody = req.body || {};
+        const { name, song, chord_data, display_mode, is_public } = rawBody;
         const chart = await dbGet('SELECT * FROM charts WHERE id = ? AND user_id = ?', [req.params.id, req.userId]);
         if (!chart) return res.status(404).json({ error: '图谱不存在或无权修改' });
-        const songData = song || {};
-        const lyrics = Array.isArray(songData.lyrics) ? songData.lyrics : [];
-        const sections = songData.sections || {};
+
+        const has = (k) => Object.prototype.hasOwnProperty.call(rawBody, k);
+        const hasSong = (k) => !!(song && Object.prototype.hasOwnProperty.call(song, k));
+
+        // ---- 字段合并规则：只在 body 显式传入时才更新，否则严格保留 chart.原值 ----
+        const newName = has('name')
+            ? (name ? name.trim() : (chart.name || ''))
+            : chart.name;
+
+        const parseJson = (val, fallback) => {
+            if (val === null || val === undefined) return fallback;
+            try { return JSON.parse(val); } catch (_) { return fallback; }
+        };
+
+        const newLyrics = hasSong('lyrics')
+            ? (Array.isArray(song.lyrics) ? song.lyrics : parseJson(chart.song_lyrics, []))
+            : parseJson(chart.song_lyrics, []);
+
+        const newSections = hasSong('sections')
+            ? (song.sections && typeof song.sections === 'object' ? song.sections : parseJson(chart.song_sections, {}))
+            : parseJson(chart.song_sections, {});
+
+        const newChordData = has('chord_data')
+            ? (chord_data || {})
+            : parseJson(chart.chord_data, {});
+
+        const newTitle = hasSong('title')
+            ? (song.title || '')
+            : chart.song_title;
+        const newArtist = hasSong('artist')
+            ? (song.artist || '')
+            : chart.song_artist;
+        const newVersion = hasSong('version')
+            ? (song.version || '')
+            : chart.song_version;
+        const newCover = hasSong('cover')
+            ? (song.cover || null)
+            : chart.cover;
+        const newDisplay = has('display_mode')
+            ? (display_mode || chart.display_mode)
+            : chart.display_mode;
+        const newIsPublic = has('is_public')
+            ? (is_public ? 1 : 0)
+            : chart.is_public;
+
         await dbRun(`
             UPDATE charts SET
                 name = ?, song_title = ?, song_artist = ?, song_version = ?,
                 song_lyrics = ?, song_sections = ?, chord_data = ?, display_mode = ?,
-                cover = COALESCE(?, cover),
-                is_public = CASE WHEN ? IS NOT NULL THEN ? ELSE is_public END,
-                updated_at = CURRENT_TIMESTAMP
+                cover = ?, is_public = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ? AND user_id = ?
         `, [
-            name ? name.trim() : chart.name,
-            songData.title || chart.song_title,
-            songData.artist || chart.song_artist,
-            songData.version !== undefined ? (songData.version || '') : chart.song_version,
-            JSON.stringify(lyrics),
-            JSON.stringify(sections),
-            JSON.stringify(chord_data || (chart.chord_data ? JSON.parse(chart.chord_data) : {})),
-            display_mode || chart.display_mode,
-            songData.cover !== undefined ? songData.cover : null,
-            is_public !== undefined ? (is_public ? 1 : 0) : null,
-            is_public !== undefined ? (is_public ? 1 : 0) : null,
+            newName,
+            newTitle,
+            newArtist,
+            newVersion,
+            JSON.stringify(newLyrics),
+            JSON.stringify(newSections),
+            JSON.stringify(newChordData),
+            newDisplay,
+            newCover,
+            newIsPublic,
             req.params.id,
             req.userId
         ]);
