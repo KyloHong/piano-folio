@@ -9008,11 +9008,39 @@
                 if (!best) best = data.songs.find(s => s.cover);
                 if (!best || !best.cover) return;
                 const coverUrl = best.cover;
-                // 更新服务端
+                // 更新服务端：采用 Read-Modify-Write 模式。
+                // 1) 先 GET 详情拿到最新完整 song + chordData
+                // 2) 只替换 cover，其余字段原样提交
+                // 即使以后后端 hasOwnProperty 保护被误改，也永远不会清空歌词/和弦/段落
                 try {
+                    const existing = await apiRequest('/api/charts/my/' + chartId, { method: 'GET' });
+                    const existingSong = (existing && typeof existing === 'object') ? {
+                        title: existing.song_title ?? '',
+                        artist: existing.song_artist ?? '',
+                        version: existing.song_version ?? '',
+                        cover: coverUrl,
+                        lyrics: (typeof existing.song_lyrics === 'string')
+                            ? JSON.parse(existing.song_lyrics || '[]')
+                            : (existing.song_lyrics ?? []),
+                        sections: (typeof existing.song_sections === 'string')
+                            ? JSON.parse(existing.song_sections || '{}')
+                            : (existing.song_sections ?? {}),
+                    } : { cover: coverUrl };
+                    const existingChordData = (existing && typeof existing === 'object')
+                        ? ((typeof existing.chord_data === 'string')
+                            ? JSON.parse(existing.chord_data || '{}')
+                            : (existing.chord_data ?? {}))
+                        : {};
+                    const existingDisplayMode = (existing && existing.display_mode) ? existing.display_mode : 'name';
+                    const existingName = (existing && existing.name) ? existing.name : titleNorm;
                     await apiRequest('/api/charts/my/' + chartId, {
                         method: 'PUT',
-                        body: JSON.stringify({ song: { cover: coverUrl } })
+                        body: JSON.stringify({
+                            name: existingName,
+                            song: existingSong,
+                            chord_data: existingChordData,
+                            display_mode: existingDisplayMode,
+                        })
                     });
                 } catch (_) { /* 忽略更新失败，下次重试 */ }
                 // 更新 DOM 中的封面图节点
