@@ -167,9 +167,6 @@ function convertChartTimestamps(chart) {
     if (!chart) return chart;
     if (chart.created_at) chart.created_at = toIsoUtc(chart.created_at);
     if (chart.updated_at) chart.updated_at = toIsoUtc(chart.updated_at);
-    if ('song_lyrics' in chart) chart.song_lyrics = _safeParseJSON(chart.song_lyrics, []);
-    if ('song_sections' in chart) chart.song_sections = _safeParseJSON(chart.song_sections, {});
-    if ('chord_data' in chart) chart.chord_data = _safeParseJSON(chart.chord_data, {});
     return chart;
 }
 
