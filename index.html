@@ -972,6 +972,7 @@
         /* Position Selector */
         .position-selector {
             display: flex;
+            flex-wrap: wrap;
             gap: 4px;
             margin: 12px 0;
             padding: 4px;
@@ -981,7 +982,8 @@
         }
 
         .pos-btn {
-            flex: 1;
+            flex: 1 1 0;
+            min-width: 48px;
             padding: 7px 4px;
             background: transparent;
             border: 1px solid transparent;
@@ -3168,6 +3170,23 @@
             height: 100%;
             object-fit: cover;
             display: block;
+            opacity: 0;
+            transition: opacity 220ms ease;
+            will-change: opacity;
+        }
+        .grid-card-cover .chart-cover-img.loaded,
+        .library-cover .chart-cover-img.loaded {
+            opacity: 1;
+        }
+        /* 当有专辑封面时，SVG 兜底底座先隐藏，等 img.onerror 才显示，避免"先默认封面再专辑封面"的闪 */
+        .grid-card-cover svg[data-chart-svg-role="fallback"],
+        .library-cover svg[data-chart-svg-role="fallback"] {
+            transition: opacity 180ms ease;
+        }
+        .grid-card-cover.is-cover-fallback-hide svg[data-chart-svg-role="fallback"],
+        .library-cover.is-cover-fallback-hide svg[data-chart-svg-role="fallback"] {
+            opacity: 0;
+            visibility: hidden;
         }
         .grid-card-level {
             position: absolute;
@@ -4080,6 +4099,211 @@
             .chords-submenu .submenu-btn { padding: 8px 12px; font-size: 0.78rem; }
             #pageChords .container { padding: 20px 14px 100px; }
             .chords-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ========== 右下角浮窗播放控制器 ========== */
+        .floating-play {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            pointer-events: none; /* 只让具体控件接收事件 */
+        }
+        .floating-play * { pointer-events: auto; }
+
+        .fp-toggle-pill {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(145deg, #8b7142, #6d5930);
+            color: #fffdf5;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 16px rgba(109, 89, 48, 0.35), 0 0 0 1px rgba(255,255,255,0.06) inset;
+            transition: transform 160ms ease, box-shadow 160ms ease;
+        }
+        .fp-toggle-pill:hover { transform: translateY(-1px) scale(1.02); }
+        .fp-toggle-pill:active { transform: translateY(0) scale(0.98); }
+        .fp-toggle-pill.playing {
+            background: linear-gradient(145deg, #5e7c54, #46603f);
+            box-shadow: 0 6px 16px rgba(70, 96, 63, 0.35), 0 0 0 1px rgba(255,255,255,0.06) inset;
+        }
+
+        .fp-panel {
+            min-width: 240px;
+            background: var(--bg-elevated, #ffffff);
+            border: 1px solid var(--border-subtle, #e8e3d7);
+            border-radius: 14px;
+            padding: 14px 14px 12px;
+            box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(8px);
+            /* 展开动画 */
+            transform-origin: bottom right;
+            transform: translateY(8px) scale(0.96);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 180ms cubic-bezier(.2,.9,.3,1.2), opacity 160ms ease, visibility 0ms linear 160ms;
+        }
+        .floating-play.expanded .fp-panel {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            visibility: visible;
+            transition: transform 180ms cubic-bezier(.2,.9,.3,1.2), opacity 180ms ease, visibility 0ms;
+        }
+
+        .fp-panel-title {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .fp-status-dot {
+            display: inline-block;
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--text-dim, #999);
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .fp-status-dot.on {
+            background: #5e7c54;
+            box-shadow: 0 0 0 3px rgba(94,124,84,0.15);
+            animation: fp-dot-pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes fp-dot-pulse {
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.25); }
+        }
+
+        .fp-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fp-row + .fp-row { margin-top: 10px; }
+
+        .fp-play-btn {
+            flex: 0 0 auto;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(145deg, #f5efe2, #e8dfc9);
+            color: var(--accent-color, #7d6a3d);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 140ms ease;
+        }
+        .fp-play-btn:hover { transform: scale(1.05); }
+        .fp-play-btn.playing { color: #46603f; background: linear-gradient(145deg, #d4eccf, #b6dcb4); }
+
+        .fp-speed-group {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+        .fp-speed-btn {
+            padding: 6px 2px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            background: transparent;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 140ms ease;
+        }
+        .fp-speed-btn:hover { background: var(--bg-secondary); }
+        .fp-speed-btn.active {
+            background: var(--accent-soft-bg, rgba(125,106,61,0.12));
+            border-color: var(--accent-color, #7d6a3d);
+            color: var(--accent-color, #7d6a3d);
+            font-weight: 600;
+        }
+
+        .fp-close {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.9rem;
+            line-height: 1;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .fp-close:hover { background: var(--bg-secondary); color: var(--text-primary); }
+
+        /* ========== 无根音开关（右手省略根音） ========== */
+        .drop-root-row { justify-content: space-between; }
+        .drop-root-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            flex: 1;
+            justify-content: flex-end;
+        }
+        .drop-root-switch input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 38px;
+            height: 22px;
+            border-radius: 999px;
+            background: var(--border-subtle, #ccc);
+            position: relative;
+            outline: none;
+            cursor: pointer;
+            transition: background 180ms ease;
+            flex-shrink: 0;
+        }
+        .drop-root-switch input[type="checkbox"]::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: transform 180ms cubic-bezier(.2,.8,.2,1);
+        }
+        .drop-root-switch input[type="checkbox"]:checked {
+            background: var(--accent-color, #7d6a3d);
+        }
+        .drop-root-switch input[type="checkbox"]:checked::after {
+            transform: translateX(16px);
+        }
+        .drop-root-switch .on-hint {
+            color: var(--accent-color);
+            font-weight: 500;
+            display: none;
+        }
+        .drop-root-switch input[type="checkbox"]:checked ~ .on-hint { display: inline; }
+        .drop-root-switch input[type="checkbox"]:checked ~ .off-hint { display: none; }
+
+        @media (max-width: 520px) {
+            .floating-play { right: 14px; bottom: 16px; }
+            .fp-toggle-pill { width: 46px; height: 46px; font-size: 1.1rem; }
+            .fp-panel { min-width: 210px; padding: 12px 12px 10px; }
         }
     </style>
 </head>
@@ -5383,6 +5607,7 @@
                     <button class="chord-btn" data-quality="7">七</button>
                     <button class="chord-btn" data-quality="maj7">大七</button>
                     <button class="chord-btn" data-quality="m7">小七</button>
+                    <button class="chord-btn" data-quality="m7b5">减小七</button>
                     <button class="chord-btn" data-quality="dim">减</button>
                     <button class="chord-btn" data-quality="dim7">减七</button>
                     <button class="chord-btn" data-quality="aug">增</button>
@@ -5426,13 +5651,25 @@
                 <button class="tab-reset" id="tabReset" title="恢复默认">↺</button>
             </div>
 
-            <!-- 位置选择 -->
+            <!-- 无根音排列（右手省略根音，左手继续弹根音） -->
+            <div class="chord-row drop-root-row">
+                <span class="chord-label">无根音</span>
+                <label class="drop-root-switch" for="dropRootToggle">
+                    <span class="off-hint" style="margin-left:auto;">含根音 · 右手完整</span>
+                    <span class="on-hint"  style="margin-left:auto;">省略根音 · 只弹上层音</span>
+                    <input type="checkbox" id="dropRootToggle" title="开启后右手省略根音，由左手低音承担">
+                </label>
+            </div>
+
+            <!-- 位置选择（支持 ±1 / ±2 格加和弦） -->
             <div class="chord-row">
                 <span class="chord-label">位置</span>
                 <div class="position-selector" id="positionSelector">
-                    <button class="pos-btn active" data-pos="current">当前</button>
-                    <button class="pos-btn" data-pos="pre">之前</button>
-                    <button class="pos-btn" data-pos="post">之后</button>
+                    <button class="pos-btn active" data-offset="-2" title="向前2格">◀◀</button>
+                    <button class="pos-btn" data-offset="-1" title="向前1格">◀</button>
+                    <button class="pos-btn" data-offset="0"  title="当前位置">●</button>
+                    <button class="pos-btn" data-offset="1"  title="向后1格">▶</button>
+                    <button class="pos-btn" data-offset="2"  title="向后2格">▶▶</button>
                 </div>
             </div>
 
@@ -5484,6 +5721,7 @@
             selectedChar: null,
             chordData: {}, // { lineIndex: { charIndex: { chord: 'C', left: '1', right: '135' } } }
             keyOffset: 0, // 转调半音数，0 = C调
+            dropRoot: false, // 无根音排列：右手省略根音，左手继续弹根音
             // 图谱管理相关
             currentChartId: null,      // 当前打开的图谱ID
             currentChartName: null,    // 当前图谱名称
@@ -5513,14 +5751,66 @@
         let autoScrollActive = false;
         let autoScrollSpeedVal = 50;
 
+        // 同步更新浮窗播放 UI（与顶部按钮保持一致）
+        function syncPlaybackUI() {
+            const playing = !!autoScrollActive;
+
+            // 浮窗：外层 pill
+            const pill = document.getElementById('fpTogglePill');
+            if (pill) {
+                pill.textContent = playing ? '\u23F8' : '\u25B6';
+                pill.classList.toggle('playing', playing);
+                pill.title = playing ? '暂停自动翻谱（点击展开/收起）' : '播放自动翻谱（点击展开/收起）';
+            }
+            // 浮窗：面板内大播放按钮
+            const fpBtn = document.getElementById('fpPlayBtn');
+            if (fpBtn) {
+                fpBtn.textContent = playing ? '\u23F8' : '\u25B6';
+                fpBtn.classList.toggle('playing', playing);
+                fpBtn.setAttribute('aria-label', playing ? '暂停' : '播放');
+            }
+            // 浮窗：状态点和文字
+            const dot = document.getElementById('fpStatusDot');
+            const txt = document.getElementById('fpStatusText');
+            if (dot) dot.classList.toggle('on', playing);
+            if (txt) txt.textContent = playing ? '滚动中…' : '待机';
+
+            // 顶部按钮（已在 start/stop 单独更新，此处只是兜底同步，保持幂等）
+            const topBtn = document.getElementById('autoScrollBtn');
+            if (topBtn) {
+                topBtn.textContent = playing ? '\u23F8' : '\u25B6';
+                topBtn.classList.toggle('active', playing);
+            }
+
+            // 速度按钮高亮（浮窗）
+            syncFloatingSpeedActive();
+        }
+
+        // 同步浮窗速度按钮高亮（与 autoScrollSpeedVal 对应）
+        function syncFloatingSpeedActive() {
+            const group = document.getElementById('fpSpeedGroup');
+            if (!group) return;
+            group.querySelectorAll('.fp-speed-btn').forEach(b => {
+                const s = parseInt(b.dataset.speed, 10);
+                b.classList.toggle('active', s === autoScrollSpeedVal);
+            });
+            // 顶部 <select> 选中项也同步
+            const topSel = document.getElementById('autoScrollSpeed');
+            if (topSel && topSel.value !== String(autoScrollSpeedVal)) {
+                // 选择现有 option 中匹配的 value；若不存在不强制切换
+                for (let i = 0; i < topSel.options.length; i++) {
+                    if (parseInt(topSel.options[i].value, 10) === autoScrollSpeedVal) {
+                        topSel.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
         function startAutoScroll() {
             if (autoScrollTimer) clearInterval(autoScrollTimer);
             autoScrollActive = true;
-            const btn = document.getElementById('autoScrollBtn');
-            if (btn) {
-                btn.textContent = '\u23F8';
-                btn.classList.add('active');
-            }
+            syncPlaybackUI();
             autoScrollTimer = setInterval(() => {
                 const atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 2;
                 if (atBottom) {
@@ -5537,11 +5827,7 @@
                 autoScrollTimer = null;
             }
             autoScrollActive = false;
-            const btn = document.getElementById('autoScrollBtn');
-            if (btn) {
-                btn.textContent = '\u25B6';
-                btn.classList.remove('active');
-            }
+            syncPlaybackUI();
         }
 
         // Chord Builder State
@@ -5720,6 +6006,7 @@
             '7': [0, 4, 7, 10],
             'maj7': [0, 4, 7, 11],
             'm7': [0, 3, 7, 10],
+            'm7b5': [0, 3, 6, 10],  // 减小七和弦 / 半减七：根音 + 小三度 + 减五度 + 小七度
             'dim': [0, 3, 6],
             'dim7': [0, 3, 6, 9],
             'aug': [0, 4, 8],
@@ -5734,10 +6021,16 @@
         };
 
         // 获取和弦的最大转位数（3音和弦3个，4音和弦4个）
-        function getMaxInversions(quality, extensions) {
-            const fourNoteChords = ['6', 'm6', '7', 'maj7', 'm7', 'dim7'];
-            if (fourNoteChords.includes(quality)) return 4;
-            return 3;
+        function getMaxInversions(quality, extensions, dropRoot) {
+            const fourNoteChords = ['6', 'm6', '7', 'maj7', 'm7', 'm7b5', 'dim7'];
+            let base = fourNoteChords.includes(quality) ? 4 : 3;
+            // 如果有扩展音（add9/9/11/13），至少按扩展后的数量兜底
+            if (extensions && extensions.length > 0) {
+                const est = base + extensions.length;
+                if (est > base) base = Math.min(est, 5);
+            }
+            if (dropRoot) base = Math.max(2, base - 1);
+            return base;
         }
 
         // 计算弹唱标记
@@ -5775,21 +6068,31 @@
                 return semitoneToNumber[semitone];
             });
 
-            // 左手：始终取原位第一音（根音），不受转位影响
+            // 左手：始终取原位第一音（根音），不受转位/无根音影响
             const leftHand = notes[0];
 
-            // 转位处理：把前 `inversion` 个音移到后面
+            // ===== 无根音排列：右手去掉根音（第一个音），只保留上层音 3-5-7 等 =====
+            if (state.dropRoot && notes.length > 1) {
+                notes = notes.slice(1);
+            }
+
+            // 转位处理：把前 `inversion` 个音移到后面（对 dropRoot 后的数组循环）
             const inv = inversion || 0;
             if (inv > 0 && inv < notes.length) {
                 const moved = notes.slice(0, inv);
                 notes = notes.slice(inv).concat(moved);
             }
 
-            // 如果显式指定了 slash bass（斜杠和弦），用 slash 音做左手
+            // 如果显式指定了 slash bass（斜杠和弦），用 slash 音做左手（支持 C#/Db 等升/降号低音）
             let left = leftHand;
             if (slash) {
-                const slashSemitone = noteToSemitone[slash];
-                left = semitoneToNumber[slashSemitone];
+                const slashSemitone = parseNoteToSemitone(slash);
+                if (slashSemitone != null) left = semitoneToNumber[slashSemitone];
+                else {
+                    // 兜底：旧数据只写了字母
+                    const legacy = noteToSemitone[slash];
+                    if (legacy != null) left = semitoneToNumber[legacy];
+                }
             }
 
             // 构建和弦名称
@@ -5803,6 +6106,7 @@
             else if (quality === '7') chordName += '7';
             else if (quality === 'maj7') chordName += 'maj7';
             else if (quality === 'm7') chordName += 'm7';
+            else if (quality === 'm7b5') chordName += 'm7-5';  // 减小七和弦：显示为 Bm7-5
             else if (quality === 'dim') chordName += 'dim';
             else if (quality === 'dim7') chordName += 'dim7';
             else if (quality === 'aug') chordName += 'aug';
@@ -5813,7 +6117,7 @@
                 if (ext === 'add9' || ext === 'add2') {
                     chordName += ext;
                 } else if (['9', '11', '13'].includes(ext)) {
-                    if (quality === '7' || quality === 'm7' || quality === 'maj7') {
+                    if (['7', 'm7', 'maj7', 'm7b5'].includes(quality)) {
                         chordName = chordName.replace('7', ext);
                     } else {
                         chordName += ext;
@@ -5856,8 +6160,8 @@
                 rightInput.classList.remove('edited');
             }
 
-            // 更新转位按钮文字（动态标签：3音和弦3个，4音和弦4个）
-            const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions);
+            // 更新转位按钮文字（动态标签：3音和弦3个，4音和弦4个，无根音时少1个）
+            const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions, state.dropRoot);
             const invLabels = [];
             for (let i = 0; i < maxInv; i++) {
                 invLabels.push(i === 0 ? '原位' : i + '转');
@@ -5868,7 +6172,7 @@
 
         // 循环切换转位（根据和弦类型动态调整）
         function cycleInversion() {
-            const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions);
+            const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions, state.dropRoot);
             chordBuilderState.inversion = (chordBuilderState.inversion + 1) % maxInv;
             // 转位切换后清除用户编辑的左右手标记，让系统自动计算
             tabEdited.left = false;
@@ -5915,7 +6219,7 @@
             updateChordPreview();
         }
 
-        // 更新转位选项
+        // 更新转位选项（斜杠低音）——支持 F#/G#/A#/C#/D# 等升号 & Bb/Eb 等降号
         function updateSlashOptions() {
             const root = chordBuilderState.root;
             if (!root) {
@@ -5925,12 +6229,33 @@
             
             const slashSection = document.getElementById('slashSection');
             const slashGroup = document.getElementById('slashGroup');
+
+            // 全 12 个低音：C / C# / Db / D / D# / Eb / E / F / F# / Gb / G / G# / Ab / A / A# / Bb / B
+            // （和 noteToSemitone 对齐，保证 parseNoteToSemitone 能直接识别）
+            const allBassNotes = [
+                'C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E',
+                'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'
+            ];
+            // 过滤掉和和弦本体根音（含升降号后的实际音）一致的低音，避免"F#/F#"
+            let rootSemitone = noteToSemitone[root];
+            if (chordBuilderState.accidental === 'sharp') rootSemitone = (rootSemitone + 1) % 12;
+            if (chordBuilderState.accidental === 'flat')  rootSemitone = (rootSemitone + 11) % 12;
+            const options = allBassNotes.filter(n => {
+                const s = parseNoteToSemitone(n);
+                return s !== rootSemitone;
+            });
+
+            // 显示名："根音/低音" 例如 F#maj7 -> 按钮显示 F#/C#
+            function displayRoot() {
+                let r = root;
+                if (chordBuilderState.accidental === 'sharp') r += '#';
+                if (chordBuilderState.accidental === 'flat')  r += 'b';
+                return r;
+            }
+            const rootLabel = displayRoot();
             
-            const allNaturalNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-            const options = allNaturalNotes.filter(note => note !== root);
-            
-            slashGroup.innerHTML = `<button class="slash-btn selected" data-slash="none">无转位</button>` +
-                options.map(note => `<button class="slash-btn" data-slash="${note}">${root}/${note}</button>`).join('');
+            slashGroup.innerHTML = `<button class="slash-btn selected" data-slash="none">无低音</button>` +
+                options.map(note => `<button class="slash-btn" data-slash="${note}">${rootLabel}/${note}</button>`).join('');
             
             slashSection.style.display = 'block';
         }
@@ -5943,6 +6268,7 @@
             chordBuilderState.extensions = [];
             chordBuilderState.slash = null;
             chordBuilderState.inversion = 0;
+            state.dropRoot = false;
             tabEdited.left = false;
             tabEdited.right = false;
 
@@ -5954,6 +6280,10 @@
 
             document.querySelector('#accidentalGroup [data-accidental="none"]').classList.add('selected');
             document.querySelector('#qualityGroup [data-quality="major"]').classList.add('selected');
+
+            // 重置无根音开关
+            const drt = document.getElementById('dropRootToggle');
+            if (drt) drt.checked = false;
 
             document.getElementById('slashSection').style.display = 'none';
             document.getElementById('tabLeftInput').value = '';
@@ -6043,6 +6373,8 @@
             updateSaveMenuText();
             initAuth();
             loadPublicCharts();
+            // 初始化浮窗播放 UI（与顶部按钮状态同步）
+            syncPlaybackUI();
         }
 
         // Bind events
@@ -6108,9 +6440,48 @@
             if (autoScrollSpeedEl) {
                 autoScrollSpeedEl.addEventListener('change', function() {
                     autoScrollSpeedVal = parseInt(this.value) || 30;
+                    syncFloatingSpeedActive(); // 同步浮窗高亮
                     if (autoScrollActive) {
                         startAutoScroll(); // 重启以应用新速度
                     }
+                });
+            }
+
+            // ===== 浮窗播放控制器 事件绑定 =====
+            const floatingPlay = document.getElementById('floatingPlay');
+            const fpTogglePill = document.getElementById('fpTogglePill');
+            const fpCloseBtn = document.getElementById('fpCloseBtn');
+            const fpPlayBtn = document.getElementById('fpPlayBtn');
+            const fpSpeedGroup = document.getElementById('fpSpeedGroup');
+
+            if (fpTogglePill && floatingPlay) {
+                // 点击 pill：切换 展开 / 收起
+                fpTogglePill.addEventListener('click', e => {
+                    e.stopPropagation();
+                    // 若按住 Shift 或用户设置过直接播放偏好？ 默认按 UX：展开面板（含速度）
+                    floatingPlay.classList.toggle('expanded');
+                });
+            }
+            if (fpCloseBtn) {
+                fpCloseBtn.addEventListener('click', () => {
+                    floatingPlay && floatingPlay.classList.remove('expanded');
+                });
+            }
+            if (fpPlayBtn) {
+                fpPlayBtn.addEventListener('click', () => {
+                    if (autoScrollActive) stopAutoScroll();
+                    else startAutoScroll();
+                });
+            }
+            if (fpSpeedGroup) {
+                fpSpeedGroup.addEventListener('click', e => {
+                    const btn = e.target.closest('.fp-speed-btn');
+                    if (!btn) return;
+                    const newSpeed = parseInt(btn.dataset.speed, 10);
+                    if (!newSpeed) return;
+                    autoScrollSpeedVal = newSpeed;
+                    syncFloatingSpeedActive();
+                    if (autoScrollActive) startAutoScroll();
                 });
             }
 
@@ -6199,7 +6570,7 @@
                 btn.classList.add('selected');
                 chordBuilderState.quality = btn.dataset.quality;
                 // 如果当前转位超过新和弦类型的最大转位数，重置为原位
-                const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions);
+                const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions, state.dropRoot);
                 if (chordBuilderState.inversion >= maxInv) {
                     chordBuilderState.inversion = 0;
                 }
@@ -6218,6 +6589,11 @@
                     chordBuilderState.extensions.push(ext);
                     btn.classList.add('selected');
                 }
+                // 如果当前转位超过新和弦类型的最大转位数，重置为原位
+                const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions, state.dropRoot);
+                if (chordBuilderState.inversion >= maxInv) {
+                    chordBuilderState.inversion = 0;
+                }
                 updateChordPreview();
             });
 
@@ -6235,15 +6611,32 @@
                 updateChordPreview();
             });
 
-            // Position selector in chord panel
+            // Position selector in chord panel（向前2/1 / 当前 / 向后1/2）
             document.getElementById('positionSelector').addEventListener('click', e => {
                 const btn = e.target.closest('.pos-btn');
                 if (!btn || !state.selectedChar) return;
-                const newPos = btn.dataset.pos;
-                state.selectedChar.pos = newPos;
-                document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+                const offset = parseInt(btn.dataset.offset, 10);
+                if (Number.isNaN(offset)) return;
+                state.selectedChar.offset = offset;
+                document.querySelectorAll('#positionSelector .pos-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             });
+
+            // 无根音排列开关（右手省略根音，左手继续弹根音）
+            const dropRootToggle = document.getElementById('dropRootToggle');
+            if (dropRootToggle) {
+                dropRootToggle.addEventListener('change', function() {
+                    state.dropRoot = !!this.checked;
+                    // 开关变化后，如果转位超过无根音后的最大转位数，重置为原位
+                    const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions, state.dropRoot);
+                    if (chordBuilderState.inversion >= maxInv) {
+                        chordBuilderState.inversion = 0;
+                    }
+                    tabEdited.left = false;
+                    tabEdited.right = false;
+                    updateChordPreview();
+                });
+            }
 
             // Save dialog
             document.getElementById('saveCancel').addEventListener('click', closeSaveDialog);
@@ -7460,7 +7853,8 @@
         // Open chord panel
         function openChordPanel(lineIndex, charIndex, position, targetEl) {
             position = position || 'current';
-            state.selectedChar = { line: lineIndex, char: charIndex, pos: position };
+            // 打开面板默认落在"当前位置"（offset = 0）。向后 1/2 或向前 1/2 由用户在面板里再选。
+            state.selectedChar = { line: lineIndex, char: charIndex, pos: position, offset: 0 };
 
             // Close any open section selector dropdown
             document.querySelectorAll('.section-dropdown').forEach(el => el.remove());
@@ -7518,9 +7912,10 @@
             window.addEventListener('scroll', repositionChordPanel, true);
             window.addEventListener('resize', repositionChordPanel);
 
-            // Update position selector
-            document.querySelectorAll('.pos-btn').forEach(b => {
-                b.classList.toggle('active', b.dataset.pos === position);
+            // Update position selector（位置：偏移 -2..+2）
+            const targetOffset = (state.selectedChar.offset != null) ? state.selectedChar.offset : 0;
+            document.querySelectorAll('#positionSelector .pos-btn').forEach(b => {
+                b.classList.toggle('active', parseInt(b.dataset.offset, 10) === targetOffset);
             });
 
             updateChordPreview();
@@ -7578,14 +7973,34 @@
                 b.classList.toggle('selected', extensions.includes(b.dataset.ext));
             });
 
-            // 解析转位
-            const slashMatch = chordName.match(/\/([CDEFGAB])$/);
+            // 解析斜杠低音（支持 F#、G#、Bb、#C（旧兼容）等带升降号的低音）
+            const slashMatch = chordName.match(/\/(#?[A-G][#b]?)$/);
             if (slashMatch) {
-                chordBuilderState.slash = slashMatch[1];
+                // 统一规范化为"升号在后"（C#/Bb 形式），保证 updateSlashOptions 里的按钮 data-slash 值能被直接匹配
+                const raw = slashMatch[1];
+                const normalized = (() => {
+                    // 先转半音，再按升号/降号规则还原成标准拼写
+                    const semi = parseNoteToSemitone(raw);
+                    if (semi == null) return raw;
+                    const sharpFront = /^#[A-G]/.test(raw);
+                    const anyFlat = /b/.test(raw);
+                    if (anyFlat) return semitoneToNoteFlat[semi];
+                    // 升号在前 (#C) 或 升号在后 (C#) 都统一成升号在后 C#
+                    return sharpFront ? semitoneToNoteSharp[semi] : raw;
+                })();
+                chordBuilderState.slash = normalized;
                 updateSlashOptions();
                 setTimeout(() => {
-                    document.querySelectorAll('#slashGroup .slash-btn').forEach(b => {
-                        b.classList.toggle('selected', b.dataset.slash === slashMatch[1]);
+                    const btns = document.querySelectorAll('#slashGroup .slash-btn');
+                    btns.forEach(b => {
+                        let match = (b.dataset.slash === normalized);
+                        // 也和原始写法做半音级别的匹配（避免 Cb vs B 这种同音异名的未命中）
+                        if (!match && b.dataset.slash && b.dataset.slash !== 'none') {
+                            const s1 = parseNoteToSemitone(normalized);
+                            const s2 = parseNoteToSemitone(b.dataset.slash);
+                            match = (s1 != null && s1 === s2);
+                        }
+                        b.classList.toggle('selected', match);
                     });
                 }, 0);
             }
@@ -7639,9 +8054,29 @@
             hideConfirmDialog();
         }
 
+        // 从 selectedChar 解析最终存储的 (line, char, pos/slot)，支持 ±1/±2 偏移
+        // 规则：若点在字符 current 上，offset 应用到 current char，slot = current
+        //       若点在 pre/post slot 上，offset 应用后仍落在该 slot 上（但边界裁剪）
+        function resolveChordTarget(selectedChar) {
+            if (!selectedChar) return null;
+            const lineLen = (state.song.lyrics[selectedChar.line] || '').length;
+            const offset = parseInt(selectedChar.offset, 10) || 0;
+            const origSlot = selectedChar.pos || 'current';
+            let targetChar = selectedChar.char + offset;
+            if (targetChar < 0) targetChar = 0;
+            if (origSlot === 'current') {
+                if (targetChar > lineLen - 1) targetChar = Math.max(lineLen - 1, 0);
+                return { line: selectedChar.line, char: targetChar, pos: 'current' };
+            }
+            // pre/post slot：slot 跟随 slot 类型；char 做边界裁剪（0..lineLen-1 作为允许范围）
+            if (targetChar > lineLen - 1) targetChar = Math.max(lineLen - 1, 0);
+            return { line: selectedChar.line, char: targetChar, pos: origSlot };
+        }
+
         // Confirm chord
         function confirmChord() {
-            if (!state.selectedChar) return;
+            const target = resolveChordTarget(state.selectedChar);
+            if (!target) return;
 
             // 先自动计算（用于获得和弦名称、含转位）
             const autoResult = calculateChordTab(
@@ -7662,18 +8097,16 @@
             const leftVal = document.getElementById('tabLeftInput').value.trim() || autoResult.left;
             const rightVal = document.getElementById('tabRightInput').value.trim() || autoResult.right;
 
-            const position = state.selectedChar.pos || 'current';
-
             // Save chord with composite key
-            if (!state.chordData[state.selectedChar.line]) {
-                state.chordData[state.selectedChar.line] = {};
+            if (!state.chordData[target.line]) {
+                state.chordData[target.line] = {};
             }
-            const key = `${state.selectedChar.char}_${position}`;
-            state.chordData[state.selectedChar.line][key] = {
+            const key = `${target.char}_${target.pos}`;
+            state.chordData[target.line][key] = {
                 chord: autoResult.name,
                 left: leftVal,
                 right: rightVal,
-                position: position
+                position: target.pos
             };
 
             markDirty();
@@ -7685,11 +8118,11 @@
 
         // Delete chord
         function deleteChord() {
-            if (!state.selectedChar) return;
+            const target = resolveChordTarget(state.selectedChar);
+            if (!target) return;
 
-            const { line, char, pos } = state.selectedChar;
-            const position = pos || 'current';
-            const key = `${char}_${position}`;
+            const { line, char, pos } = target;
+            const key = `${char}_${pos}`;
             if (state.chordData[line]?.[key]) {
                 delete state.chordData[line][key];
                 if (Object.keys(state.chordData[line]).length === 0) {
@@ -7702,6 +8135,91 @@
             renderLyrics();
             updateSummary();
             saveToStorage();
+        }
+
+        // ====== 段落和弦复制：辅助函数 ======
+        // 把段落标签拆成「前缀 + 变体」，如：主歌A → {prefix:'主歌', variant:'A'}；桥段 → {prefix:'桥段', variant:null}
+        function splitSectionTag(tag) {
+            if (!tag) return { prefix: '', variant: null };
+            const m = tag.match(/^(.*?)([A-Za-z0-9]+)$/);
+            if (!m || !m[1]) return { prefix: tag, variant: null };
+            return { prefix: m[1], variant: m[2] };
+        }
+
+        // 获取带有某个 tag 的所有行号（按升序）
+        function getLinesWithTag(tag) {
+            const lines = [];
+            if (!state.song.sections) return lines;
+            for (const [k, v] of Object.entries(state.song.sections)) {
+                if (v === tag) lines.push(parseInt(k, 10));
+            }
+            return lines.sort((a, b) => a - b);
+        }
+
+        // 复制 srcTag 段落的和弦 → dstTag 段落（逐行 1:1 映射，char 位置按目标行长度裁剪）
+        function copySectionChords(srcTag, dstTag) {
+            if (!srcTag || !dstTag || srcTag === dstTag) return false;
+            if (!state.song || !state.song.lyrics) return false;
+            const srcLines = getLinesWithTag(srcTag);
+            const dstLines = getLinesWithTag(dstTag);
+            if (srcLines.length === 0 || dstLines.length === 0) return false;
+
+            const pairCount = Math.min(srcLines.length, dstLines.length);
+            let anyChanged = false;
+
+            for (let i = 0; i < pairCount; i++) {
+                const srcL = srcLines[i];
+                const dstL = dstLines[i];
+                const srcMap = state.chordData && state.chordData[srcL];
+                // 先清空目标行原有和弦（整体替换）
+                if (state.chordData && state.chordData[dstL]) {
+                    delete state.chordData[dstL];
+                    anyChanged = true;
+                }
+                if (!srcMap || Object.keys(srcMap).length === 0) continue;
+
+                const dstLineText = state.song.lyrics[dstL] || '';
+                const dstLen = dstLineText.length;
+                const dstMap = {};
+                for (const [key, entry] of Object.entries(srcMap)) {
+                    let newKey = key;
+                    // 解析现代格式键：{charIndex}_{current|pre|post}
+                    const mm = key.match(/^(\d+)_(current|pre|post)$/);
+                    if (mm) {
+                        let ci = parseInt(mm[1], 10);
+                        const slot = mm[2];
+                        if (dstLen > 0) ci = Math.min(ci, dstLen - 1);
+                        if (ci < 0) ci = 0;
+                        newKey = `${ci}_${slot}`;
+                    }
+                    dstMap[newKey] = { ...entry };
+                }
+                if (Object.keys(dstMap).length > 0) {
+                    if (!state.chordData) state.chordData = {};
+                    state.chordData[dstL] = dstMap;
+                    anyChanged = true;
+                }
+            }
+            return anyChanged;
+        }
+
+        // 找出当前 tag 的同前缀兄弟 tag（主歌A → 主歌B/C；副歌A → 副歌B/C）
+        function findSiblingTags(currentTag) {
+            if (!currentTag) return [];
+            const seen = new Set(sectionTags.slice());
+            if (state.song && state.song.sections) {
+                Object.values(state.song.sections).forEach(t => t && seen.add(t));
+            }
+            const allTags = Array.from(seen);
+            const cur = splitSectionTag(currentTag);
+            if (!cur.variant) return []; // 没有变体字母/数字，不算可复制的分段段落
+            return allTags
+                .filter(t => {
+                    if (t === currentTag) return false;
+                    const s = splitSectionTag(t);
+                    return s.prefix === cur.prefix && s.variant != null;
+                })
+                .sort();
         }
 
         // Show section selector - toggle behavior
@@ -7755,11 +8273,29 @@
                 `<button class="section-dropdown-btn" data-tag="${tag}">${escapeHtml(tag)}${tag === currentTag ? ' <span style="color: var(--accent-color, #7d6a3d); float: right; margin-left: 8px;">✓</span>' : ''}</button>`
             ).join('');
 
+            // 段落和弦复制：只在当前行有 tag 且存在同前缀兄弟 tag 时显示
+            let copyHtml = '';
+            if (currentTag) {
+                const siblings = findSiblingTags(currentTag);
+                if (siblings.length > 0) {
+                    const copyBtns = siblings.map(t =>
+                        `<button class="section-dropdown-btn section-copy-target" data-copy-to="${escapeHtml(t)}" title="将「${escapeHtml(currentTag)}」的和弦逐行复制到「${escapeHtml(t)}」">
+                            <span>→ ${escapeHtml(t)}</span>
+                            <span style="float:right;font-size:0.7rem;color:var(--text-dim);">复制</span>
+                        </button>`
+                    ).join('');
+                    copyHtml = `<div style="border-top: 1px solid var(--border-subtle); margin: 6px 0 4px;"></div>
+                        <div style="padding: 6px 10px 2px; font-size: 0.72rem; color: var(--text-secondary); letter-spacing: 0.02em;">
+                            复制本段和弦到
+                        </div>${copyBtns}`;
+                }
+            }
+
             const clearBtn = currentTag
                 ? `<div style="border-top: 1px solid var(--border-subtle); margin: 4px 0;"></div><button class="section-dropdown-btn section-clear" data-action="clear">清除段落</button>`
                 : '';
 
-            dropdown.innerHTML = customInputHtml + tagButtons + clearBtn;
+            dropdown.innerHTML = customInputHtml + tagButtons + copyHtml + clearBtn;
             parentSelector.appendChild(dropdown);
 
             // Force line-actions visible while dropdown is open
@@ -7815,8 +8351,45 @@
                 }
             }
 
-            // Bind tag selection
+            // 绑定：复制本段和弦到目标段落
+            dropdown.querySelectorAll('.section-copy-target').forEach(copyBtn => {
+                copyBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const dstTag = copyBtn.dataset.copyTo;
+
+                    // Remove event listeners before removing dropdown
+                    dropdown.removeEventListener('mousedown', dropdownMousedownHandler);
+                    dropdown.removeEventListener('mouseup', dropdownMouseupHandler);
+                    dropdown.removeEventListener('click', dropdownClickHandler);
+                    // Close dropdown
+                    dropdown.remove();
+                    if (lineActions) lineActions.classList.remove('section-dropdown-active');
+                    if (parentLine) parentLine.classList.remove('line-with-active-dropdown');
+                    if (sectionDropdownOutsideHandler) {
+                        document.removeEventListener('mousedown', sectionDropdownOutsideHandler);
+                        sectionDropdownOutsideHandler = null;
+                    }
+                    // Re-enable all edit buttons
+                    allEditBtns.forEach(editBtn => {
+                        editBtn.style.pointerEvents = '';
+                        editBtn.style.opacity = '';
+                    });
+
+                    // 真正执行复制
+                    if (dstTag && currentTag) {
+                        copySectionChords(currentTag, dstTag);
+                    }
+                    markDirty();
+                    saveToStorage();
+                    renderLyrics();
+                    updateSummary();
+                });
+            });
+
+            // Bind tag selection（跳过已单独绑定的 copy-target 按钮）
             dropdown.querySelectorAll('.section-dropdown-btn').forEach(tagBtn => {
+                if (tagBtn.classList.contains('section-copy-target')) return;
                 tagBtn.addEventListener('click', e => {
                     e.stopPropagation();
                     e.preventDefault();
@@ -7926,9 +8499,10 @@
 
         // Parse chord name into its constituent semitone positions (mod 12)
         // Returns { rootSemitone: number, pitches: [number, ...] } or null
-        function parseChordToPitches(chordName) {
+        function parseChordToPitches(chordName, opts = {}) {
             if (!chordName) return null;
             const name = chordName.trim();
+            const { dropRoot = false } = opts;
 
             // 1. Extract root note (supports C# D# F# [标准写法] 和 #C #D #F [兼容旧写法])
             let rootLetter;
@@ -7967,7 +8541,14 @@
             const qualityPatterns = [
                 ['maj7', 'maj7'],
                 ['Maj7', 'maj7'],
-                ['m7b5', 'dim'],     // half-diminished treated as dim for pitch display
+                // 减小七和弦 / 半减七：支持多种写法 —— m7b5、m7-5、m7−5(−U+2212)、m7‑5(‑U+2011)、ø7、ø
+                ['m7b5', 'm7b5'],
+                ['m7-5', 'm7b5'],
+                ['m7−5', 'm7b5'],
+                ['m7‑5', 'm7b5'],
+                ['m7–5', 'm7b5'],
+                ['ø7',   'm7b5'],
+                ['ø',    'm7b5'],
                 ['m7', 'm7'],
                 ['m6', 'm6'],        // 小六和弦，优先于m匹配
                 ['dim7', 'dim7'],
@@ -7999,7 +8580,7 @@
             // 4. Detect extension (7, 9, add9, add2, sus4 handled above)
             // remainder may have "7" "9" "add9" etc.
             // If selectedQuality already produced "7" chord, skip adding again.
-            const alreadyHas7 = ['7', 'maj7', 'm7', 'dim7'].includes(selectedQuality);
+            const alreadyHas7 = ['7', 'maj7', 'm7', 'm7b5', 'dim7'].includes(selectedQuality);
             if (!alreadyHas7) {
                 if (remainder.indexOf('add9') !== -1 && intervals.indexOf(14) === -1) {
                     intervals.push(14);
@@ -8020,9 +8601,15 @@
                 pitchSet.add((rootSemitone + semi) % 12);
             });
 
+            let pitchesArr = Array.from(pitchSet).sort((a, b) => a - b);
+            // 无根音：去掉根音（rootSemitone），只保留上层和弦音
+            if (dropRoot) {
+                pitchesArr = pitchesArr.filter(p => p !== rootSemitone);
+            }
+
             return {
                 rootSemitone: rootSemitone,
-                pitches: Array.from(pitchSet).sort((a, b) => a - b)
+                pitches: pitchesArr
             };
         }
 
@@ -8651,13 +9238,24 @@
             </svg>`;
         }
 
-        // 渲染图谱封面：有专辑封面则覆盖在钢琴键 SVG 之上，加载失败时回退显示 SVG
+        // 渲染图谱封面：
+        // - 有专辑封面：SVG 底座直接行内隐藏（避免先露默认封面），img 初始透明 → onload 淡入；
+        //   仅当 img.onerror 加载失败时把 SVG 兜底露出来（配合 transition）。
+        // - 无专辑封面：直接显示 SVG 钢琴键默认封面。
         function renderChartCover(chart, seed) {
             const coverUrl = chart && chart.cover;
             const svg = renderPianoCover(seed);
             if (!coverUrl) return svg;
+            // 给 SVG 根加 fallback 标记 + 初始隐藏（样式内联保证首帧就藏好，CSS 过渡留着兜底显示时的动画）
+            const fallbackSvg = svg.replace(/^<svg\s/,
+                '<svg data-chart-svg-role="fallback" style="opacity:0; visibility:hidden; transition:opacity 180ms ease;" ');
             const alt = escapeHtml((chart.song_title || chart.name || '') + ' cover');
-            return `${svg}<img class="chart-cover-img" src="${escapeHtml(coverUrl)}" alt="${alt}" loading="lazy" onerror="this.style.display='none'">`;
+            // img 初始透明 → onload 加 .loaded 触发 220ms 淡入；
+            // onerror 先移除自己，再把 SVG 兜底露出来（opacity 过渡 180ms 柔化）
+            const imgHtml = `<img class="chart-cover-img" src="${escapeHtml(coverUrl)}" alt="${alt}" loading="lazy"
+  onload="this.classList.add('loaded');"
+  onerror="var p=this.parentElement,s=p&&p.querySelector('svg[data-chart-svg-role=fallback]');this.remove();if(s){s.style.opacity='';s.style.visibility='';}">`;
+            return `${fallbackSvg}${imgHtml}`;
         }
 
         // Open favorites dialog
@@ -8966,8 +9564,8 @@
                                 </div>
                             </div>
                             <div class="library-card-artist">${escapeHtml(c.song_artist || '—')}</div>
-                            ${c.song_version ? `<div class="library-card-version">${escapeHtml(c.song_version)}</div>` : ''}
-                            <div class="library-card-author">@ ${escapeHtml(currentUser || '我')}</div>
+                            ${(c.song_version && typeof c.song_version === 'string') ? `<div class="library-card-version">${escapeHtml(c.song_version)}</div>` : ''}
+                            <div class="library-card-author">@ ${escapeHtml((typeof currentUser === 'string') ? currentUser : (currentUser && currentUser.username) || '我')}</div>
                             <div class="library-tags">
                                 <span class="tag-pill">${formatDate(c.updated_at)}</span>
                             </div>
@@ -9043,21 +9641,51 @@
                         })
                     });
                 } catch (_) { /* 忽略更新失败，下次重试 */ }
-                // 更新 DOM 中的封面图节点
+                // 更新 DOM 中的封面图节点（丝滑切换，避免 SVG → img 的"先默认封面再专辑封面"闪一下）
                 const coverWrap = document.querySelector(`.library-cover[data-chart-id="${chartId}"]`);
                 if (coverWrap) {
+                    // 给 SVG 加 role 标记，方便做交叉淡入淡出（如果之前没有的话）
+                    const existSvg = coverWrap.querySelector('svg');
+                    if (existSvg && !existSvg.hasAttribute('data-chart-svg-role')) {
+                        existSvg.setAttribute('data-chart-svg-role', 'fallback');
+                        existSvg.style.transition = 'opacity 180ms ease';
+                    }
                     const oldImg = coverWrap.querySelector('img.chart-cover-img');
-                    if (oldImg) { oldImg.src = coverUrl; oldImg.style.display = ''; }
-                    else {
-                        const existSvg = coverWrap.querySelector('svg');
+                    const fadeInImg = (imgEl) => {
+                        imgEl.classList.remove('loaded');
+                        // 强制 reflow 让 transition 重新生效
+                        void imgEl.offsetWidth;
+                        const onReady = () => { imgEl.classList.add('loaded'); };
+                        if (imgEl.complete && imgEl.naturalWidth > 0) onReady();
+                        else imgEl.addEventListener('load', onReady, { once: true });
+                    };
+                    const hideSvgOnImgReady = (imgEl, svgEl) => {
+                        if (!svgEl) return;
+                        const doHide = () => {
+                            svgEl.style.opacity = '0';
+                            // 过渡结束后再 visibility:hidden，避免断过渡
+                            const cleanup = () => { svgEl.style.visibility = 'hidden'; svgEl.removeEventListener('transitionend', cleanup); };
+                            svgEl.addEventListener('transitionend', cleanup);
+                            setTimeout(() => { svgEl.style.visibility = 'hidden'; }, 220);
+                        };
+                        if (imgEl.complete && imgEl.naturalWidth > 0) doHide();
+                        else imgEl.addEventListener('load', doHide, { once: true });
+                    };
+                    if (oldImg) {
+                        oldImg.style.display = '';
+                        oldImg.onerror = () => { oldImg.style.display = 'none'; if (existSvg) { existSvg.style.visibility = ''; existSvg.style.opacity = ''; } };
+                        if (oldImg.src !== coverUrl) { oldImg.src = coverUrl; fadeInImg(oldImg); hideSvgOnImgReady(oldImg, existSvg); }
+                        else { fadeInImg(oldImg); hideSvgOnImgReady(oldImg, existSvg); }
+                    } else {
                         const img = document.createElement('img');
                         img.className = 'chart-cover-img';
                         img.src = coverUrl;
                         img.alt = (titleNorm || 'cover') + ' cover';
                         img.loading = 'lazy';
-                        img.onerror = () => { img.style.display = 'none'; };
+                        img.onerror = () => { img.remove(); if (existSvg) { existSvg.style.visibility = ''; existSvg.style.opacity = ''; } };
                         coverWrap.appendChild(img);
-                        if (existSvg) { /* 保留 SVG 作为底层，img 覆盖在上面（CSS absolute） */ }
+                        hideSvgOnImgReady(img, existSvg);
+                        fadeInImg(img);
                     }
                 }
             } catch (e) {
@@ -9277,7 +9905,7 @@
                         <div>
                             <div class="grid-card-title">${escapeHtml(c.name)}</div>
                             <div class="grid-card-meta">${escapeHtml(c.song_artist || 'Various')}</div>
-                            ${c.song_version ? `<div class="grid-card-version">${escapeHtml(c.song_version)}</div>` : ''}
+                            ${(c.song_version && typeof c.song_version === 'string') ? `<div class="grid-card-version">${escapeHtml(c.song_version)}</div>` : ''}
                             <div class="grid-card-artist">@ ${escapeHtml(c.author)}</div>
                             <span class="grid-card-time">${formatDate(c.updated_at)}</span>
                             <div class="grid-card-actions">
@@ -9343,7 +9971,7 @@
             bodyEl.innerHTML = `
                 ${chart.cover ? `<div class="chart-viewer-cover"><img src="${escapeHtml(chart.cover)}" alt="${escapeHtml(chart.song_title || chart.name || 'cover')}" onerror="this.parentElement.style.display='none'"></div>` : ''}
                 <div class="chart-viewer-song">${escapeHtml(chart.song_title)}${chart.song_artist ? ' · ' + escapeHtml(chart.song_artist) : ''}</div>
-                ${chart.song_version ? `<div class="chart-viewer-version" style="font-size:0.78rem;color:var(--accent-color);font-weight:500;font-style:italic;margin-top:3px;">${escapeHtml(chart.song_version)}</div>` : ''}
+                ${(chart.song_version && typeof chart.song_version === 'string') ? `<div class="chart-viewer-version" style="font-size:0.78rem;color:var(--accent-color);font-weight:500;font-style:italic;margin-top:3px;">${escapeHtml(chart.song_version)}</div>` : ''}
                 ${isPublic && chart.author ? '<div class="chart-viewer-author">作者：@' + escapeHtml(chart.author) + '</div>' : ''}
                 <div style="margin-top:12px;display:flex;gap:6px;align-items:center">
                     <span style="font-size:0.75rem;color:var(--text-secondary)">显示模式：</span>
@@ -9494,7 +10122,8 @@
                 'major': [0, 4, 7],   'minor': [0, 3, 7],
                 '6':     [0, 4, 7, 9],   'm6':    [0, 3, 7, 9],
                 '7':     [0, 4, 7, 10], 'maj7':  [0, 4, 7, 11],
-                'm7':    [0, 3, 7, 10], 'dim':   [0, 3, 6],
+                'm7':    [0, 3, 7, 10], 'm7b5':  [0, 3, 6, 10],
+                'dim':   [0, 3, 6],
                 'dim7':  [0, 3, 6, 9],   'aug':   [0, 4, 8],
                 'sus2':  [0, 2, 7],      'sus4':  [0, 5, 7]
             };
@@ -9506,6 +10135,7 @@
                 '7':     { label: '属七和弦', suffix: '7',    cat: '7',     intervals: '根音 + 大三度 + 纯五度 + 小七度' },
                 'maj7':  { label: '大七和弦', suffix: 'maj7', cat: '7',     intervals: '根音 + 大三度 + 纯五度 + 大七度' },
                 'm7':    { label: '小七和弦', suffix: 'm7',   cat: '7',     intervals: '根音 + 小三度 + 纯五度 + 小七度' },
+                'm7b5':  { label: '减小七和弦', suffix: 'm7-5', cat: '7',   intervals: '根音 + 小三度 + 减五度 + 小七度（又称半减七，记谱写作 Bm7‑5 / Bø7）' },
                 'dim':   { label: '减三和弦', suffix: 'dim',  cat: 'dim',   intervals: '根音 + 小三度 + 减五度' },
                 'dim7':  { label: '减七和弦', suffix: 'dim7', cat: 'dim',   intervals: '根音 + 小三度 + 减五度 + 减七度' },
                 'aug':   { label: '增三和弦', suffix: 'aug',  cat: 'dim',   intervals: '根音 + 大三度 + 增五度' },
@@ -9922,5 +10552,28 @@
         // Start
         init();
     </script>
+
+    <!-- 右下角浮窗播放控制器（与顶部自动翻谱按钮双态同步） -->
+    <div class="floating-play" id="floatingPlay" aria-label="自动翻谱控制器">
+        <div class="fp-panel" role="dialog" aria-label="翻谱控制面板">
+            <div class="fp-panel-title">
+                <span>
+                    <span class="fp-status-dot" id="fpStatusDot"></span>
+                    <span id="fpStatusText">待机</span>
+                </span>
+                <button class="fp-close" id="fpCloseBtn" title="收起面板" aria-label="收起">✕</button>
+            </div>
+            <div class="fp-row">
+                <button class="fp-play-btn" id="fpPlayBtn" title="播放/暂停自动翻谱" aria-label="播放/暂停">&#9654;</button>
+                <div class="fp-speed-group" id="fpSpeedGroup" role="group" aria-label="翻谱速度">
+                    <button class="fp-speed-btn" data-speed="200">极慢</button>
+                    <button class="fp-speed-btn" data-speed="100">慢</button>
+                    <button class="fp-speed-btn" data-speed="50">中</button>
+                    <button class="fp-speed-btn" data-speed="25">快</button>
+                </div>
+            </div>
+        </div>
+        <button class="fp-toggle-pill" id="fpTogglePill" title="展开播放控制" aria-label="展开/收起">&#9654;</button>
+    </div>
 </body>
 </html>
