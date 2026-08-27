@@ -972,39 +972,62 @@
         /* Position Selector */
         .position-selector {
             display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin: 12px 0;
-            padding: 4px;
-            background: var(--bg-primary);
-            border-radius: 2px;
-            border: 1px solid var(--border-subtle);
+            gap: 0;
+            margin: 10px 0;
+            padding: 3px;
+            background: linear-gradient(180deg, #f5f2ea 0%, #ede8db 100%);
+            border: 1px solid #d9d2c1;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
         }
 
         .pos-btn {
             flex: 1 1 0;
-            min-width: 48px;
-            padding: 7px 4px;
+            min-width: 0;
+            padding: 6px 2px;
             background: transparent;
-            border: 1px solid transparent;
-            border-radius: 2px;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            color: #8a8275;
+            font-size: 0.7rem;
             font-family: inherit;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 160ms ease;
             text-align: center;
+            letter-spacing: 0.2px;
+            position: relative;
         }
 
         .pos-btn:hover {
             color: var(--text-primary);
-            background: var(--bg-hover);
+            background: rgba(255,255,255,0.6);
+        }
+
+        .pos-btn[data-offset="-2"],
+        .pos-btn[data-offset="-1"] {
+            color: #7c8798; /* 前：冷色（灰蓝） */
+        }
+        .pos-btn[data-offset="1"],
+        .pos-btn[data-offset="2"] {
+            color: #a07d5b; /* 后：暖色（棕） */
         }
 
         .pos-btn.active {
-            background: var(--text-primary);
-            color: var(--bg-primary);
-            font-weight: 500;
+            background: linear-gradient(180deg, #2d2a25 0%, #1a1816 100%);
+            color: #f4ecd8;
+            font-weight: 600;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.15) inset,
+                0 2px 6px rgba(0,0,0,0.18);
+        }
+        .pos-btn[data-offset="-2"].active,
+        .pos-btn[data-offset="-1"].active {
+            background: linear-gradient(180deg, #5b6b86 0%, #3e4a60 100%);
+        }
+        .pos-btn[data-offset="1"].active,
+        .pos-btn[data-offset="2"].active {
+            background: linear-gradient(180deg, #a06b3a 0%, #7a4e25 100%);
         }
 
         /* --- Chord Builder Panel --- */
@@ -1013,11 +1036,11 @@
             z-index: 1000;
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
-            border-radius: 2px;
-            padding: 14px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
             display: none;
-            width: 300px;
+            width: 370px;
         }
 
         .chord-panel.visible {
@@ -1167,54 +1190,60 @@
         .chord-tab-row {
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin-bottom: 10px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 2px;
-            padding: 8px;
+            gap: 10px;
+            margin-bottom: 12px;
+            background: linear-gradient(180deg, #faf7f0 0%, #f3eee1 100%);
+            border: 1px solid #e0d9c8;
+            border-radius: 6px;
+            padding: 10px 12px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
         }
 
         .tab-item {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             flex: 1 1 0;
             min-width: 0;
         }
 
         .tab-label {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             color: var(--text-dim);
             white-space: nowrap;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.6px;
+            font-weight: 600;
         }
 
         .tab-input {
             flex: 1;
-            max-width: 80px;
-            background: transparent;
-            border: none;
-            border-bottom: 1px dashed var(--border-subtle);
-            padding: 2px 4px;
+            max-width: 180px;
+            background: rgba(255,255,255,0.75);
+            border: 1px solid #e3dccb;
+            border-radius: 4px;
+            padding: 5px 8px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--text-primary);
             text-align: center;
             outline: none;
             min-width: 0;
+            transition: border-color 120ms ease, background 120ms ease;
         }
 
         .tab-input:focus {
-            border-bottom-color: var(--text-primary);
-            background: var(--bg-hover);
+            border-color: var(--text-primary);
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(45,42,37,0.08);
         }
 
         .tab-input.edited {
             color: var(--text-primary);
-            border-bottom-style: solid;
-            border-bottom-color: var(--text-primary);
+            border-style: solid;
+            border-color: var(--accent-color, #8a6b3c);
+            background: #fffbf2;
+            font-weight: 600;
         }
 
         .tab-reset {
@@ -5655,21 +5684,21 @@
             <div class="chord-row drop-root-row">
                 <span class="chord-label">无根音</span>
                 <label class="drop-root-switch" for="dropRootToggle">
-                    <span class="off-hint" style="margin-left:auto;">含根音 · 右手完整</span>
-                    <span class="on-hint"  style="margin-left:auto;">省略根音 · 只弹上层音</span>
-                    <input type="checkbox" id="dropRootToggle" title="开启后右手省略根音，由左手低音承担">
+                    <span class="off-hint" style="margin-left:auto;">右手完整</span>
+                    <span class="on-hint"  style="margin-left:auto;">右手无根音</span>
+                    <input type="checkbox" id="dropRootToggle" checked title="开启后右手省略根音，由左手低音承担">
                 </label>
             </div>
 
-            <!-- 位置选择（支持 ±1 / ±2 格加和弦） -->
+            <!-- 加空拍位置（单个歌词前后最多 ±2 空拍） -->
             <div class="chord-row">
-                <span class="chord-label">位置</span>
+                <span class="chord-label">空拍</span>
                 <div class="position-selector" id="positionSelector">
-                    <button class="pos-btn active" data-offset="-2" title="向前2格">◀◀</button>
-                    <button class="pos-btn" data-offset="-1" title="向前1格">◀</button>
-                    <button class="pos-btn" data-offset="0"  title="当前位置">●</button>
-                    <button class="pos-btn" data-offset="1"  title="向后1格">▶</button>
-                    <button class="pos-btn" data-offset="2"  title="向后2格">▶▶</button>
+                    <button class="pos-btn" data-offset="-2" title="向前加2空拍">前2拍</button>
+                    <button class="pos-btn" data-offset="-1" title="向前加1空拍">前1拍</button>
+                    <button class="pos-btn active" data-offset="0"  title="当前歌词位置">当前</button>
+                    <button class="pos-btn" data-offset="1"  title="向后加1空拍">后1拍</button>
+                    <button class="pos-btn" data-offset="2"  title="向后加2空拍">后2拍</button>
                 </div>
             </div>
 
@@ -5721,7 +5750,7 @@
             selectedChar: null,
             chordData: {}, // { lineIndex: { charIndex: { chord: 'C', left: '1', right: '135' } } }
             keyOffset: 0, // 转调半音数，0 = C调
-            dropRoot: false, // 无根音排列：右手省略根音，左手继续弹根音
+            dropRoot: true, // 无根音排列（默认开启）：右手省略根音，左手继续弹根音
             // 图谱管理相关
             currentChartId: null,      // 当前打开的图谱ID
             currentChartName: null,    // 当前图谱名称
@@ -6268,7 +6297,7 @@
             chordBuilderState.extensions = [];
             chordBuilderState.slash = null;
             chordBuilderState.inversion = 0;
-            state.dropRoot = false;
+            state.dropRoot = true; // 默认开启无根音
             tabEdited.left = false;
             tabEdited.right = false;
 
@@ -6281,9 +6310,9 @@
             document.querySelector('#accidentalGroup [data-accidental="none"]').classList.add('selected');
             document.querySelector('#qualityGroup [data-quality="major"]').classList.add('selected');
 
-            // 重置无根音开关
+            // 重置无根音开关（默认开启）
             const drt = document.getElementById('dropRootToggle');
-            if (drt) drt.checked = false;
+            if (drt) drt.checked = true;
 
             document.getElementById('slashSection').style.display = 'none';
             document.getElementById('tabLeftInput').value = '';
