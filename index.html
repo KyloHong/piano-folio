@@ -5690,9 +5690,9 @@
                 </label>
             </div>
 
-            <!-- 加空拍位置（单个歌词前后最多 ±2 空拍） -->
+            <!-- 加空拍位置（单个歌词前后最多 ±2 空拍，label改回"位置"） -->
             <div class="chord-row">
-                <span class="chord-label">空拍</span>
+                <span class="chord-label">位置</span>
                 <div class="position-selector" id="positionSelector">
                     <button class="pos-btn" data-offset="-2" title="向前加2空拍">前2拍</button>
                     <button class="pos-btn" data-offset="-1" title="向前加1空拍">前1拍</button>
@@ -6289,6 +6289,22 @@
             slashSection.style.display = 'block';
         }
 
+        // 根据和弦类型（三和弦 vs 四/五音/扩展）动态设置 dropRoot 默认值：
+        //   三和弦（major/minor/aug/dim/sus2/sus4，且无扩展音）→ 默认关（右手完整）
+        //   其他（六/七和弦，或有 add9/9/11/13 扩展音）       → 默认开（右手无根音）
+        function applyDropRootByChordType(quality, extensions) {
+            const triads = ['major', 'minor', 'aug', 'dim', 'sus2', 'sus4'];
+            const isTriad = triads.includes(quality) && Array.isArray(extensions) && extensions.length === 0;
+            const wantOn = !isTriad;
+            // 同步 state + checkbox，不触发 change 事件（否则会触发递归）
+            state.dropRoot = wantOn;
+            const drt = document.getElementById('dropRootToggle');
+            if (drt && drt.checked !== wantOn) drt.checked = wantOn;
+            // 检查转位越界
+            const maxInv = getMaxInversions(quality, extensions, state.dropRoot);
+            if (chordBuilderState.inversion >= maxInv) chordBuilderState.inversion = 0;
+        }
+
         // 重置和弦构建器
         function resetChordBuilder() {
             chordBuilderState.root = null;
@@ -6297,7 +6313,6 @@
             chordBuilderState.extensions = [];
             chordBuilderState.slash = null;
             chordBuilderState.inversion = 0;
-            state.dropRoot = true; // 默认开启无根音
             tabEdited.left = false;
             tabEdited.right = false;
 
@@ -6310,9 +6325,8 @@
             document.querySelector('#accidentalGroup [data-accidental="none"]').classList.add('selected');
             document.querySelector('#qualityGroup [data-quality="major"]').classList.add('selected');
 
-            // 重置无根音开关（默认开启）
-            const drt = document.getElementById('dropRootToggle');
-            if (drt) drt.checked = true;
+            // 按当前和弦类型设置无根音开关（三和弦=major无扩展 → 默认关）
+            applyDropRootByChordType(chordBuilderState.quality, chordBuilderState.extensions);
 
             document.getElementById('slashSection').style.display = 'none';
             document.getElementById('tabLeftInput').value = '';
@@ -6598,11 +6612,10 @@
                 document.querySelectorAll('#qualityGroup .chord-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 chordBuilderState.quality = btn.dataset.quality;
-                // 如果当前转位超过新和弦类型的最大转位数，重置为原位
-                const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions, state.dropRoot);
-                if (chordBuilderState.inversion >= maxInv) {
-                    chordBuilderState.inversion = 0;
-                }
+                // 根据新类型设置无根音默认值（三和弦关/其他开），内部已包含转位越界检查
+                applyDropRootByChordType(chordBuilderState.quality, chordBuilderState.extensions);
+                tabEdited.left = false;
+                tabEdited.right = false;
                 updateChordPreview();
             });
 
@@ -6618,11 +6631,10 @@
                     chordBuilderState.extensions.push(ext);
                     btn.classList.add('selected');
                 }
-                // 如果当前转位超过新和弦类型的最大转位数，重置为原位
-                const maxInv = getMaxInversions(chordBuilderState.quality, chordBuilderState.extensions, state.dropRoot);
-                if (chordBuilderState.inversion >= maxInv) {
-                    chordBuilderState.inversion = 0;
-                }
+                // 根据新类型设置无根音默认值（有扩展音→视为非三和弦→默认开），内部已包含转位越界检查
+                applyDropRootByChordType(chordBuilderState.quality, chordBuilderState.extensions);
+                tabEdited.left = false;
+                tabEdited.right = false;
                 updateChordPreview();
             });
 
@@ -6640,15 +6652,68 @@
                 updateChordPreview();
             });
 
-            // Position selector in chord panel（向前2/1 / 当前 / 向后1/2）
+            // Position selector（「位置」按钮组）：
+            //   - 当前：不改歌词，仅激活
+            //   - 前N拍 / 后N拍：**立即**在歌词对应位置插入 N 个空格（空拍字符），
+            //     平移该行 chordData，重绘 DOM，然后选中新插入的目标空格位并激活「当前」按钮。
             document.getElementById('positionSelector').addEventListener('click', e => {
                 const btn = e.target.closest('.pos-btn');
                 if (!btn || !state.selectedChar) return;
                 const offset = parseInt(btn.dataset.offset, 10);
                 if (Number.isNaN(offset)) return;
-                state.selectedChar.offset = offset;
-                document.querySelectorAll('#positionSelector .pos-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+
+                const { line: lineIdx, char: origChar, pos: origPos } = state.selectedChar;
+
+                if (offset === 0) {
+                    // 「当前」：不做任何插入，只激活
+                    state.selectedChar.offset = 0;
+                    document.querySelectorAll('#positionSelector .pos-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    return;
+                }
+
+                // ===== 前/后空拍：即时插入空格并平移 chordData 同条目 =====
+                const count = Math.abs(offset);
+                let insertAt;
+                let newChar;
+                if (offset > 0) {
+                    // 后1/2拍：插在原字后面 (origChar + 1)
+                    insertAt = origChar + 1;
+                    insertSpacesAndShift(lineIdx, insertAt, count);
+                    newChar = origChar + offset;
+                } else {
+                    // 前1/2拍：插在原字位置
+                    insertAt = origChar;
+                    insertSpacesAndShift(lineIdx, insertAt, count);
+                    newChar = origChar; // 空格段 0 索引位置（离原字最远一格=count 拍距离）
+                }
+
+                // 重绘歌词 DOM
+                renderLyrics();
+                updateSummary();
+
+                // 找到新目标空格字符对应的 DOM span
+                const targetEl = document.querySelector(
+                    `.lyric-char[data-line="${lineIdx}"][data-char="${newChar}"]`
+                );
+
+                // 更新 selectedChar 到新字符位置（此时位置=当前/offset=0）
+                state.selectedChar = {
+                    line: lineIdx,
+                    char: newChar,
+                    pos: (origPos === 'pre' || origPos === 'post') ? 'current' : (origPos || 'current'),
+                    offset: 0
+                };
+
+                // 激活「当前」按钮（data-offset=0）
+                document.querySelectorAll('#positionSelector .pos-btn').forEach(b => {
+                    b.classList.toggle('active', parseInt(b.dataset.offset, 10) === 0);
+                });
+
+                // 面板跟随新位置重新定位
+                chordPanelTargetEl = targetEl;
+                repositionChordPanel();
+                saveToStorage();
             });
 
             // 无根音排列开关（右手省略根音，左手继续弹根音）
@@ -8033,6 +8098,9 @@
                     });
                 }, 0);
             }
+
+            // 根据解析出的和弦类型设置无根音默认值（三和弦关 / 四/五音及扩展开）
+            applyDropRootByChordType(chordBuilderState.quality, chordBuilderState.extensions);
         }
 
         // Close chord panel
@@ -8081,6 +8149,35 @@
                 confirmCallback(false);
             }
             hideConfirmDialog();
+        }
+
+        // 在指定行歌词的 insertAt 位置插入 count 个空格（空拍），
+        // 并同步平移该行 chordData 中所有 charIndex >= insertAt 的条目（+count）
+        // 返回实际插入的空格数
+        function insertSpacesAndShift(lineIdx, insertAt, count) {
+            if (!Number.isFinite(count) || count <= 0) return 0;
+            const line = state.song.lyrics[lineIdx];
+            if (typeof line !== 'string') return 0;
+            const origLen = line.length;
+            insertAt = Math.max(0, Math.min(insertAt, origLen));
+            // 拼接新歌词
+            state.song.lyrics[lineIdx] = line.slice(0, insertAt) + ' '.repeat(count) + line.slice(insertAt);
+            // 平移 chordData 该行 entry
+            if (state.chordData[lineIdx]) {
+                const newEntry = {};
+                for (const key of Object.keys(state.chordData[lineIdx])) {
+                    const [cStr, slot] = key.split('_');
+                    const c = parseInt(cStr, 10);
+                    if (!Number.isNaN(c) && c >= insertAt) {
+                        newEntry[`${c + count}_${slot}`] = state.chordData[lineIdx][key];
+                    } else {
+                        newEntry[key] = state.chordData[lineIdx][key];
+                    }
+                }
+                state.chordData[lineIdx] = newEntry;
+            }
+            markDirty();
+            return count;
         }
 
         // 从 selectedChar 解析最终存储的 (line, char, pos/slot)，支持 ±1/±2 偏移
