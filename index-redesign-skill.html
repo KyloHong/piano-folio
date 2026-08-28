@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小星星 — 和弦图谱</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;500;700;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --bg: #f2f1ee;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #ebe9e4;
+  --ink: #1c1b19;
+  --ink-soft: #4a4844;
+  --ink-muted: #8a8780;
+  --accent: #b85c38;
+  --accent-hover: #a04e2e;
+  --accent-soft: #f5e8e0;
+  --border: #e0ddd6;
+  --border-strong: #cfcbc2;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(28,27,25,0.04), 0 1px 3px rgba(28,27,25,0.03);
+  --shadow-md: 0 4px 16px rgba(28,27,25,0.06), 0 2px 4px rgba(28,27,25,0.03);
+  --shadow-lg: 0 12px 40px rgba(28,27,25,0.08), 0 4px 12px rgba(28,27,25,0.04);
+  --font-display: 'Satoshi', 'Inter', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+/* Subtle grain texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ===== LAYOUT ===== */
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* ===== NAV ===== */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(242,241,238,0.82);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-brand {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-link {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s var(--ease);
+}
+.nav-link:hover { color: var(--ink); background: var(--bg-subtle); }
+.nav-link.active { color: var(--ink); background: var(--bg-elevated); box-shadow: var(--shadow-sm); }
+.nav-save {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 8px 18px;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+.nav-save:hover { background: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.nav-save:active { transform: translateY(0); }
+
+/* ===== HERO ===== */
+.hero {
+  padding: 64px 0 48px;
+  position: relative;
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 48px;
+  align-items: end;
+}
+.hero-content { max-width: 640px; }
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  color: var(--ink);
+  margin-bottom: 16px;
+  text-wrap: balance;
+}
+.hero-title em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+  font-family: Georgia, serif;
+}
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  font-weight: 400;
+  line-height: 1.6;
+  max-width: 48ch;
+  margin-bottom: 32px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+.hero-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hero-meta-value {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.hero-meta-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+
+/* Hero side card */
+.hero-side {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  min-width: 220px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-side::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+}
+.hero-side-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+  margin-bottom: 16px;
+}
+.hero-side-progress {
+  margin-bottom: 16px;
+}
+.progress-bar {
+  height: 6px;
+  background: var(--bg-subtle);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.6s var(--ease);
+}
+.progress-label {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+}
+.progress-label span:last-child {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--ink);
+}
+.hero-side-chords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chord-chip {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s var(--ease);
+  cursor: default;
+}
+.chord-chip:hover { background: var(--accent); color: #fff; }
+
+/* ===== MAIN CONTENT ===== */
+.main {
+  padding: 0 0 96px;
+}
+.content-layout {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ===== LYRICS CARD ===== */
+.lyrics-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.lyrics-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.lyrics-card-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lyrics-card-title .count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  background: var(--bg-subtle);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.lyrics-card-actions {
+  display: flex;
+  gap: 6px;
+}
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  font-size: 0.85rem;
+}
+.icon-btn:hover {
+  border-color: var(--border);
+  color: var(--ink);
+  background: var(--bg);
+}
+
+/* Section label */
+.lyric-section {
+  padding: 0 28px;
+}
+.lyric-section-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0 12px;
+}
+.lyric-section-label-text {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+.lyric-section-label-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.lyric-section-label-bars {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink-muted);
+}
+
+/* Lyric lines */
+.lyric-line {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 16px;
+  padding: 12px 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  position: relative;
+}
+.lyric-line:hover { background: var(--bg); }
+.lyric-line.active { background: var(--accent-soft); }
+.lyric-line.active .lyric-num { color: var(--accent); }
+.lyric-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.lyric-body { min-width: 0; }
+.lyric-chords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+  min-height: 22px;
+}
+.chord-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s var(--ease);
+}
+.chord-badge:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.lyric-text {
+  font-size: 1.02rem;
+  color: var(--ink);
+  line-height: 1.55;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+.lyric-text .hl {
+  background: linear-gradient(180deg, transparent 62%, rgba(184,92,56,0.18) 62%);
+  padding: 0 1px;
+}
+
+/* ===== CONTROL PANEL ===== */
+.control-panel {
+  position: sticky;
+  top: 80px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  box-shadow: var(--shadow-sm);
+}
+.panel-header {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-header .dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.panel-group { margin-bottom: 18px; }
+.panel-group:last-child { margin-bottom: 0; }
+.panel-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+  display: block;
+  letter-spacing: 0.01em;
+}
+/* Select */
+.panel-select {
+  width: 100%;
+  padding: 9px 34px 9px 12px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238a8780' d='M5 6L0 0h10z'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: all 0.2s var(--ease);
+}
+.panel-select:hover { border-color: var(--border-strong); }
+.panel-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(184,92,56,0.12);
+}
+/* Button group */
+.btn-group {
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.btn-group-btn {
+  flex: 1;
+  padding: 8px 4px;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  white-space: nowrap;
+}
+.btn-group-btn:last-child { border-right: none; }
+.btn-group-btn:hover { color: var(--ink); background: var(--bg-subtle); }
+.btn-group-btn.active {
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 600;
+}
+/* Play row */
+.play-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.play-row .btn-group {
+  flex: 1;
+  border: none;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+}
+.play-btn {
+  width: 40px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s var(--ease);
+  flex-shrink: 0;
+}
+.play-btn:hover { background: var(--accent-hover); }
+.play-btn:active { transform: scale(0.95); }
+.play-btn.playing { background: var(--ink); }
+
+/* ===== FOOTER ===== */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 0;
+}
+.footer-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-left {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-left .mark {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.footer-right {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.05em;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 32px; }
+  .hero-side { min-width: 0; }
+  .content-layout { grid-template-columns: 1fr; gap: 24px; }
+  .control-panel { position: static; order: -1; }
+}
+@media (max-width: 640px) {
+  .container, .nav-inner, .footer-inner { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 40px 0 32px; }
+  .hero-meta { gap: 20px; }
+  .lyric-line { grid-template-columns: 28px 1fr; gap: 12px; }
+  .lyric-section, .lyrics-card-header { padding-left: 20px; padding-right: 20px; }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <span class="nav-brand-dot"></span>
+      ChordFolio
+    </a>
+    <div class="nav-links">
+      <a href="#" class="nav-link">首页</a>
+      <a href="#" class="nav-link active">我的图谱</a>
+      <a href="#" class="nav-link">和弦知识</a>
+    </div>
+    <button class="nav-save">保存图谱</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-eyebrow">Chart #001 · Piano</div>
+        <h1 class="hero-title">小星星 <em>Twinkle</em></h1>
+        <p class="hero-subtitle">莫扎特经典钢琴入门曲，C 大调简化编配。I-V-vi-IV 经典和弦进行，适合初学者练习和弦转换与弹唱配合。</p>
+        <div class="hero-meta">
+          <div class="hero-meta-item">
+            <span class="hero-meta-value">C Major</span>
+            <span class="hero-meta-label">调式 / Key</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-value">4/4</span>
+            <span class="hero-meta-label">拍号 / Time</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-value">~120</span>
+            <span class="hero-meta-label">速度 / BPM</span>
+          </div>
+          <div class="hero-meta-item">
+            <span class="hero-meta-value">07</span>
+            <span class="hero-meta-label">段落 / Sections</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="hero-side">
+        <div class="hero-side-title">练习进度 / Progress</div>
+        <div class="hero-side-progress">
+          <div class="progress-bar"><div class="progress-fill" style="width:68%"></div></div>
+          <div class="progress-label"><span>已掌握段落</span><span>5 / 7</span></div>
+        </div>
+        <div class="hero-side-title" style="margin-top:20px;">和弦 / Chords</div>
+        <div class="hero-side-chords">
+          <span class="chord-chip">C</span>
+          <span class="chord-chip">G</span>
+          <span class="chord-chip">Am</span>
+          <span class="chord-chip">F</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="container">
+    <div class="content-layout">
+
+      <!-- LYRICS CARD -->
+      <section class="lyrics-card">
+        <div class="lyrics-card-header">
+          <span class="lyrics-card-title">歌词与和弦 <span class="count">7 行</span></span>
+          <div class="lyrics-card-actions">
+            <button class="icon-btn" title="编辑">✎</button>
+            <button class="icon-btn" title="分享">↗</button>
+            <button class="icon-btn" title="更多">⋯</button>
+          </div>
+        </div>
+
+        <div class="lyric-section">
+          <!-- Verse 1 -->
+          <div class="lyric-section-label">
+            <span class="lyric-section-label-text">主歌 A / Verse 1</span>
+            <span class="lyric-section-label-line"></span>
+            <span class="lyric-section-label-bars">BAR 01–08</span>
+          </div>
+
+          <div class="lyric-line active">
+            <span class="lyric-num">01</span>
+            <div class="lyric-body">
+              <div class="lyric-chords">
+                <span class="chord-badge">C</span>
+                <span class="chord-badge">G</span>
+              </div>
+              <div class="lyric-text">一闪一闪<span class="hl">亮晶晶</span></div>
+            </div>
+          </div>
+
+          <div class="lyric-line">
+            <span class="lyric-num">02</span>
+            <div class="lyric-body">
+              <div class="lyric-chords">
+                <span class="chord-badge">Am</span>
+                <span class="chord-badge">F</span>
+              </div>
+              <div class="lyric-text">满天都是小星星</div>
+            </div>
+          </div>
+
+          <div class="lyric-line">
+            <span class="lyric-num">03</span>
+            <div class="lyric-body">
+              <div class="lyric-chords">
+                <span class="chord-badge">C</span>
+                <span class="chord-badge">G</span>
+              </div>
+              <div class="lyric-text">挂在天上放光明</div>
+            </div>
+          </div>
+
+          <div class="lyric-line">
+            <span class="lyric-num">04</span>
+            <div class="lyric-body">
+              <div class="lyric-chords">
+                <span class="chord-badge">Am</span>
+                <span class="chord-badge">F</span>
+              </div>
+              <div class="lyric-text">好像许多小眼睛</div>
+            </div>
+          </div>
+
+          <!-- Chorus -->
+          <div class="lyric-section-label">
+            <span class="lyric-section-label-text">副歌 / Chorus</span>
+            <span class="lyric-section-label-line"></span>
+            <span class="lyric-section-label-bars">BAR 09–16</span>
+          </div>
+
+          <div class="lyric-line">
+            <span class="lyric-num">05</span>
+            <div class="lyric-body">
+              <div class="lyric-chords">
+                <span class="chord-badge">C</span>
+                <span class="chord-badge">G</span>
+              </div>
+              <div class="lyric-text">一闪一闪亮晶晶</div>
+            </div>
+          </div>
+
+          <div class="lyric-line">
+            <span class="lyric-num">06</span>
+            <div class="lyric-body">
+              <div class="lyric-chords">
+                <span class="chord-badge">Am</span>
+                <span class="chord-badge">F</span>
+              </div>
+              <div class="lyric-text">满天都是小星星</div>
+            </div>
+          </div>
+
+          <div class="lyric-line">
+            <span class="lyric-num">07</span>
+            <div class="lyric-body">
+              <div class="lyric-chords">
+                <span class="chord-badge">C</span>
+              </div>
+              <div class="lyric-text">小星星</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTROL PANEL -->
+      <aside class="control-panel">
+        <div class="panel-header">
+          <span>控制面板</span>
+          <span class="dot"></span>
+        </div>
+
+        <div class="panel-group">
+          <label class="panel-label">调式</label>
+          <select class="panel-select">
+            <option>C</option>
+            <option>C# / Db</option>
+            <option>D</option>
+            <option>D# / Eb</option>
+            <option>E</option>
+            <option>F</option>
+            <option>F# / Gb</option>
+            <option>G</option>
+            <option>G# / Ab</option>
+            <option>A</option>
+            <option>A# / Bb</option>
+            <option>B</option>
+          </select>
+        </div>
+
+        <div class="panel-group">
+          <label class="panel-label">显示模式</label>
+          <div class="btn-group">
+            <button class="btn-group-btn active">和弦名</button>
+            <button class="btn-group-btn">弹唱</button>
+          </div>
+        </div>
+
+        <div class="panel-group">
+          <label class="panel-label">播放速度</label>
+          <div class="play-row">
+            <div class="btn-group">
+              <button class="btn-group-btn">慢</button>
+              <button class="btn-group-btn active">中</button>
+            </div>
+            <button class="play-btn" title="播放/暂停">▶</button>
+          </div>
+        </div>
+
+        <div class="panel-group">
+          <label class="panel-label">布局</label>
+          <div class="btn-group">
+            <button class="btn-group-btn active">顺序</button>
+            <button class="btn-group-btn">并行</button>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-left"><span class="mark"></span> ChordFolio · 钢琴和弦图谱工具</span>
+    <span class="footer-right">REDESIGNED v3 · 2026</span>
+  </div>
+</footer>
+
+<script>
+// Interactivity
+document.querySelectorAll('.btn-group-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const group = this.closest('.btn-group');
+    group.querySelectorAll('.btn-group-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.lyric-line').forEach(line => {
+  line.addEventListener('click', function() {
+    document.querySelectorAll('.lyric-line').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+const playBtn = document.querySelector('.play-btn');
+let isPlaying = false;
+if (playBtn) {
+  playBtn.addEventListener('click', function() {
+    isPlaying = !isPlaying;
+    this.textContent = isPlaying ? '⏸' : '▶';
+    this.classList.toggle('playing', isPlaying);
+  });
+}
+</script>
+
+</body>
+</html>

@@ -9,12 +9,13 @@
     <title>钢琴曲目练习 - 和弦标记工具</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #F9F9F7;
             --bg-secondary: #EFEFE9;
             --bg-card: #FFFFFF;
+            --bg-subtle: #f5f5f2;
             --bg-hover: #EAE8E2;
             --accent-gold: #000000;
             --accent-gold-dim: #444444;
@@ -34,7 +35,7 @@
         }
 
         body {
-            font-family: 'Noto Serif SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Noto Serif SC', 'Playfair Display', Georgia, serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
@@ -491,14 +492,82 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
+            padding: 0 4px;
+        }
+        .editor-topbar .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #fff;
+            border: 1px solid #e8e2d9;
+            border-radius: 10px;
+            color: #555;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+        .editor-topbar .back-btn:hover {
+            border-color: #8B7355;
+            color: #8B7355;
+            background: #faf8f5;
+        }
+        .editor-topbar .save-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .editor-topbar .save-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .editor-topbar .save-icon {
+            font-size: 0.9rem;
         }
 
-        /* Song Info Hero */
+        /* Song Info Hero - 升级设计 */
         .song-info {
             text-align: center;
-            padding: 32px 24px 40px;
-            margin-bottom: 32px;
+            padding: 40px 32px 44px;
+            margin-bottom: 28px;
+            background: linear-gradient(180deg, #faf8f5 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 1px solid #f0ece6;
+            position: relative;
+            overflow: hidden;
+        }
+        .song-info::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(139,115,85,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .song-info::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: -40px;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(139,115,85,0.04) 0%, transparent 70%);
+            border-radius: 50%;
         }
         .song-cover-wrap {
             width: 180px;
@@ -666,11 +735,13 @@
 
         /* Lyrics Section */
         .lyrics-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 2px;
-            padding: 36px;
-            margin-bottom: 32px;
+            background: #ffffff;
+            border: 1px solid #f0ece6;
+            border-radius: 16px;
+            padding: 36px 40px;
+            margin-bottom: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 4px 16px rgba(0,0,0,0.03);
+            position: relative;
         }
 
         .section-title-row {
@@ -758,36 +829,49 @@
 
         .section-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.15rem;
-            color: var(--text-primary);
+            font-size: 1.25rem;
+            color: #1a1a1a;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 3px;
+            height: 20px;
+            background: linear-gradient(180deg, #8B7355 0%, #a0896c 100%);
+            border-radius: 2px;
+            flex-shrink: 0;
         }
 
         .section-title::after {
             content: '';
             flex: 1;
             height: 1px;
-            background: var(--border-subtle);
+            background: linear-gradient(90deg, #e8e2d9 0%, transparent 100%);
             margin-left: 16px;
         }
 
-        /* Lyric Line */
+        /* Lyric Line - 升级设计 */
         .lyric-line {
             display: flex;
             align-items: flex-end;
-            padding: 10px 18px;
-            margin: 6px 0;
-            border-radius: 2px;
-            transition: background 0.2s ease;
+            padding: 12px 20px;
+            margin: 4px 0;
+            border-radius: 10px;
+            transition: all 0.2s ease;
             cursor: pointer;
-            min-height: 48px;
+            min-height: 52px;
+            border: 1px solid transparent;
         }
 
         .lyric-line:hover {
-            background: var(--bg-hover);
+            background: #faf8f5;
+            border-color: #f0ece6;
+        }
         }
 
         .lyric-line.active {
@@ -2344,6 +2428,15 @@
             font-family: 'Playfair Display', serif;
             letter-spacing: 0.5px;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-logo-icon {
+            width: 26px;
+            height: 20px;
+            flex-shrink: 0;
+            opacity: 0.9;
         }
         .nav-links {
             display: flex;
@@ -2575,6 +2668,20 @@
         }
         .modal-footer a { color: var(--accent-gold); text-decoration: none; }
         .modal-footer a:hover { text-decoration: underline; }
+        .modal-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 14px 0;
+            color: #999;
+            font-size: 0.78rem;
+        }
+        .modal-divider::before, .modal-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .modal-divider span { padding: 0 12px; }
 
         /* Search Results Modal */
         .search-results-content {
@@ -3436,21 +3543,45 @@
         #pageChords .chords-header {
             margin-left: 0;
             padding-left: 0;
-            text-align: center;
+            text-align: left;
+            margin-bottom: 36px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--border-subtle);
+            position: relative;
+        }
+        #pageChords .chords-header::before {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 48px;
+            height: 2px;
+            background: var(--text-primary);
         }
 
         .chords-header { margin-bottom: 24px; }
         .chords-title {
-            font-family: 'Playfair Display', 'Noto Serif SC', serif;
-            font-size: 2rem; font-weight: 700; margin-bottom: 6px;
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            margin-bottom: 10px;
+            color: var(--text-primary);
         }
-        .chords-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
+        .chords-subtitle {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            line-height: 1.6;
+            max-width: 56ch;
+        }
 
-        /* 和弦知识主布局：左侧菜单栏（贴网页最左边缘） + 右侧内容区 */
+        /* 和弦知识主布局：左侧菜单栏 + 右侧内容区 */
         .chords-main-layout {
             display: grid;
-            grid-template-columns: 100px 1fr;
-            gap: 16px;
+            grid-template-columns: 220px 1fr;
+            gap: 40px;
             align-items: flex-start;
         }
         .chords-sidebar { padding: 0; }
@@ -3460,42 +3591,97 @@
             flex-direction: column;
             gap: 0;
             position: sticky;
-            top: 20px;
-            padding: 0 6px 0 8px;
-            background: transparent;
-            border: none;
-            border-radius: 0;
-            border-top: 1px solid var(--border-subtle);
+            top: 24px;
+            padding: 20px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 4px 16px rgba(0,0,0,0.03);
         }
         .chords-submenu .submenu-btn {
             background: transparent;
             border: none;
-            border-radius: 0;
-            padding: 7px 1px;
-            font-family: inherit;
-            font-size: 0.76rem;
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            font-size: 0.84rem;
+            font-weight: 500;
             color: var(--text-secondary);
             cursor: pointer;
-            transition: color 0.15s ease;
-            letter-spacing: 0.2px;
+            transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+            letter-spacing: 0.01em;
             text-align: left;
-            margin: 0;
-            border-bottom: 1px solid var(--border-subtle);
-            border-left: 2px solid transparent;
+            margin: 1px 0;
             width: 100%;
             white-space: nowrap;
-            line-height: 1.3;
+            line-height: 1.4;
+            position: relative;
         }
         .chords-submenu .submenu-btn:hover {
             color: var(--text-primary);
-            background: transparent;
+            background: rgba(0,0,0,0.04);
+            transform: translateX(2px);
         }
         .chords-submenu .submenu-btn.active {
             color: var(--text-primary);
-            font-weight: 600;
-            background: transparent;
-            border-left-color: var(--text-primary);
-            padding-left: 7px;
+            font-weight: 700;
+            background: rgba(0,0,0,0.06);
+        }
+        .chords-submenu .submenu-btn.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 18px;
+            background: var(--text-primary);
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ===== 一级/二级目录分组（桌面端） ===== */
+        .nav-mobile-toggle { display: none; }
+        .nav-groups { display: flex; flex-direction: column; gap: 4px; }
+        .nav-group { margin: 0; }
+        .nav-group-title {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 10px 12px;
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+            border-radius: 8px;
+        }
+        .nav-group-title:hover { color: var(--text-secondary); background: rgba(0,0,0,0.02); }
+        .nav-group-title .nav-arrow {
+            font-size: 0.6rem;
+            transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            opacity: 0.5;
+        }
+        .nav-group.expanded .nav-group-title .nav-arrow { transform: rotate(180deg); }
+        .nav-group-items {
+            display: none;
+            padding-left: 0;
+            margin-top: 2px;
+        }
+        .nav-group.expanded .nav-group-items { display: block; }
+        .nav-group-items .submenu-btn {
+            padding-left: 20px;
+            font-size: 0.82rem;
+            margin: 1px 0;
+        }
+        .nav-group-items .submenu-btn.active {
+            padding-left: 20px;
         }
 
         .chords-main-content {
@@ -4041,83 +4227,464 @@
         .kp-bk.hl { background: linear-gradient(180deg, #ffdca8, #f48c1c); }
 
         /* ===========================================
+           Knowledge Block 通用样式
+           =========================================== */
+        .chords-kb-hero {
+            margin-bottom: 36px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--border-subtle);
+            position: relative;
+        }
+        .chords-kb-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 56px;
+            height: 2px;
+            background: var(--text-primary);
+        }
+        .knowledge-heading {
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+        .knowledge-sub {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            max-width: 68ch;
+            font-weight: 400;
+        }
+        .knowledge-block {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 4px 16px rgba(0,0,0,0.03);
+            position: relative;
+        }
+        .knowledge-block-title {
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+        .knowledge-p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+        .knowledge-p strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+        .knowledge-table-wrap {
+            overflow-x: auto;
+            margin-top: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-subtle);
+        }
+        .knowledge-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        .knowledge-table th {
+            background: var(--bg-subtle, #f5f5f5);
+            color: var(--text-primary);
+            font-weight: 700;
+            padding: 12px 16px;
+            text-align: center;
+            border-bottom: 2px solid var(--border-subtle);
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            letter-spacing: 0.02em;
+        }
+        .knowledge-table td {
+            padding: 11px 16px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        .knowledge-table tr:last-child td { border-bottom: none; }
+        .knowledge-table tr:hover td { background: rgba(0,0,0,0.02); }
+        .knowledge-table td:first-child {
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: left;
+        }
+        .knowledge-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 8px;
+        }
+        .knowledge-note {
+            background: var(--bg-subtle, #f8f8f8);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 18px 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .knowledge-note strong {
+            color: var(--text-primary);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 6px;
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+        }
+        @media (max-width: 768px) {
+            .knowledge-block { padding: 20px 18px; }
+            .knowledge-grid-2 { grid-template-columns: 1fr; }
+            .knowledge-table { font-size: 0.8rem; }
+            .knowledge-table th, .knowledge-table td { padding: 8px 10px; }
+        }
+
+        /* ===========================================
            Progression 4536251 专用样式
            =========================================== */
         .kb-block-head {
             display: flex; align-items: center; justify-content: space-between;
-            gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+            gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-subtle);
         }
+        .kb-block-head .knowledge-block-title { margin-bottom: 0; }
         .prog-play-btn {
             appearance: none; border: 0; cursor: pointer;
-            background: linear-gradient(135deg, var(--kb-accent, #ff6b6b), #ff8e53);
-            color: #fff; font-weight: 600; font-size: 0.88rem;
-            padding: 9px 18px; border-radius: 999px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transition: transform .15s ease, box-shadow .15s ease;
+            background: var(--kb-accent, #ff6b6b);
+            color: #fff; font-weight: 600; font-size: 0.85rem;
+            padding: 10px 20px; border-radius: 999px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            letter-spacing: 0.02em;
         }
-        .prog-play-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
-        .prog-play-btn.active, .prog-chord-card.active {
-            outline: 3px solid #ffd43b;
-            outline-offset: 2px;
+        .prog-play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18), 0 8px 20px rgba(0,0,0,0.1);
+            filter: brightness(1.1);
+        }
+        .prog-play-btn:active { transform: translateY(0) scale(0.97); }
+        .prog-play-btn.playing {
+            background: var(--text-primary);
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+            50% { box-shadow: 0 2px 16px rgba(0,0,0,0.25), 0 0 0 4px rgba(0,0,0,0.05); }
         }
         .prog-chord-row {
-            display: grid; gap: 14px;
+            display: grid; gap: 12px;
             grid-template-columns: repeat(7, 1fr);
         }
         .prog-chord-card {
-            background: #fff; border: 1px solid var(--border-subtle); border-radius: 14px;
-            padding: 14px 10px 10px; text-align: center; cursor: pointer;
-            transition: transform .15s ease, box-shadow .15s ease, border-color .15s;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 16px 10px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
             position: relative;
+            overflow: hidden;
         }
-        .prog-chord-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); border-color: #ffe8cc; }
-        .prog-chord-card.active { border-color: var(--kb-accent, #ff6b6b); background: #fff5f5; }
-        .pcc-step { font-size: 0.7rem; color: #888; letter-spacing: 0.05em; margin-bottom: 4px; }
-        .pcc-name { font-size: 1.55rem; font-weight: 800; color: var(--text-primary); line-height: 1.15; }
+        .prog-chord-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--kb-accent, #ff6b6b);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .prog-chord-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+            border-color: var(--kb-accent, #ff6b6b);
+        }
+        .prog-chord-card:hover::before { opacity: 1; }
+        .prog-chord-card.active {
+            border-color: var(--kb-accent, #ff6b6b);
+            background: var(--bg-subtle, #f5f5f2);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .prog-chord-card.active::before { opacity: 1; height: 4px; }
+        .pcc-step {
+            font-size: 0.68rem;
+            color: var(--text-dim, #999);
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .pcc-name {
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.15;
+            margin-bottom: 4px;
+        }
         .pcc-name.pcc-root { color: var(--kb-accent, #e03131); }
-        .pcc-notes { font-size: 0.74rem; color: #868e96; margin: 4px 0 8px; letter-spacing: 0.02em; }
+        .pcc-notes {
+            font-size: 0.72rem;
+            color: var(--text-dim, #888);
+            margin: 4px 0 10px;
+            letter-spacing: 0.02em;
+            font-family: 'JetBrains Mono', monospace;
+        }
         .prog-chord-card .kp-wrap {
-            position: relative; height: 70px; border-radius: 8px;
-            background: #1a1a1a; padding: 6px 6px 5px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+            position: relative;
+            height: 72px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+            padding: 7px 7px 6px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.15);
         }
         @media (max-width: 980px) {
             .prog-chord-row { grid-template-columns: repeat(4, 1fr); }
         }
         @media (max-width: 640px) {
-            .prog-chord-row { grid-template-columns: repeat(2, 1fr); }
+            .prog-chord-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .prog-chord-card { padding: 14px 8px 10px; }
+            .pcc-name { font-size: 1.4rem; }
+        }
+
+        /* ===== 移动端浮动导航按钮 + 抽屉 ===== */
+        .chords-nav-fab {
+            display: none;
+            position: fixed;
+            top: 76px;
+            left: 16px;
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(145deg, #2a2a28 0%, #1a1a18 100%);
+            color: #fff;
+            cursor: pointer;
+            z-index: 200;
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.2),
+                0 8px 24px rgba(0,0,0,0.15),
+                inset 0 1px 1px rgba(255,255,255,0.1);
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .chords-nav-fab:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow:
+                0 4px 12px rgba(0,0,0,0.25),
+                0 12px 32px rgba(0,0,0,0.18),
+                inset 0 1px 1px rgba(255,255,255,0.12);
+        }
+        .chords-nav-fab:active { transform: scale(0.95); }
+        .chords-nav-fab svg { width: 20px; height: 20px; }
+        .chords-drawer-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 201;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .chords-drawer-overlay.open { display: block; opacity: 1; }
+        .chords-drawer {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: 300px;
+            max-width: 82vw;
+            background: var(--bg-card);
+            z-index: 202;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-subtle);
+        }
+        .chords-drawer.open { transform: translateX(0); }
+        .chords-drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+        }
+        .chords-drawer-close {
+            background: rgba(0,0,0,0.04);
+            border: none;
+            font-size: 1.2rem;
+            line-height: 1;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .chords-drawer-close:hover {
+            color: var(--text-primary);
+            background: rgba(0,0,0,0.08);
+        }
+        .chords-drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+        }
+        .chords-drawer-body .nav-group-title {
+            padding: 12px 14px;
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: none;
+            width: 100%;
+            text-align: left;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-dim);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .chords-drawer-body .nav-group-title:hover {
+            color: var(--text-secondary);
+            background: rgba(0,0,0,0.03);
+        }
+        .chords-drawer-body .nav-group-title .nav-arrow {
+            font-size: 0.65rem; opacity: 0.5;
+            transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .chords-drawer-body .nav-group.expanded .nav-group-title .nav-arrow { transform: rotate(180deg); }
+        .chords-drawer-body .nav-group-items { display: none; margin-top: 4px; }
+        .chords-drawer-body .nav-group.expanded .nav-group-items { display: block; }
+        .chords-drawer-body .submenu-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 11px 14px 11px 28px;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+            margin: 1px 0;
+            position: relative;
+        }
+        .chords-drawer-body .submenu-btn:hover {
+            color: var(--text-primary);
+            background: rgba(0,0,0,0.04);
+            transform: translateX(2px);
+        }
+        .chords-drawer-body .submenu-btn.active {
+            color: var(--text-primary);
+            font-weight: 700;
+            background: rgba(0,0,0,0.06);
+        }
+        .chords-drawer-body .submenu-btn.active::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 16px;
+            background: var(--text-primary);
+            border-radius: 0 2px 2px 0;
         }
 
         @media (max-width: 860px) {
             #pageChords .container { padding: 20px 20px 100px 20px; max-width: none; }
-            #pageChords .chords-header { padding-left: 0; }
+            #pageChords .chords-header { padding-left: 64px; }
             .chords-main-layout { grid-template-columns: 1fr; gap: 20px; margin-left: 0; }
+            .chords-sidebar { display: none !important; }
+            .chords-nav-fab { display: flex; }
             .chords-submenu {
                 position: static;
-                flex-direction: row;
-                flex-wrap: wrap;
-                border: none;
-                background: transparent;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                border: 1px solid var(--border-subtle);
+                background: var(--bg-card, #fff);
                 padding: 0;
-                border-bottom: 1px solid var(--border-subtle);
-                border-radius: 0;
+                border-radius: 10px;
+                overflow: hidden;
             }
-            .chords-submenu .submenu-btn {
-                border-radius: 0;
-                padding: 10px 14px;
-                font-size: 0.8rem;
-                margin-bottom: -1px;
+            .nav-mobile-toggle {
+                display: flex;
+                width: 100%;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 16px;
+                background: none;
                 border: none;
-                border-bottom: 2px solid transparent;
+                font-size: 0.88rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                cursor: pointer;
+                font-family: inherit;
+            }
+            .nav-mobile-toggle .nav-arrow {
+                transition: transform 0.2s ease;
+                font-size: 0.75rem;
+                opacity: 0.6;
+            }
+            .chords-submenu.mobile-open .nav-mobile-toggle .nav-arrow { transform: rotate(180deg); }
+            .nav-groups { display: none; border-top: 1px solid var(--border-subtle); }
+            .chords-submenu.mobile-open .nav-groups { display: block; }
+            .nav-group-title {
+                padding: 10px 16px;
+                font-size: 0.82rem;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+            .nav-group-items .submenu-btn {
+                padding: 10px 16px 10px 28px;
+                font-size: 0.82rem;
+                border: none;
+                border-bottom: 1px solid var(--border-subtle);
                 background: transparent;
                 color: var(--text-secondary);
+                border-radius: 0;
+                margin: 0;
+                text-align: left;
+                width: 100%;
+                border-left: 3px solid transparent;
             }
-            .chords-submenu .submenu-btn:hover { background: transparent; color: var(--text-primary); }
-            .chords-submenu .submenu-btn.active {
-                background: transparent;
+            .nav-group-items .submenu-btn:last-child { border-bottom: none; }
+            .nav-group-items .submenu-btn:hover { background: var(--bg-secondary); color: var(--text-primary); }
+            .nav-group-items .submenu-btn.active {
+                background: var(--bg-secondary);
                 color: var(--text-primary);
-                border-bottom-color: var(--text-primary);
+                border-left-color: var(--text-primary);
+                font-weight: 600;
             }
         }
 
@@ -4130,6 +4697,270 @@
             .chords-grid { grid-template-columns: 1fr; }
         }
 
+        /* ========== 右侧控制面板（与歌词内容并排，sticky） ========== */
+        .lyrics-section {
+            display: flex;
+            gap: 28px;
+            align-items: flex-start;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            margin-bottom: 28px;
+        }
+        .lyrics-content-wrap {
+            flex: 1;
+            min-width: 0;
+            background: #ffffff;
+            border: 1px solid #f0ece6;
+            border-radius: 16px;
+            padding: 36px 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 4px 16px rgba(0,0,0,0.03);
+        }
+        /* ===== 编辑器页面：主内容 + 右侧面板 flex 布局 ===== */
+        #pageEditor .container {
+            display: flex;
+            gap: 28px;
+            align-items: flex-start;
+            max-width: 1280px;
+        }
+        #pageEditor .editor-main {
+            flex: 1;
+            min-width: 0;
+        }
+        /* ===== SOFT-SKILL 高端控制面板 ===== */
+        .control-panel {
+            position: sticky;
+            top: 24px;
+            flex-shrink: 0;
+            z-index: 10;
+            width: 220px;
+            /* 双边框嵌套结构：外层壳 */
+            background: linear-gradient(145deg, #f8f7f5 0%, #f0eeeb 100%);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 20px;
+            box-shadow:
+                0 1px 2px rgba(0,0,0,0.04),
+                0 8px 32px rgba(0,0,0,0.06),
+                0 24px 64px rgba(0,0,0,0.04),
+                inset 0 1px 1px rgba(255,255,255,0.8);
+            padding: 6px;
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+        }
+        /* 内层核心 */
+        .control-panel::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(0,0,0,0.02);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .control-panel > * { position: relative; z-index: 1; }
+        .control-panel > .cp-row { padding: 0 14px; }
+        .control-panel > .cp-row:first-child { padding-top: 16px; }
+        .control-panel > .cp-row:last-child { padding-bottom: 16px; }
+
+        /* 移动端：面板全宽堆叠 */
+        @media (max-width: 900px) {
+            #pageEditor .container { flex-direction: column; gap: 20px; }
+            #pageEditor .control-panel {
+                position: static;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                border-radius: 16px;
+                padding: 4px;
+            }
+            #pageEditor .control-panel::before { border-radius: 12px; }
+            #pageEditor .control-panel > .cp-row { padding: 0 16px; }
+            #pageEditor .control-panel > .cp-row:first-child { padding-top: 18px; }
+            #pageEditor .control-panel > .cp-row:last-child { padding-bottom: 18px; }
+            #pageEditor .cp-row {
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            #pageEditor .cp-label {
+                font-size: 0.9rem;
+            }
+            #pageEditor .cp-select {
+                padding: 12px 36px 12px 16px;
+                font-size: 0.9rem;
+                border-radius: 12px;
+            }
+            #pageEditor .cp-btn-group {
+                border-radius: 12px;
+            }
+            #pageEditor .cp-btn {
+                padding: 12px 8px;
+                font-size: 0.88rem;
+            }
+            #pageEditor .cp-speed-row .cp-btn-group {
+                border-radius: 12px 0 0 12px;
+            }
+            #pageEditor .cp-play-circle {
+                width: 52px;
+                border-radius: 0 12px 12px 0;
+                font-size: 0.85rem;
+            }
+        }
+
+        .cp-row {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .cp-row:last-of-type { margin-bottom: 0; }
+        .cp-label {
+            font-size: 0.88rem;
+            color: #2a2a28;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            white-space: normal;
+            flex-shrink: 0;
+            text-transform: none;
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+        }
+        .cp-control {
+            flex: 1;
+            display: flex;
+            justify-content: stretch;
+            width: 100%;
+        }
+
+        /* 下拉选择 - 高端版本 */
+        .cp-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: #faf9f7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23777' d='M5 6L0 0h10z'/%3E%3C/svg%3E") no-repeat right 14px center;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 10px;
+            padding: 10px 36px 10px 14px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #2a2a28;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.8);
+        }
+        .cp-select:hover {
+            border-color: rgba(0,0,0,0.15);
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,0.9);
+            transform: translateY(-1px);
+        }
+        .cp-select:focus {
+            outline: none;
+            border-color: #2a2a28;
+            box-shadow: 0 0 0 4px rgba(42,42,40,0.08), 0 2px 8px rgba(0,0,0,0.06);
+            background-color: #fff;
+        }
+
+        /* 按钮组 - 高端版本 */
+        .cp-btn-group {
+            display: flex;
+            width: 100%;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #faf9f7;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.8);
+        }
+        .cp-btn {
+            border: none;
+            background: transparent;
+            padding: 10px 8px;
+            font-size: 0.84rem;
+            color: #8a8a85;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+            font-weight: 600;
+            font-family: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+            position: relative;
+            flex: 1;
+            text-align: center;
+        }
+        .cp-btn + .cp-btn { border-left: 1px solid rgba(0,0,0,0.06); }
+        .cp-btn:hover {
+            color: #2a2a28;
+            background: rgba(0,0,0,0.03);
+        }
+        .cp-btn:active { transform: scale(0.96); }
+        .cp-btn.active {
+            background: linear-gradient(145deg, #2a2a28 0%, #1a1a18 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18), inset 0 1px 1px rgba(255,255,255,0.1);
+            font-weight: 700;
+        }
+        .cp-btn.active:hover {
+            background: linear-gradient(145deg, #3a3a38 0%, #2a2a28 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.22), inset 0 1px 1px rgba(255,255,255,0.12);
+        }
+
+        /* 速度行 */
+        .cp-speed-row {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            width: 100%;
+        }
+        .cp-speed-row .cp-btn-group {
+            flex: 1;
+            border-radius: 10px 0 0 10px;
+        }
+        .cp-speed-row .cp-btn { flex: 1; padding: 10px 8px; }
+
+        /* 圆形播放按钮 - 高端版本 */
+        .cp-play-circle {
+            width: 44px;
+            height: auto;
+            border-radius: 0 10px 10px 0;
+            border: none;
+            background: linear-gradient(145deg, #3a3a38 0%, #1a1a18 100%);
+            color: #fff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.2),
+                0 4px 16px rgba(0,0,0,0.12),
+                inset 0 1px 1px rgba(255,255,255,0.15);
+        }
+        .cp-play-circle:hover {
+            background: linear-gradient(145deg, #4a4a48 0%, #2a2a28 100%);
+            transform: scale(1.1) translateY(-1px);
+            box-shadow:
+                0 4px 12px rgba(0,0,0,0.25),
+                0 8px 24px rgba(0,0,0,0.15),
+                inset 0 1px 1px rgba(255,255,255,0.18);
+        }
+        .cp-play-circle:active { transform: scale(0.95); }
+        .cp-play-circle.active {
+            background: linear-gradient(145deg, #c45c38 0%, #a04e2e 100%);
+            box-shadow:
+                0 2px 8px rgba(196,92,56,0.35),
+                0 4px 16px rgba(196,92,56,0.2),
+                inset 0 1px 1px rgba(255,255,255,0.2);
+        }
+        .cp-play-circle.active:hover {
+            background: linear-gradient(145deg, #d46c48 0%, #b45e3e 100%);
+            box-shadow:
+                0 4px 12px rgba(196,92,56,0.4),
+                0 8px 24px rgba(196,92,56,0.25),
+                inset 0 1px 1px rgba(255,255,255,0.22);
+        }
         /* ========== 右下角浮窗播放控制器 ========== */
         .floating-play {
             position: fixed;
@@ -4339,7 +5170,18 @@
 <body>
     <!-- Top Navigation -->
     <nav class="top-nav" id="topNav">
-        <div class="nav-logo">Piano Folio</div>
+        <div class="nav-logo">
+            <svg class="nav-logo-icon" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="1" y="2" width="7" height="18" rx="1.2" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="9.5" y="2" width="7" height="18" rx="1.2" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="18" y="2" width="7" height="18" rx="1.2" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="26.5" y="2" width="4.5" height="18" rx="1.2" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="6.2" y="2" width="3.2" height="11" rx="0.8" fill="currentColor"/>
+                <rect x="14.7" y="2" width="3.2" height="11" rx="0.8" fill="currentColor"/>
+                <rect x="23.2" y="2" width="3.2" height="11" rx="0.8" fill="currentColor"/>
+            </svg>
+            Piano Folio
+        </div>
         <div class="nav-links">
             <button class="nav-btn active" data-page="home" id="navHome">首页</button>
             <button class="nav-btn" data-page="my" id="navMy">我的图谱</button>
@@ -4391,6 +5233,44 @@
 
     <!-- 和弦知识 -->
     <div id="pageChords" class="page-section">
+        <!-- 移动端浮动导航按钮 -->
+        <button class="chords-nav-fab" id="chordsNavFab" aria-label="目录导航" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <!-- 移动端导航抽屉遮罩 -->
+        <div class="chords-drawer-overlay" id="chordsDrawerOverlay"></div>
+        <!-- 移动端导航抽屉 -->
+        <div class="chords-drawer" id="chordsDrawer">
+            <div class="chords-drawer-header">
+                <span>目录导航</span>
+                <button class="chords-drawer-close" id="chordsDrawerClose" type="button">&times;</button>
+            </div>
+            <div class="chords-drawer-body">
+                <div class="nav-group expanded">
+                    <button class="nav-group-title" type="button">和弦速查 <span class="nav-arrow">▾</span></button>
+                    <div class="nav-group-items">
+                        <button class="submenu-btn active" data-tab="chart">和弦图</button>
+                        <button class="submenu-btn" data-tab="interval">音程表</button>
+                        <button class="submenu-btn" data-tab="prog4536">4536251 走向</button>
+                    </div>
+                </div>
+                <div class="nav-group">
+                    <button class="nav-group-title" type="button">乐理进阶 <span class="nav-arrow">▾</span></button>
+                    <div class="nav-group-items">
+                        <button class="submenu-btn" data-tab="basic">乐理基础</button>
+                        <button class="submenu-btn" data-tab="structure">和弦构成</button>
+                        <button class="submenu-btn" data-tab="inversion">和弦转位</button>
+                    </div>
+                </div>
+                <div class="nav-group">
+                    <button class="nav-group-title" type="button">演奏实践 <span class="nav-arrow">▾</span></button>
+                    <div class="nav-group-items">
+                        <button class="submenu-btn" data-tab="strum">分解弹法</button>
+                        <button class="submenu-btn" data-tab="video">视频教学</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="container">
             <header class="chords-header">
                 <h1 class="chords-title">Chord Library</h1>
@@ -4400,14 +5280,35 @@
             <div class="chords-main-layout">
                 <aside class="chords-sidebar">
                     <nav class="chords-submenu" id="chordsSubmenu">
-                        <button class="submenu-btn active" data-tab="chart">和弦图</button>
-                        <button class="submenu-btn" data-tab="prog4536">4536251 走向</button>
-                        <button class="submenu-btn" data-tab="basic">乐理基础</button>
-                        <button class="submenu-btn" data-tab="structure">和弦构成</button>
-                        <button class="submenu-btn" data-tab="inversion">和弦转位</button>
-                        <button class="submenu-btn" data-tab="strum">分解弹法</button>
-                        <button class="submenu-btn" data-tab="interval">音程表</button>
-                        <button class="submenu-btn" data-tab="video">视频教学</button>
+                        <button class="nav-mobile-toggle" id="chordsNavToggle" aria-label="展开目录" type="button">
+                            <span>目录导航</span>
+                            <span class="nav-arrow">▾</span>
+                        </button>
+                        <div class="nav-groups">
+                            <div class="nav-group expanded">
+                                <button class="nav-group-title" type="button">和弦速查 <span class="nav-arrow">▾</span></button>
+                                <div class="nav-group-items">
+                                    <button class="submenu-btn active" data-tab="chart">和弦图</button>
+                                    <button class="submenu-btn" data-tab="interval">音程表</button>
+                                    <button class="submenu-btn" data-tab="prog4536">4536251 走向</button>
+                                </div>
+                            </div>
+                            <div class="nav-group">
+                                <button class="nav-group-title" type="button">乐理进阶 <span class="nav-arrow">▾</span></button>
+                                <div class="nav-group-items">
+                                    <button class="submenu-btn" data-tab="basic">乐理基础</button>
+                                    <button class="submenu-btn" data-tab="structure">和弦构成</button>
+                                    <button class="submenu-btn" data-tab="inversion">和弦转位</button>
+                                </div>
+                            </div>
+                            <div class="nav-group">
+                                <button class="nav-group-title" type="button">演奏实践 <span class="nav-arrow">▾</span></button>
+                                <div class="nav-group-items">
+                                    <button class="submenu-btn" data-tab="strum">分解弹法</button>
+                                    <button class="submenu-btn" data-tab="video">视频教学</button>
+                                </div>
+                            </div>
+                        </div>
                     </nav>
                 </aside>
 
@@ -5379,6 +6280,7 @@
     <!-- 编辑器/预览视图 -->
     <div id="pageEditor" style="display:none;">
         <div class="container">
+            <div class="editor-main">
             <!-- Top Action Bar -->
             <div class="editor-topbar">
                 <button class="back-btn" id="backFromChartBtn" aria-label="返回" style="display:none;">← 返回</button>
@@ -5399,9 +6301,6 @@
                 <div class="song-meta">
                     <input type="text" class="song-artist-input" id="songArtistInput" placeholder="请输入歌手名称" aria-label="歌手名称">
                 </div>
-                <div class="song-meta" style="margin-top:2px;">
-                    <input type="text" class="song-version-input" id="songVersionInput" placeholder="版本描述（如：@劳老师、C调简化版）" aria-label="版本描述">
-                </div>
                 <div class="song-divider"></div>
             </section>
 
@@ -5417,46 +6316,10 @@
 
             <!-- Lyrics Section -->
             <section class="lyrics-section">
+                <div class="lyrics-content-wrap">
                 <div class="section-title-row">
                     <h2 class="section-title">歌词与和弦</h2>
                     <div class="lyrics-header-actions">
-                        <div class="key-selector">
-                            <span class="key-label">调式：</span>
-                            <select class="key-select" id="keySelect">
-                                <option value="0">C</option>
-                                <option value="1">C# / Db</option>
-                                <option value="2">D</option>
-                                <option value="3">D# / Eb</option>
-                                <option value="4">E</option>
-                                <option value="5">F</option>
-                                <option value="6">F# / Gb</option>
-                                <option value="7">G</option>
-                                <option value="8">G# / Ab</option>
-                                <option value="9">A</option>
-                                <option value="10">A# / Bb</option>
-                                <option value="11">B</option>
-                            </select>
-                        </div>
-                        <div class="mode-toggle">
-                            <button class="mode-btn active" data-mode="name" aria-label="和弦名模式">和弦名模式</button>
-                            <button class="mode-btn" data-mode="tab" aria-label="弹唱标记">弹唱标记</button>
-                        </div>
-                        <!-- 自动翻谱控制 -->
-                        <div class="auto-scroll-control">
-                            <button class="auto-scroll-btn" id="autoScrollBtn" title="自动翻谱">&#9654;</button>
-                            <select class="auto-scroll-speed" id="autoScrollSpeed" title="翻谱速度">
-                                <option value="200">极慢</option>
-                                <option value="100">慢</option>
-                                <option value="50" selected>中等</option>
-                                <option value="25">快</option>
-                            </select>
-                        </div>
-                        <!-- 歌词布局切换（顺序 / 并行） -->
-                        <div class="lyrics-layout-toggle">
-                            <span class="layout-label">布局：</span>
-                            <button class="layout-btn active" data-layout="sequential">顺序</button>
-                            <button class="layout-btn" data-layout="parallel">并行</button>
-                        </div>
                         <!-- AI 智能和弦分析按钮 -->
                         <div id="aiChordAnalyzer" class="ai-chord-analyzer" style="display:none;">
                             <button class="ai-chord-btn" id="aiAnalyzeBtn">
@@ -5474,9 +6337,59 @@
                 <div id="lyricsContainer">
                     <!-- Default 2 editable lines -->
                 </div>
+                </div>
+                <!-- 右侧控制面板（歌词与和弦模块内右侧） -->
+                <div class="control-panel" id="controlPanel">
+                    <div class="cp-row">
+                        <span class="cp-label">调式</span>
+                        <div class="cp-control">
+                            <select class="cp-select" id="keySelect">
+                                <option value="0">C</option>
+                                <option value="1">C# / Db</option>
+                                <option value="2">D</option>
+                                <option value="3">D# / Eb</option>
+                                <option value="4">E</option>
+                                <option value="5">F</option>
+                                <option value="6">F# / Gb</option>
+                                <option value="7">G</option>
+                                <option value="8">G# / Ab</option>
+                                <option value="9">A</option>
+                                <option value="10">A# / Bb</option>
+                                <option value="11">B</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="cp-row">
+                        <span class="cp-label">显示</span>
+                        <div class="cp-control">
+                            <div class="cp-btn-group">
+                                <button class="cp-btn mode-btn active" data-mode="name">和弦名</button>
+                                <button class="cp-btn mode-btn" data-mode="tab">弹唱</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cp-row">
+                        <span class="cp-label">速度</span>
+                        <div class="cp-control cp-speed-row">
+                            <div class="cp-btn-group">
+                                <button class="cp-btn cp-speed-btn" data-speed="100">慢</button>
+                                <button class="cp-btn cp-speed-btn active" data-speed="50">中</button>
+                            </div>
+                            <button class="cp-play-circle" id="autoScrollBtn" aria-label="播放/暂停自动翻谱">&#9654;</button>
+                        </div>
+                    </div>
+                    <div class="cp-row">
+                        <span class="cp-label">布局</span>
+                        <div class="cp-control">
+                            <div class="cp-btn-group">
+                                <button class="cp-btn layout-btn active" data-layout="sequential">顺序</button>
+                                <button class="cp-btn layout-btn" data-layout="parallel">并行</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
-
-            <!-- Chord Summary 已移除 -->
+            </div>
         </div>
     </div>
 
@@ -5558,6 +6471,8 @@
                 </div>
                 <div class="form-error" id="loginError"></div>
                 <button class="btn btn-primary btn-full" id="doLoginBtn">登录</button>
+                <div class="modal-divider"><span>或</span></div>
+                <button class="btn btn-full" id="guestLoginBtn" style="background:#8B7355;color:#fff;border:none;">一键体验（预置3首图谱）</button>
             </div>
             <div class="modal-footer">
                 还没有账号？<a href="#" id="switchToRegister">立即注册</a>
@@ -5587,6 +6502,8 @@
                 </div>
                 <div class="form-error" id="registerError"></div>
                 <button class="btn btn-primary btn-full" id="doRegisterBtn">注册</button>
+                <div class="modal-divider"><span>或</span></div>
+                <button class="btn btn-full" id="guestRegisterBtn" style="background:#8B7355;color:#fff;border:none;">一键体验（预置3首图谱）</button>
             </div>
             <div class="modal-footer">
                 已有账号？<a href="#" id="switchToLogin">立即登录</a>
@@ -6490,6 +7407,16 @@
                 });
             }
 
+            // ===== 控制面板：速度按钮 =====
+            document.querySelectorAll('.cp-speed-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.cp-speed-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    autoScrollSpeedVal = parseInt(btn.dataset.speed, 10) || 50;
+                    if (autoScrollActive) startAutoScroll();
+                });
+            });
+
             // ===== 浮窗播放控制器 事件绑定 =====
             const floatingPlay = document.getElementById('floatingPlay');
             const fpTogglePill = document.getElementById('fpTogglePill');
@@ -6845,6 +7772,27 @@
             document.getElementById('switchToLogin').addEventListener('click', e => { e.preventDefault(); switchToLogin(); });
             document.getElementById('doLoginBtn').addEventListener('click', performLogin);
             document.getElementById('doRegisterBtn').addEventListener('click', performRegister);
+            // 一键体验（游客登录）
+            async function guestLogin() {
+                try {
+                    const data = await apiRequest('/api/auth/guest', { method: 'POST' });
+                    authToken = data.token;
+                    currentUser = { userId: data.userId, username: data.username };
+                    safeSet('authToken', data.token);
+                    safeSet('currentUser', JSON.stringify(currentUser));
+                    closeLoginModal();
+                    closeRegisterModal();
+                    updateNavUI();
+                    loadMyCharts();
+                    switchPage('my');
+                } catch (e) {
+                    showToast('一键体验失败：' + e.message);
+                }
+            }
+            const glb = document.getElementById('guestLoginBtn');
+            if (glb) glb.addEventListener('click', guestLogin);
+            const grb = document.getElementById('guestRegisterBtn');
+            if (grb) grb.addEventListener('click', guestLogin);
 
             // Modal backdrop click to close
             document.getElementById('loginModal').addEventListener('click', e => {
@@ -10506,11 +11454,41 @@
                 });
             });
 
-            // 子Tab切换 (chords-submenu 下的 submenu-btn，面板前缀 chordTab-)
-            document.querySelectorAll('#chordsSubmenu .submenu-btn').forEach(btn => {
+            // ===== 和弦知识：一级目录展开/收起（侧边栏+抽屉）=====
+            document.querySelectorAll('.nav-group-title').forEach(title => {
+                title.addEventListener('click', () => {
+                    title.closest('.nav-group').classList.toggle('expanded');
+                });
+            });
+
+            // ===== 和弦知识：移动端浮动导航抽屉 =====
+            const chordsDrawer = document.getElementById('chordsDrawer');
+            const chordsDrawerOverlay = document.getElementById('chordsDrawerOverlay');
+            function openChordsDrawer() {
+                if (chordsDrawer) chordsDrawer.classList.add('open');
+                if (chordsDrawerOverlay) chordsDrawerOverlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeChordsDrawer() {
+                if (chordsDrawer) chordsDrawer.classList.remove('open');
+                if (chordsDrawerOverlay) chordsDrawerOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+            const chordsNavFab = document.getElementById('chordsNavFab');
+            if (chordsNavFab) chordsNavFab.addEventListener('click', openChordsDrawer);
+            const chordsDrawerClose = document.getElementById('chordsDrawerClose');
+            if (chordsDrawerClose) chordsDrawerClose.addEventListener('click', closeChordsDrawer);
+            if (chordsDrawerOverlay) chordsDrawerOverlay.addEventListener('click', closeChordsDrawer);
+
+            // 子Tab切换（侧边栏+抽屉的 submenu-btn，面板前缀 chordTab-）
+            document.querySelectorAll('.submenu-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    document.querySelectorAll('#chordsSubmenu .submenu-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.submenu-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    // 点击子项后收起移动端抽屉，并确保父级分组展开
+                    closeChordsDrawer();
+                    const parentGroup = btn.closest('.nav-group');
+                    if (parentGroup) parentGroup.classList.add('expanded');
                     const tab = btn.dataset.tab;
                     document.querySelectorAll('.chords-tab-panel').forEach(p => p.classList.remove('active'));
                     const panel = document.getElementById('chordTab-' + tab);
@@ -10675,31 +11653,25 @@
             setTimeout(() => playBtn.removeEventListener('click', onceStop, true), Math.round(chords.length * step * 1000 + 400));
         }
 
+        // ===== 导航事件独立绑定（不依赖init，防止init内部报错导致导航失效）=====
+        (function bindNavSafe() {
+            try {
+                const navHome = document.getElementById('navHome');
+                const navMy = document.getElementById('navMy');
+                const navChords = document.getElementById('navChords');
+                const navLogin = document.getElementById('navLoginBtn');
+                const navRegister = document.getElementById('navRegisterBtn');
+                if (navHome) navHome.addEventListener('click', () => { if (typeof exitChartView === 'function') exitChartView(); if (typeof switchPage === 'function') switchPage('home'); });
+                if (navMy) navMy.addEventListener('click', () => { if (!authToken) { if (typeof openLoginModal === 'function') openLoginModal(); return; } if (typeof exitChartView === 'function') exitChartView(); if (typeof switchPage === 'function') switchPage('my'); });
+                if (navChords) navChords.addEventListener('click', () => { if (typeof exitChartView === 'function') exitChartView(); if (typeof switchPage === 'function') switchPage('chords'); });
+                if (navLogin) navLogin.addEventListener('click', () => { if (typeof openLoginModal === 'function') openLoginModal(); });
+                if (navRegister) navRegister.addEventListener('click', () => { if (typeof openRegisterModal === 'function') openRegisterModal(); });
+            } catch (e) { console.error('nav bind error:', e); }
+        })();
+
         // Start
-        init();
+        try { init(); } catch (e) { console.error('init error:', e); }
     </script>
 
-    <!-- 右下角浮窗播放控制器（与顶部自动翻谱按钮双态同步） -->
-    <div class="floating-play" id="floatingPlay" aria-label="自动翻谱控制器">
-        <div class="fp-panel" role="dialog" aria-label="翻谱控制面板">
-            <div class="fp-panel-title">
-                <span>
-                    <span class="fp-status-dot" id="fpStatusDot"></span>
-                    <span id="fpStatusText">待机</span>
-                </span>
-                <button class="fp-close" id="fpCloseBtn" title="收起面板" aria-label="收起">✕</button>
-            </div>
-            <div class="fp-row">
-                <button class="fp-play-btn" id="fpPlayBtn" title="播放/暂停自动翻谱" aria-label="播放/暂停">&#9654;</button>
-                <div class="fp-speed-group" id="fpSpeedGroup" role="group" aria-label="翻谱速度">
-                    <button class="fp-speed-btn" data-speed="200">极慢</button>
-                    <button class="fp-speed-btn" data-speed="100">慢</button>
-                    <button class="fp-speed-btn" data-speed="50">中</button>
-                    <button class="fp-speed-btn" data-speed="25">快</button>
-                </div>
-            </div>
-        </div>
-        <button class="fp-toggle-pill" id="fpTogglePill" title="展开播放控制" aria-label="展开/收起">&#9654;</button>
-    </div>
 </body>
 </html>

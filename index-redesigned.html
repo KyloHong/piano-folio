@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chord Chart — Redesigned</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --bg: #f7f6f3;
+  --bg-card: #ffffff;
+  --text: #171717;
+  --text-secondary: #525252;
+  --text-muted: #a3a3a3;
+  --accent: #1a3a2a;
+  --accent-hover: #244d38;
+  --accent-soft: #e8efe9;
+  --border: #e5e4e0;
+  --border-strong: #d4d3ce;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
+  --font-display: 'Space Grotesk', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', monospace;
+  --ease: cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== LAYOUT ===== */
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* ===== TOP NAV ===== */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(247, 246, 243, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.top-nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-brand-mark {
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.nav-link {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s var(--ease);
+}
+.nav-link:hover { color: var(--text); }
+.nav-link.active { color: var(--accent); }
+.nav-cta {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), transform 0.1s var(--ease);
+  font-family: var(--font-body);
+}
+.nav-cta:hover { background: var(--accent-hover); }
+.nav-cta:active { transform: scale(0.97); }
+
+/* ===== SONG HERO ===== */
+.song-hero {
+  padding: 56px 0 40px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.song-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 64px;
+  height: 2px;
+  background: var(--accent);
+}
+.hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.hero-breadcrumb {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.hero-breadcrumb a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.hero-breadcrumb a:hover { color: var(--text-secondary); }
+.hero-key-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+.hero-key-badge .dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  color: var(--text);
+  margin-bottom: 12px;
+  text-wrap: balance;
+}
+.hero-artist {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 28px;
+}
+.hero-artist .separator {
+  color: var(--text-muted);
+  margin: 0 10px;
+}
+.hero-stats {
+  display: flex;
+  gap: 32px;
+}
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hero-stat-value {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.hero-stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ===== MAIN CONTENT GRID ===== */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 40px;
+  padding: 48px 0 80px;
+  align-items: start;
+}
+
+/* ===== LYRICS SECTION ===== */
+.lyrics-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 44px;
+  box-shadow: var(--shadow-sm);
+}
+.lyrics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.lyrics-header-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lyrics-header-title::before {
+  content: '';
+  width: 3px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.lyrics-header-actions {
+  display: flex;
+  gap: 8px;
+}
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+  font-size: 0.85rem;
+}
+.icon-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ===== LYRIC LINES ===== */
+.lyric-line {
+  display: flex;
+  align-items: flex-end;
+  padding: 14px 16px;
+  margin: 2px 0;
+  border-radius: var(--radius-md);
+  transition: background 0.15s var(--ease);
+  cursor: pointer;
+  min-height: 56px;
+  position: relative;
+}
+.lyric-line:hover {
+  background: var(--bg);
+}
+.lyric-line.active {
+  background: var(--accent-soft);
+}
+.lyric-line.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+.lyric-chords {
+  display: flex;
+  gap: 0;
+  margin-bottom: 4px;
+  min-height: 22px;
+}
+.chord-tag {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 2px 8px;
+  background: var(--accent-soft);
+  border-radius: 4px;
+  margin-right: 4px;
+  letter-spacing: 0.01em;
+  transition: all 0.15s var(--ease);
+}
+.chord-tag:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.lyric-text {
+  font-size: 1.02rem;
+  color: var(--text);
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+}
+.lyric-text .highlight {
+  background: linear-gradient(180deg, transparent 60%, rgba(26,58,42,0.12) 60%);
+  padding: 0 2px;
+}
+
+/* ===== SECTION DIVIDER ===== */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 20px;
+  padding-left: 4px;
+}
+.section-divider-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--font-display);
+}
+.section-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ===== CONTROL PANEL ===== */
+.control-panel {
+  position: sticky;
+  top: 80px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  box-shadow: var(--shadow-sm);
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-group {
+  margin-bottom: 22px;
+}
+.panel-group:last-child { margin-bottom: 0; }
+.panel-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+  display: block;
+}
+/* Select */
+.panel-select {
+  width: 100%;
+  padding: 9px 32px 9px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23737373' d='M5 6L0 0h10z'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+  appearance: none;
+  -webkit-appearance: none;
+}
+.panel-select:hover { border-color: var(--border-strong); }
+.panel-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26,58,42,0.1);
+}
+/* Button group */
+.btn-group {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg);
+}
+.btn-group-btn {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+  white-space: nowrap;
+}
+.btn-group-btn:hover {
+  color: var(--text);
+  background: rgba(0,0,0,0.03);
+}
+.btn-group-btn.active {
+  background: var(--text);
+  color: #fff;
+  font-weight: 600;
+}
+.btn-group-btn + .btn-group-btn {
+  border-left: 1px solid var(--border);
+}
+/* Play button */
+.play-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.play-row .btn-group { flex: 1; }
+.play-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s var(--ease);
+  box-shadow: 0 2px 8px rgba(26,58,42,0.25);
+}
+.play-circle:hover {
+  background: var(--accent-hover);
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(26,58,42,0.35);
+}
+.play-circle:active { transform: scale(0.96); }
+.play-circle.playing {
+  background: var(--text);
+}
+
+/* ===== FOOTER ===== */
+.page-footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0;
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.footer-badge {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .control-panel {
+    position: static;
+    order: -1;
+  }
+  .lyrics-card {
+    padding: 28px 24px;
+  }
+  .hero-stats { gap: 24px; }
+}
+@media (max-width: 640px) {
+  .page-wrap { padding: 0 20px; }
+  .top-nav-inner { padding: 0 20px; }
+  .nav-links { display: none; }
+  .song-hero { padding: 36px 0 28px; }
+  .hero-stats { flex-wrap: wrap; gap: 20px; }
+  .lyrics-card { padding: 20px 16px; }
+  .lyric-line { padding: 10px 12px; }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <a href="#" class="nav-brand">
+      <span class="nav-brand-mark">♪</span>
+      ChordFolio
+    </a>
+    <div class="nav-links">
+      <a href="#" class="nav-link">首页</a>
+      <a href="#" class="nav-link active">我的图谱</a>
+      <a href="#" class="nav-link">和弦知识</a>
+    </div>
+    <button class="nav-cta">保存图谱</button>
+  </div>
+</nav>
+
+<!-- SONG HERO -->
+<header class="song-hero">
+  <div class="page-wrap">
+    <div class="hero-meta-row">
+      <span class="hero-breadcrumb"><a href="#">我的图谱</a> / 小星星</span>
+      <span class="hero-key-badge"><span class="dot"></span>C 大调</span>
+    </div>
+    <h1 class="hero-title">小星星</h1>
+    <p class="hero-artist">莫扎特 <span class="separator">·</span> C调简化版 <span class="separator">·</span> 4/4 拍</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-value">6</span>
+        <span class="hero-stat-label">歌词段落</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-value">4</span>
+        <span class="hero-stat-label">和弦种类</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-value">C / G / Am / F</span>
+        <span class="hero-stat-label">和弦进行</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="page-wrap">
+  <div class="content-grid">
+
+    <!-- LYRICS CARD -->
+    <section class="lyrics-card">
+      <div class="lyrics-header">
+        <span class="lyrics-header-title">歌词与和弦</span>
+        <div class="lyrics-header-actions">
+          <button class="icon-btn" title="编辑">✎</button>
+          <button class="icon-btn" title="分享">↗</button>
+          <button class="icon-btn" title="更多">⋯</button>
+        </div>
+      </div>
+
+      <!-- Verse 1 -->
+      <div class="section-divider">
+        <span class="section-divider-label">主歌 A</span>
+        <span class="section-divider-line"></span>
+      </div>
+
+      <div class="lyric-line active">
+        <div>
+          <div class="lyric-chords">
+            <span class="chord-tag">C</span>
+            <span class="chord-tag">G</span>
+          </div>
+          <div class="lyric-text">一闪一闪<span class="highlight">亮晶晶</span></div>
+        </div>
+      </div>
+
+      <div class="lyric-line">
+        <div>
+          <div class="lyric-chords">
+            <span class="chord-tag">Am</span>
+            <span class="chord-tag">F</span>
+          </div>
+          <div class="lyric-text">满天都是小星星</div>
+        </div>
+      </div>
+
+      <div class="lyric-line">
+        <div>
+          <div class="lyric-chords">
+            <span class="chord-tag">C</span>
+            <span class="chord-tag">G</span>
+          </div>
+          <div class="lyric-text">挂在天上放光明</div>
+        </div>
+      </div>
+
+      <div class="lyric-line">
+        <div>
+          <div class="lyric-chords">
+            <span class="chord-tag">Am</span>
+            <span class="chord-tag">F</span>
+          </div>
+          <div class="lyric-text">好像许多小眼睛</div>
+        </div>
+      </div>
+
+      <!-- Chorus -->
+      <div class="section-divider">
+        <span class="section-divider-label">副歌</span>
+        <span class="section-divider-line"></span>
+      </div>
+
+      <div class="lyric-line">
+        <div>
+          <div class="lyric-chords">
+            <span class="chord-tag">C</span>
+            <span class="chord-tag">G</span>
+          </div>
+          <div class="lyric-text">一闪一闪亮晶晶</div>
+        </div>
+      </div>
+
+      <div class="lyric-line">
+        <div>
+          <div class="lyric-chords">
+            <span class="chord-tag">Am</span>
+            <span class="chord-tag">F</span>
+          </div>
+          <div class="lyric-text">满天都是小星星</div>
+        </div>
+      </div>
+
+      <div class="lyric-line">
+        <div>
+          <div class="lyric-chords">
+            <span class="chord-tag">C</span>
+          </div>
+          <div class="lyric-text">小星星</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- CONTROL PANEL -->
+    <aside class="control-panel">
+      <div class="panel-title">控制面板</div>
+
+      <div class="panel-group">
+        <label class="panel-label">调式</label>
+        <select class="panel-select">
+          <option>C</option>
+          <option>C# / Db</option>
+          <option>D</option>
+          <option>D# / Eb</option>
+          <option>E</option>
+          <option>F</option>
+          <option>F# / Gb</option>
+          <option>G</option>
+          <option>G# / Ab</option>
+          <option>A</option>
+          <option>A# / Bb</option>
+          <option>B</option>
+        </select>
+      </div>
+
+      <div class="panel-group">
+        <label class="panel-label">显示模式</label>
+        <div class="btn-group">
+          <button class="btn-group-btn active">和弦名</button>
+          <button class="btn-group-btn">弹唱</button>
+        </div>
+      </div>
+
+      <div class="panel-group">
+        <label class="panel-label">播放速度</label>
+        <div class="play-row">
+          <div class="btn-group">
+            <button class="btn-group-btn">慢</button>
+            <button class="btn-group-btn active">中</button>
+          </div>
+          <button class="play-circle" title="播放/暂停">▶</button>
+        </div>
+      </div>
+
+      <div class="panel-group">
+        <label class="panel-label">布局</label>
+        <div class="btn-group">
+          <button class="btn-group-btn active">顺序</button>
+          <button class="btn-group-btn">并行</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <div class="footer-inner">
+    <span class="footer-text">ChordFolio — 钢琴和弦图谱工具</span>
+    <span class="footer-badge">REDESIGNED · taste-skill</span>
+  </div>
+</footer>
+
+<script>
+// Simple interactivity for the redesigned preview
+document.querySelectorAll('.btn-group-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const group = this.closest('.btn-group');
+    group.querySelectorAll('.btn-group-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.lyric-line').forEach(line => {
+  line.addEventListener('click', function() {
+    document.querySelectorAll('.lyric-line').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+const playBtn = document.querySelector('.play-circle');
+let isPlaying = false;
+if (playBtn) {
+  playBtn.addEventListener('click', function() {
+    isPlaying = !isPlaying;
+    this.textContent = isPlaying ? '⏸' : '▶';
+    this.classList.toggle('playing', isPlaying);
+  });
+}
+</script>
+
+</body>
+</html>

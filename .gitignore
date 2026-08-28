@@ -1,4 +1,11 @@
 node_modules/
 .DS_Store
-charts.db
+*.db
+*.backup*
+*.backup-*
+cloudflared
 .env
+.trae/
+test-results/
+screenshots/
+*.log

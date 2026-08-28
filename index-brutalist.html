@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHORD CHART // BRUTALIST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ===== INDUSTRIAL BRUTALIST TOKENS ===== */
+:root {
+  --paper: #F4F4F0;
+  --paper-dark: #EAE8E3;
+  --ink: #0A0A0A;
+  --ink-soft: #2A2A2A;
+  --ink-muted: #6B6B6B;
+  --hazard: #E61919;
+  --hazard-dark: #B31212;
+  --border: 2px solid var(--ink);
+  --border-thin: 1px solid var(--ink);
+  --font-display: 'Archivo Black', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-body: 'Inter', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: auto; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Halftone noise overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: multiply;
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
+  border-bottom: var(--border);
+  background: var(--paper);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  padding: 0 24px;
+  height: 48px;
+}
+.topbar-brand {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar-brand .mark {
+  width: 20px;
+  height: 20px;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  justify-content: center;
+}
+.topbar-nav a {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  text-decoration: none;
+  padding: 0 16px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  border-left: var(--border-thin);
+  transition: all 0.1s;
+}
+.topbar-nav a:last-child { border-right: var(--border-thin); }
+.topbar-nav a:hover { color: var(--ink); background: var(--paper-dark); }
+.topbar-nav a.active {
+  color: var(--paper);
+  background: var(--ink);
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.topbar-btn {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 18px;
+  height: 32px;
+  border: var(--border);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.topbar-btn:hover {
+  background: var(--hazard);
+  border-color: var(--hazard);
+}
+.topbar-btn:active { transform: translate(1px, 1px); }
+
+/* ===== HERO SECTION ===== */
+.hero {
+  border-bottom: var(--border);
+  padding: 48px 24px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content: '+';
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 24px;
+  border-bottom: var(--border-thin);
+  padding-bottom: 12px;
+}
+.hero-meta-item {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+  padding-right: 20px;
+  margin-right: 20px;
+  border-right: var(--border-thin);
+}
+.hero-meta-item:last-child { border-right: none; }
+.hero-meta-item .val {
+  color: var(--ink);
+  font-weight: 700;
+}
+.hero-meta-item .val.red { color: var(--hazard); }
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 12vw, 10rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+  color: var(--ink);
+  margin-bottom: 8px;
+  position: relative;
+}
+.hero-title .strike {
+  position: relative;
+  display: inline-block;
+}
+.hero-title .strike::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -2%;
+  width: 104%;
+  height: 6px;
+  background: var(--hazard);
+  transform: rotate(-1deg);
+}
+.hero-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-subtitle::before {
+  content: '>>>';
+  color: var(--hazard);
+  font-weight: 700;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: var(--border);
+}
+.hero-stat {
+  padding: 16px 20px;
+  border-right: var(--border);
+  position: relative;
+}
+.hero-stat:last-child { border-right: none; }
+.hero-stat-value {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.hero-stat-value.red { color: var(--hazard); }
+.hero-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+.hero-stat-id {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--ink-muted);
+  opacity: 0.6;
+}
+
+/* ===== MAIN GRID ===== */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  border-bottom: var(--border);
+}
+
+/* ===== LYRICS COMPARTMENT ===== */
+.lyrics-compartment {
+  border-right: var(--border);
+  padding: 0;
+}
+.compartment-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 14px 24px;
+  border-bottom: var(--border);
+  background: var(--ink);
+}
+.compartment-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.compartment-title::before {
+  content: '[';
+  color: var(--hazard);
+}
+.compartment-title::after {
+  content: ']';
+  color: var(--hazard);
+}
+.compartment-actions {
+  display: flex;
+  gap: 0;
+}
+.compartment-action {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border: 1px solid var(--paper);
+  background: transparent;
+  color: var(--paper);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.compartment-action:hover {
+  background: var(--hazard);
+  border-color: var(--hazard);
+}
+.compartment-action + .compartment-action { border-left: none; }
+
+/* Section divider */
+.lyric-section-divider {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  border-bottom: var(--border-thin);
+  background: var(--paper-dark);
+}
+.lyric-section-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink);
+}
+.lyric-section-line {
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--ink) 0, var(--ink) 4px, transparent 4px, transparent 8px);
+}
+.lyric-section-bars {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+/* Lyric lines */
+.lyric-line {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  align-items: stretch;
+  border-bottom: var(--border-thin);
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+}
+.lyric-line:hover { background: var(--paper-dark); }
+.lyric-line.active { background: var(--ink); }
+.lyric-line.active .lyric-num,
+.lyric-line.active .lyric-text { color: var(--paper); }
+.lyric-line.active .chord-tag {
+  background: var(--hazard);
+  color: var(--paper);
+  border-color: var(--hazard);
+}
+.lyric-num {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: var(--border-thin);
+  letter-spacing: 0.05em;
+}
+.lyric-content {
+  padding: 14px 24px;
+}
+.lyric-chords {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+  min-height: 22px;
+}
+.chord-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border: var(--border-thin);
+  background: var(--paper);
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  transition: all 0.1s;
+}
+.chord-tag:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.lyric-text {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.005em;
+}
+.lyric-text .emph {
+  background: var(--hazard);
+  color: var(--paper);
+  padding: 0 4px;
+}
+
+/* ===== CONTROL PANEL ===== */
+.control-panel {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+}
+.panel-header {
+  padding: 14px 16px;
+  border-bottom: var(--border);
+  background: var(--hazard);
+}
+.panel-header-text {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel-header-text::before {
+  content: '◢';
+  font-size: 0.6rem;
+}
+.panel-group {
+  padding: 16px;
+  border-bottom: var(--border-thin);
+}
+.panel-group:last-child { border-bottom: none; }
+.panel-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-label .id {
+  font-weight: 400;
+  opacity: 0.5;
+}
+/* Select */
+.panel-select {
+  width: 100%;
+  padding: 10px 36px 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%230A0A0A' d='M5 6L0 0h10z'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border: var(--border);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: all 0.1s;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.panel-select:hover { background-color: var(--paper-dark); }
+.panel-select:focus {
+  outline: none;
+  border-color: var(--hazard);
+  box-shadow: 0 0 0 3px rgba(230,25,25,0.15);
+}
+/* Button group */
+.btn-group {
+  display: flex;
+  border: var(--border);
+}
+.btn-group-btn {
+  flex: 1;
+  padding: 9px 4px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  background: var(--paper);
+  border: none;
+  border-right: var(--border);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.btn-group-btn:last-child { border-right: none; }
+.btn-group-btn:hover {
+  color: var(--ink);
+  background: var(--paper-dark);
+}
+.btn-group-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+/* Play row */
+.play-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border: var(--border);
+}
+.play-row .btn-group {
+  flex: 1;
+  border: none;
+  border-right: var(--border);
+}
+.play-btn {
+  width: 44px;
+  height: 38px;
+  background: var(--hazard);
+  color: var(--paper);
+  border: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+  flex-shrink: 0;
+}
+.play-btn:hover { background: var(--hazard-dark); }
+.play-btn:active { transform: scale(0.95); }
+.play-btn.playing { background: var(--ink); }
+
+/* Panel footer */
+.panel-footer {
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: var(--border);
+  background: var(--ink);
+}
+.panel-footer-text {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--paper);
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+}
+.panel-footer-text .red { color: var(--hazard); opacity: 1; }
+
+/* ===== FOOTER ===== */
+.page-footer {
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+.footer-left {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-center {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink);
+}
+.footer-right {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.footer-right .hazard { color: var(--hazard); font-weight: 700; }
+
+/* ===== BARCODE DECORATION ===== */
+.barcode {
+  display: flex;
+  gap: 1px;
+  height: 24px;
+  align-items: center;
+}
+.barcode span {
+  background: var(--ink);
+  height: 100%;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  .lyrics-compartment { border-right: none; border-bottom: var(--border); }
+  .control-panel { order: -1; border-bottom: var(--border); }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .hero-stat:nth-child(2) { border-right: none; }
+  .hero-stat:nth-child(1), .hero-stat:nth-child(2) { border-bottom: var(--border); }
+}
+@media (max-width: 640px) {
+  .topbar-nav { display: none; }
+  .hero { padding: 32px 16px 28px; }
+  .hero-stats { grid-template-columns: 1fr; }
+  .hero-stat { border-right: none !important; border-bottom: var(--border); }
+  .hero-stat:last-child { border-bottom: none; }
+  .lyric-line { grid-template-columns: 36px 1fr; }
+  .lyric-content { padding: 12px 16px; }
+  .page-footer { grid-template-columns: 1fr; text-align: center; gap: 12px; }
+  .footer-left, .footer-right { justify-content: center; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">
+      <span class="mark">♪</span>
+      CHORD/FOLIO
+    </div>
+    <nav class="topbar-nav">
+      <a href="#">首页</a>
+      <a href="#" class="active">我的图谱</a>
+      <a href="#">和弦知识</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="topbar-btn">[ 保存 ]</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-meta">
+    <span class="hero-meta-item">DOC / <span class="val">CHART-001</span></span>
+    <span class="hero-meta-item">KEY / <span class="val red">C MAJOR</span></span>
+    <span class="hero-meta-item">TEMPO / <span class="val">120 BPM</span></span>
+    <span class="hero-meta-item">REV / <span class="val">2.6</span></span>
+  </div>
+
+  <h1 class="hero-title">小星<span class="strike">星</span></h1>
+
+  <p class="hero-subtitle">莫扎特 · C调简化版 · 4/4拍 · 钢琴入门曲</p>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-id">D-01</span>
+      <div class="hero-stat-value">06</div>
+      <div class="hero-stat-label">歌词段落</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-id">D-02</span>
+      <div class="hero-stat-value">04</div>
+      <div class="hero-stat-label">和弦种类</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-id">D-03</span>
+      <div class="hero-stat-value red">I-V-vi-IV</div>
+      <div class="hero-stat-label">和弦进行</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-id">D-04</span>
+      <div class="hero-stat-value">24</div>
+      <div class="hero-stat-label">小节总数</div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+
+  <!-- LYRICS COMPARTMENT -->
+  <section class="lyrics-compartment">
+    <div class="compartment-header">
+      <span class="compartment-title">歌词与和弦 / LYRICS &amp; CHORDS</span>
+      <div class="compartment-actions">
+        <button class="compartment-action">编辑</button>
+        <button class="compartment-action">导出</button>
+      </div>
+    </div>
+
+    <!-- Verse 1 -->
+    <div class="lyric-section-divider">
+      <span class="lyric-section-label">/// 主歌 A / VERSE A</span>
+      <span class="lyric-section-line"></span>
+      <span class="lyric-section-bars">BAR 01-08</span>
+    </div>
+
+    <div class="lyric-line active">
+      <span class="lyric-num">01</span>
+      <div class="lyric-content">
+        <div class="lyric-chords">
+          <span class="chord-tag">C</span>
+          <span class="chord-tag">G</span>
+        </div>
+        <div class="lyric-text">一闪一闪<span class="emph">亮晶晶</span></div>
+      </div>
+    </div>
+
+    <div class="lyric-line">
+      <span class="lyric-num">02</span>
+      <div class="lyric-content">
+        <div class="lyric-chords">
+          <span class="chord-tag">Am</span>
+          <span class="chord-tag">F</span>
+        </div>
+        <div class="lyric-text">满天都是小星星</div>
+      </div>
+    </div>
+
+    <div class="lyric-line">
+      <span class="lyric-num">03</span>
+      <div class="lyric-content">
+        <div class="lyric-chords">
+          <span class="chord-tag">C</span>
+          <span class="chord-tag">G</span>
+        </div>
+        <div class="lyric-text">挂在天上放光明</div>
+      </div>
+    </div>
+
+    <div class="lyric-line">
+      <span class="lyric-num">04</span>
+      <div class="lyric-content">
+        <div class="lyric-chords">
+          <span class="chord-tag">Am</span>
+          <span class="chord-tag">F</span>
+        </div>
+        <div class="lyric-text">好像许多小眼睛</div>
+      </div>
+    </div>
+
+    <!-- Chorus -->
+    <div class="lyric-section-divider">
+      <span class="lyric-section-label">/// 副歌 / CHORUS</span>
+      <span class="lyric-section-line"></span>
+      <span class="lyric-section-bars">BAR 09-16</span>
+    </div>
+
+    <div class="lyric-line">
+      <span class="lyric-num">05</span>
+      <div class="lyric-content">
+        <div class="lyric-chords">
+          <span class="chord-tag">C</span>
+          <span class="chord-tag">G</span>
+        </div>
+        <div class="lyric-text">一闪一闪亮晶晶</div>
+      </div>
+    </div>
+
+    <div class="lyric-line">
+      <span class="lyric-num">06</span>
+      <div class="lyric-content">
+        <div class="lyric-chords">
+          <span class="chord-tag">Am</span>
+          <span class="chord-tag">F</span>
+        </div>
+        <div class="lyric-text">满天都是小星星</div>
+      </div>
+    </div>
+
+    <div class="lyric-line">
+      <span class="lyric-num">07</span>
+      <div class="lyric-content">
+        <div class="lyric-chords">
+          <span class="chord-tag">C</span>
+        </div>
+        <div class="lyric-text">小星星</div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- CONTROL PANEL -->
+  <aside class="control-panel">
+    <div class="panel-header">
+      <span class="panel-header-text">控制面板 / CTRL</span>
+    </div>
+
+    <div class="panel-group">
+      <label class="panel-label">调式 / KEY <span class="id">K-01</span></label>
+      <select class="panel-select">
+        <option>C</option>
+        <option>C# / Db</option>
+        <option>D</option>
+        <option>D# / Eb</option>
+        <option>E</option>
+        <option>F</option>
+        <option>F# / Gb</option>
+        <option>G</option>
+        <option>G# / Ab</option>
+        <option>A</option>
+        <option>A# / Bb</option>
+        <option>B</option>
+      </select>
+    </div>
+
+    <div class="panel-group">
+      <label class="panel-label">显示 / MODE <span class="id">M-02</span></label>
+      <div class="btn-group">
+        <button class="btn-group-btn active">和弦名</button>
+        <button class="btn-group-btn">弹唱</button>
+      </div>
+    </div>
+
+    <div class="panel-group">
+      <label class="panel-label">速度 / SPD <span class="id">S-03</span></label>
+      <div class="play-row">
+        <div class="btn-group">
+          <button class="btn-group-btn">慢</button>
+          <button class="btn-group-btn active">中</button>
+        </div>
+        <button class="play-btn" title="播放/暂停">▶</button>
+      </div>
+    </div>
+
+    <div class="panel-group">
+      <label class="panel-label">布局 / LAY <span class="id">L-04</span></label>
+      <div class="btn-group">
+        <button class="btn-group-btn active">顺序</button>
+        <button class="btn-group-btn">并行</button>
+      </div>
+    </div>
+
+    <div class="panel-footer">
+      <div class="panel-footer-text">
+        SYS / CHORD-FOLIO<br>
+        BUILD / <span class="red">2.6.0-BRUTAL</span><br>
+        © 2026 ALL RIGHTS RESERVED
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <div class="footer-left">
+    <span class="barcode">
+      <span style="width:2px"></span><span style="width:1px"></span><span style="width:3px"></span><span style="width:1px"></span><span style="width:2px"></span><span style="width:1px"></span><span style="width:3px"></span><span style="width:2px"></span><span style="width:1px"></span><span style="width:2px"></span>
+    </span>
+    DOC-ID / CHART-001
+  </div>
+  <div class="footer-center">® CHORD/FOLIO</div>
+  <div class="footer-right">
+    <span class="hazard">●</span> LIVE / ACTIVE
+  </div>
+</footer>
+
+<script>
+// Brutalist interactivity
+document.querySelectorAll('.btn-group-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const group = this.closest('.btn-group');
+    group.querySelectorAll('.btn-group-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.lyric-line').forEach(line => {
+  line.addEventListener('click', function() {
+    document.querySelectorAll('.lyric-line').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+const playBtn = document.querySelector('.play-btn');
+let isPlaying = false;
+if (playBtn) {
+  playBtn.addEventListener('click', function() {
+    isPlaying = !isPlaying;
+    this.textContent = isPlaying ? '⏸' : '▶';
+    this.classList.toggle('playing', isPlaying);
+  });
+}
+</script>
+
+</body>
+</html>
