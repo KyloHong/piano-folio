@@ -2887,7 +2887,7 @@
             max-width: none;
             width: 100%;
             margin: 0;
-            padding: 32px 11px 64px;
+            padding: 32px 28px 64px;
             box-sizing: border-box;
         }
 
@@ -3554,6 +3554,14 @@
            否则即使后代 .container 设为 100%，也永远无法超过 720px，导致左侧红框大片空白 */
         #pageChords.page-section {
             display: none;
+            max-width: none;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* 我的图谱页：破除全局 .page-section 的 max-width:720px 限制，扩大两侧内容宽度 */
+        #pageMy.page-section {
             max-width: none;
             width: 100%;
             margin: 0;
@@ -7820,6 +7828,12 @@
             if (glb) glb.addEventListener('click', guestLogin);
             const grb = document.getElementById('guestRegisterBtn');
             if (grb) grb.addEventListener('click', guestLogin);
+            // 生产环境隐藏一键体验按钮（仅本地测试用）
+            const isProd = !['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+            if (isProd) {
+                if (glb) glb.style.display = 'none';
+                if (grb) grb.style.display = 'none';
+            }
 
             // Modal backdrop click to close
             document.getElementById('loginModal').addEventListener('click', e => {
@@ -10630,19 +10644,52 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === page));
         }
 
+        // 我的图谱加载锁与缓存：防止多处同时调用导致反复重绘闪屏
+        let _myChartsLoading = false;
+        let _myChartsCache = null;
+        let _myChartsCacheTime = 0;
+        const MY_CHARTS_CACHE_TTL = 3000; // 3秒内重复调用直接用缓存
+
+        // 失效我的图谱缓存（创建/更新/删除/发布后调用）
+        function invalidateMyChartsCache() {
+            _myChartsCache = null;
+            _myChartsCacheTime = 0;
+        }
+
         async function loadMyCharts() {
             const list = document.getElementById('myChartList');
             if (!authToken) {
                 list.innerHTML = '<div class="empty-list"><div class="empty-list-icon">🔐</div>请先登录后查看我的图谱</div>';
                 return;
             }
+            // 防重复：3秒缓存内直接用缓存，不重新请求和重绘
+            const now = Date.now();
+            if (_myChartsCache && (now - _myChartsCacheTime) < MY_CHARTS_CACHE_TTL) {
+                renderMyChartsList(_myChartsCache, list);
+                return;
+            }
+            // 防并发：正在加载时直接返回，避免多次同时请求导致闪屏
+            if (_myChartsLoading) return;
+            _myChartsLoading = true;
             try {
                 const charts = await apiRequest('/api/charts/my');
-                if (charts.length === 0) {
-                    list.innerHTML = '<div class="empty-list"><div class="empty-list-icon">📝</div>还没有图谱，去首页创作吧！</div>';
-                    return;
-                }
-                list.innerHTML = charts.map(c => {
+                _myChartsCache = charts;
+                _myChartsCacheTime = now;
+                renderMyChartsList(charts, list);
+            } catch (e) {
+                list.innerHTML = '<div class="empty-list"><div class="empty-list-icon">🌐</div>暂无图谱</div>';
+            } finally {
+                _myChartsLoading = false;
+            }
+        }
+
+        // 抽取渲染逻辑，供缓存路径复用
+        function renderMyChartsList(charts, list) {
+            if (charts.length === 0) {
+                list.innerHTML = '<div class="empty-list"><div class="empty-list-icon">📝</div>还没有图谱，去首页创作吧！</div>';
+                return;
+            }
+            list.innerHTML = charts.map(c => {
                     return `
                     <div class="grid-card library-card" onclick="loadChart('${c.id}', 'my')">
                         <div class="library-cover" data-chart-id="${c.id}">
@@ -10681,9 +10728,6 @@
                         setTimeout(() => fetchAndApplyChartCover(chart.id, chart.song_title, chart.song_artist), idx * 450);
                     });
                 }
-            } catch (e) {
-                list.innerHTML = '<div class="empty-list"><div class="empty-list-icon">🌐</div>暂无图谱</div>';
-            }
         }
 
         // 为指定图谱搜索网易云封面，并在命中时更新服务端与封面 DOM
@@ -10799,6 +10843,7 @@
                     method: 'PUT',
                     body: JSON.stringify({ is_public: isPublic })
                 });
+                invalidateMyChartsCache();
                 loadMyCharts();
                 if (isPublic) loadPublicCharts();
             } catch (e) { alert(e.message); }
@@ -10847,6 +10892,7 @@
             cancelDeleteChart();
             try {
                 await apiRequest('/api/charts/my/' + id, { method: 'DELETE' });
+                invalidateMyChartsCache();
                 loadMyCharts();
             } catch (e) { alert(e.message); }
         }
@@ -10855,6 +10901,7 @@
             if (!confirm('确定要删除这条图谱吗？')) return;
             try {
                 await apiRequest('/api/charts/my/' + id, { method: 'DELETE' });
+                invalidateMyChartsCache();
                 loadMyCharts();
             } catch (e) { alert(e.message); }
         }
@@ -11037,6 +11084,7 @@
                     })
                 });
                 showToast('已保存到我的图谱！');
+                invalidateMyChartsCache();
                 switchPage('my');
             } catch (e) { showToast(e.message); }
         }
@@ -11125,6 +11173,7 @@
 
                 // 更新成功后刷新我的图谱列表，确保更新时间正确
                 if (typeof loadMyCharts === 'function' && document.getElementById('pageMy')?.style.display === 'block') {
+                    invalidateMyChartsCache();
                     loadMyCharts();
                 }
                 if (typeof loadPublicCharts === 'function' && currentPage === 'home') {
