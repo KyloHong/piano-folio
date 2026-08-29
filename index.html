@@ -4996,6 +4996,124 @@
                 0 8px 24px rgba(196,92,56,0.25),
                 inset 0 1px 1px rgba(255,255,255,0.22);
         }
+
+        /* ========== 训练模式 ========== */
+        .cp-training-row .cp-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .training-toggle {
+            flex: 1;
+            padding: 8px 14px;
+            font-size: 0.78rem;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.6);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .training-toggle:hover {
+            background: rgba(255,255,255,0.9);
+            color: var(--text-primary);
+        }
+        .training-toggle.active {
+            background: linear-gradient(145deg, #2d6a4f 0%, #1b4332 100%);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 2px 8px rgba(45,106,79,0.3);
+        }
+        .midi-status {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.05);
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .midi-status.connected {
+            background: rgba(45,106,79,0.12);
+            color: #2d6a4f;
+        }
+        .midi-status.error {
+            background: rgba(192,96,112,0.12);
+            color: #c06070;
+        }
+        body.training-active .lyric-char.has-chord.training-current,
+        body.training-active .chord-slot.has-chord.training-current {
+            background: rgba(45,106,79,0.12);
+            border-radius: 4px;
+            position: relative;
+        }
+        body.training-active .lyric-char.has-chord.training-current .char-chord,
+        body.training-active .chord-slot.has-chord.training-current .slot-chord {
+            color: #2d6a4f;
+            font-weight: 700;
+        }
+        body.training-active .lyric-char.has-chord.training-current::after,
+        body.training-active .chord-slot.has-chord.training-current::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: #2d6a4f;
+            border-radius: 2px;
+            animation: trainingPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes trainingPulse {
+            0%, 100% { opacity: 1; transform: translateX(-50%) scaleX(1); }
+            50% { opacity: 0.5; transform: translateX(-50%) scaleX(0.7); }
+        }
+        body.training-active .lyric-char.has-chord.training-done .char-chord,
+        body.training-active .chord-slot.has-chord.training-done .slot-chord {
+            color: rgba(0,0,0,0.25);
+        }
+        .training-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #2d6a4f, #52b788);
+            z-index: 10000;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px rgba(45,106,79,0.4);
+        }
+        .training-hint {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20,20,20,0.92);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .training-hint .hint-chord {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #52b788;
+        }
+        .training-hint .hint-progress {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.5px;
+        }
+
         /* ========== 右下角浮窗播放控制器 ========== */
         .floating-play {
             position: fixed;
@@ -6420,6 +6538,13 @@
                                 <button class="cp-btn layout-btn active" data-layout="sequential">顺序</button>
                                 <button class="cp-btn layout-btn" data-layout="parallel">并行</button>
                             </div>
+                        </div>
+                    </div>
+                    <div class="cp-row cp-training-row">
+                        <span class="cp-label">训练</span>
+                        <div class="cp-control">
+                            <button class="training-toggle" id="trainingToggleBtn">开启训练</button>
+                            <span class="midi-status" id="midiStatus">未连接</span>
                         </div>
                     </div>
                 </div>
@@ -11743,6 +11868,363 @@
                 if (navRegister) navRegister.addEventListener('click', () => { if (typeof openRegisterModal === 'function') openRegisterModal(); });
             } catch (e) { console.error('nav bind error:', e); }
         })();
+
+        /* ============================================================
+         * 训练模式：MIDI 键盘连接 + 和弦识别 + 自动跳转
+         * 支持雅马哈 P225 等 USB MIDI 键盘
+         * ============================================================ */
+
+        // ---- 和弦名 → 音高集合解析器 ----
+        const CHORD_QUALITY_INTERVALS = {
+            '': [0, 4, 7], 'm': [0, 3, 7], 'dim': [0, 3, 6], 'aug': [0, 4, 8],
+            'sus2': [0, 2, 7], 'sus4': [0, 5, 7],
+            '6': [0, 4, 7, 9], 'm6': [0, 3, 7, 9],
+            '7': [0, 4, 7, 10], 'maj7': [0, 4, 7, 11], 'm7': [0, 3, 7, 10],
+            'm7b5': [0, 3, 6, 10], 'dim7': [0, 3, 6, 9],
+            'add9': [0, 4, 7, 14], '9': [0, 4, 7, 10, 14],
+            'm9': [0, 3, 7, 10, 14], 'maj9': [0, 4, 7, 11, 14],
+            '11': [0, 4, 7, 10, 14, 17], '13': [0, 4, 7, 10, 14, 21],
+        };
+        const NOTE_TO_SEMITONE = {
+            'C':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'F':5,
+            'F#':6,'Gb':6,'G':7,'G#':8,'Ab':8,'A':9,'A#':10,'Bb':10,'B':11
+        };
+        const QUALITY_ORDER = ['maj9','m7b5','dim7','maj7','add9','m9','sus2','sus4','m6','m7','aug','dim','11','13','9','7','6','m'];
+
+        function parseChordToPitches(chordName) {
+            if (!chordName) return null;
+            let bassNote = null;
+            // 处理转位和弦 C/G
+            const slashMatch = chordName.match(/^(.+)\/([A-G][#b]?)$/);
+            if (slashMatch) {
+                chordName = slashMatch[1];
+                bassNote = NOTE_TO_SEMITONE[slashMatch[2]] !== undefined ? NOTE_TO_SEMITONE[slashMatch[2]] : null;
+            }
+            const rootMatch = chordName.match(/^([A-G][#b]?)(.*)$/);
+            if (!rootMatch) return null;
+            const root = NOTE_TO_SEMITONE[rootMatch[1]] !== undefined ? NOTE_TO_SEMITONE[rootMatch[1]] : 0;
+            const qualityStr = rootMatch[2] || '';
+            let matchedQuality = '';
+            for (const q of QUALITY_ORDER) {
+                if (qualityStr.startsWith(q)) { matchedQuality = q; break; }
+            }
+            const intervals = CHORD_QUALITY_INTERVALS[matchedQuality] || CHORD_QUALITY_INTERVALS[''];
+            let pitches = intervals.map(i => (root + i) % 12);
+            if (bassNote !== null) pitches.push(bassNote % 12);
+            return [...new Set(pitches)];
+        }
+
+        // ---- MIDI 管理器 ----
+        const MIDIManager = {
+            access: null,
+            inputs: [],
+            pressedNotes: new Set(),
+            onNoteChange: null,
+            onDeviceChange: null,
+            connected: false,
+            initialized: false,
+
+            async init() {
+                if (this.initialized) return { success: true };
+                if (!navigator.requestMIDIAccess) {
+                    return { success: false, error: '浏览器不支持 Web MIDI' };
+                }
+                try {
+                    this.access = await navigator.requestMIDIAccess({ sysex: false });
+                    this.initialized = true;
+                    this.refreshInputs();
+                    this.access.onstatechange = () => this.refreshInputs();
+                    return { success: true };
+                } catch (e) {
+                    return { success: false, error: e.message };
+                }
+            },
+
+            refreshInputs() {
+                this.inputs = [];
+                if (!this.access) return;
+                this.access.inputs.forEach(input => {
+                    input.onmidimessage = (e) => this.handleMessage(e);
+                    this.inputs.push(input);
+                });
+                this.connected = this.inputs.length > 0;
+                if (this.onDeviceChange) this.onDeviceChange(this.connected, this.inputs);
+            },
+
+            handleMessage(event) {
+                const [status, note, velocity] = event.data;
+                const command = status & 0xf0;
+                if (command === 0x90 && velocity > 0) {
+                    this.pressedNotes.add(note);
+                } else if (command === 0x80 || (command === 0x90 && velocity === 0)) {
+                    this.pressedNotes.delete(note);
+                }
+                if (this.onNoteChange) this.onNoteChange([...this.pressedNotes]);
+            },
+
+            getPressedPitchClasses() {
+                return [...new Set([...this.pressedNotes].map(n => n % 12))];
+            },
+
+            reset() {
+                this.pressedNotes.clear();
+            }
+        };
+
+        // ---- 训练引擎 ----
+        const TrainingEngine = {
+            active: false,
+            chords: [],
+            currentIndex: 0,
+            matchDelay: 250,
+            lastMatchTime: 0,
+            onProgress: null,
+            onChordChange: null,
+            onComplete: null,
+
+            start(chordList) {
+                this.chords = chordList;
+                this.currentIndex = 0;
+                this.active = true;
+                this.lastMatchTime = 0;
+                this.notify();
+            },
+
+            stop() {
+                this.active = false;
+            },
+
+            checkMatch(pressedPitchClasses) {
+                if (!this.active || this.currentIndex >= this.chords.length) return false;
+                const now = Date.now();
+                if (now - this.lastMatchTime < this.matchDelay) return false;
+                const currentChord = this.chords[this.currentIndex];
+                const targetPitches = currentChord.pitches;
+                if (!targetPitches || targetPitches.length === 0) {
+                    this.advance();
+                    return true;
+                }
+                // 所有目标音都在按下的音中（允许额外音，如踏板延音）
+                const allTargetPresent = targetPitches.every(p => pressedPitchClasses.includes(p));
+                // 至少按下3个音（避免单音/双音误触发）
+                const enoughNotes = pressedPitchClasses.length >= Math.min(targetPitches.length, 3);
+                if (allTargetPresent && enoughNotes) {
+                    this.lastMatchTime = now;
+                    this.advance();
+                    return true;
+                }
+                return false;
+            },
+
+            advance() {
+                this.currentIndex++;
+                if (this.currentIndex >= this.chords.length) {
+                    this.active = false;
+                    if (this.onComplete) this.onComplete();
+                }
+                this.notify();
+            },
+
+            reset() {
+                this.currentIndex = 0;
+                this.notify();
+            },
+
+            notify() {
+                if (this.onProgress) this.onProgress(this.currentIndex, this.chords.length);
+                if (this.onChordChange && this.currentIndex < this.chords.length) {
+                    this.onChordChange(this.chords[this.currentIndex], this.currentIndex);
+                }
+            }
+        };
+
+        // ---- 从当前图谱提取和弦序列 ----
+        function extractChordsForTraining() {
+            const chords = [];
+            const lyrics = state.song.lyrics || [];
+            for (let lineIndex = 0; lineIndex < lyrics.length; lineIndex++) {
+                const line = lyrics[lineIndex];
+                for (let charIndex = 0; charIndex < line.length; charIndex++) {
+                    for (const pos of ['pre', 'current', 'post']) {
+                        const chord = getChord(lineIndex, charIndex, pos);
+                        if (chord && chord.chord) {
+                            const transposed = transposeChordName(chord.chord, state.keyOffset || 0);
+                            const pitches = parseChordToPitches(transposed);
+                            chords.push({
+                                name: transposed,
+                                pitches: pitches,
+                                lineIndex: lineIndex,
+                                charIndex: charIndex,
+                                position: pos
+                            });
+                        }
+                    }
+                }
+            }
+            return chords;
+        }
+
+        // ---- 训练模式 UI 控制器 ----
+        const TrainingUI = {
+            toggleBtn: null,
+            midiStatusEl: null,
+            progressBar: null,
+            hintEl: null,
+            active: false,
+
+            init() {
+                this.toggleBtn = document.getElementById('trainingToggleBtn');
+                this.midiStatusEl = document.getElementById('midiStatus');
+                if (!this.toggleBtn) return;
+                this.toggleBtn.addEventListener('click', () => this.toggle());
+
+                MIDIManager.onDeviceChange = (connected, inputs) => {
+                    if (this.midiStatusEl) {
+                        if (connected) {
+                            this.midiStatusEl.textContent = inputs[0]?.name?.substring(0, 12) || '已连接';
+                            this.midiStatusEl.className = 'midi-status connected';
+                        } else {
+                            this.midiStatusEl.textContent = '未连接';
+                            this.midiStatusEl.className = 'midi-status';
+                        }
+                    }
+                };
+
+                MIDIManager.onNoteChange = (notes) => {
+                    if (!TrainingEngine.active) return;
+                    const pitchClasses = MIDIManager.getPressedPitchClasses();
+                    TrainingEngine.checkMatch(pitchClasses);
+                };
+
+                TrainingEngine.onProgress = (current, total) => {
+                    this.updateProgress(current, total);
+                };
+                TrainingEngine.onChordChange = (chord, index) => {
+                    this.highlightChord(chord, index);
+                };
+                TrainingEngine.onComplete = () => {
+                    this.showHint('训练完成！', '全部和弦已通过');
+                    setTimeout(() => this.stop(), 2000);
+                };
+            },
+
+            async toggle() {
+                if (this.active) {
+                    this.stop();
+                } else {
+                    await this.start();
+                }
+            },
+
+            async start() {
+                // 确保在图谱详情页
+                if (!state.song || !state.song.lyrics || state.song.lyrics.length === 0) {
+                    showToast('请先打开一个图谱');
+                    return;
+                }
+                // 初始化 MIDI
+                const result = await MIDIManager.init();
+                if (!result.success) {
+                    showToast('MIDI 初始化失败: ' + result.error);
+                    if (this.midiStatusEl) {
+                        this.midiStatusEl.textContent = '不支持';
+                        this.midiStatusEl.className = 'midi-status error';
+                    }
+                    return;
+                }
+                if (!MIDIManager.connected) {
+                    showToast('未检测到 MIDI 键盘，请连接雅马哈 P225 后重试');
+                    return;
+                }
+
+                // 提取和弦
+                const chords = extractChordsForTraining();
+                if (chords.length === 0) {
+                    showToast('当前图谱没有和弦数据');
+                    return;
+                }
+
+                this.active = true;
+                document.body.classList.add('training-active');
+                this.toggleBtn.textContent = '停止训练';
+                this.toggleBtn.classList.add('active');
+
+                // 创建进度条
+                this.progressBar = document.createElement('div');
+                this.progressBar.className = 'training-progress-bar';
+                this.progressBar.style.width = '0%';
+                document.body.appendChild(this.progressBar);
+
+                // 创建提示浮层
+                this.hintEl = document.createElement('div');
+                this.hintEl.className = 'training-hint';
+                document.body.appendChild(this.hintEl);
+
+                MIDIManager.reset();
+                TrainingEngine.start(chords);
+                showToast(`训练开始：共 ${chords.length} 个和弦，按下当前和弦自动前进`);
+            },
+
+            stop() {
+                this.active = false;
+                TrainingEngine.stop();
+                document.body.classList.remove('training-active');
+                if (this.toggleBtn) {
+                    this.toggleBtn.textContent = '开启训练';
+                    this.toggleBtn.classList.remove('active');
+                }
+                if (this.progressBar) { this.progressBar.remove(); this.progressBar = null; }
+                if (this.hintEl) { this.hintEl.remove(); this.hintEl = null; }
+                // 清除所有高亮
+                document.querySelectorAll('.training-current, .training-done').forEach(el => {
+                    el.classList.remove('training-current', 'training-done');
+                });
+            },
+
+            updateProgress(current, total) {
+                if (this.progressBar) {
+                    const pct = total > 0 ? (current / total) * 100 : 0;
+                    this.progressBar.style.width = pct + '%';
+                }
+            },
+
+            highlightChord(chord, index) {
+                // 清除旧高亮
+                document.querySelectorAll('.training-current').forEach(el => {
+                    el.classList.remove('training-current');
+                    el.classList.add('training-done');
+                });
+                // 高亮当前和弦
+                const selector = `[data-line="${chord.lineIndex}"][data-char="${chord.charIndex}"][data-pos="${chord.position}"]`;
+                const el = document.querySelector(selector);
+                if (el) {
+                    el.classList.add('training-current');
+                    // 自动滚动到当前和弦
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                // 更新提示浮层
+                if (this.hintEl) {
+                    this.hintEl.innerHTML = `
+                        <span>当前和弦</span>
+                        <span class="hint-chord">${chord.name}</span>
+                        <span class="hint-progress">${index + 1} / ${TrainingEngine.chords.length}</span>
+                    `;
+                }
+            },
+
+            showHint(title, sub) {
+                if (this.hintEl) {
+                    this.hintEl.innerHTML = `<span class="hint-chord">${title}</span><span>${sub}</span>`;
+                }
+            }
+        };
+
+        // 初始化训练模式 UI
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => TrainingUI.init());
+        } else {
+            TrainingUI.init();
+        }
 
         // Start
         try { init(); } catch (e) { console.error('init error:', e); }
